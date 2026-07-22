@@ -166,15 +166,15 @@ st.sidebar.markdown(logo_svg, unsafe_allow_html=True)
 # CONTROLE DE ACESSO
 # ==========================================
 st.sidebar.title("🔐 Acesso Seguro")
-perfil = st.sidebar.radio("Nível de permissão:", ["👀 Visualizador (Equipe)", "⚙️ Controle (Fran)", "👑 Coordenador"])
+perfil = st.sidebar.radio("Nível de permissão:", ["👀 Visualizador (Equipe)", "⚙️ Controle (Marcello)", "👑 Coordenador"])
 
-acesso_fran = False
+acesso_marcello = False
 acesso_coord = False
 
-if perfil == "⚙️ Controle (Fran)":
-    senha = st.sidebar.text_input("Senha da Fran:", type="password")
-    if senha == "fran123":
-        acesso_fran = True
+if perfil == "⚙️ Controle (Marcello)":
+    senha = st.sidebar.text_input("Senha do Marcello:", type="password")
+    if senha == "marcello123":
+        acesso_marcello = True
     elif senha != "":
         st.sidebar.error("❌ Senha incorreta!")
 
@@ -190,8 +190,8 @@ elif perfil == "👑 Coordenador":
 # ==========================================
 st.markdown("<h1 class='main-title'>📦 Caixas - ESTOQUE</h1>", unsafe_allow_html=True)
 
-if not (acesso_fran or acesso_coord):
-    st.info("👋 **Bem-vindo(a) à central de estoque de Caixas.** Você está no modo visualização. Solicite as retiradas de material diretamente à Fran.")
+if not (acesso_marcello or acesso_coord):
+    st.info("👋 **Bem-vindo(a) à central de estoque de Caixas.** Você está no modo visualização. Solicite as retiradas de material diretamente ao Marcello.")
     
     busca = st.text_input("🔍 Buscar modelo ou cor (Ex: CXP01T Branco)...", key="busca_equipe")
     st.divider()
@@ -202,7 +202,7 @@ else:
         st.sidebar.success("👑 Acesso Liberado: Coordenador")
         abas_nomes = ["📦 Operação", "📊 Dashboard", "🕒 Histórico e Dados", "👑 Fechamento"]
     else:
-        st.sidebar.success("✅ Acesso Liberado: Fran")
+        st.sidebar.success("✅ Acesso Liberado: Marcello")
         abas_nomes = ["📦 Operação", "📊 Dashboard", "🕒 Histórico e Dados"]
 
     abas = st.tabs(abas_nomes)
@@ -421,7 +421,7 @@ else:
             df_entradas = df_historico[df_historico["Ação"] == "Entrada"]
             
             texto_relatorio = f"====================================\n"
-            texto_relatorio += f"RELATORIO DE FECHAMENTO - CAIXAS\n"
+            texto_relatorio += f"RELATÓRIO DE FECHAMENTO - CAIXAS\n"
             texto_relatorio += f"Data de Emissão: {datetime.now().strftime('%d/%m/%Y %H:%M')}\n"
             texto_relatorio += f"====================================\n\n"
             
