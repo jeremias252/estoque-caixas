@@ -118,7 +118,7 @@ def ler_codigo_barras(foto):
     return None
 
 # ==========================================
-# EXIBIÇÃO DE ESTOQUE (AGORA IDÊNTICO AO DAS TORRES)
+# EXIBIÇÃO DE ESTOQUE
 # ==========================================
 def exibir_estoque_premium(df_base, termo_busca=""):
     df_view = df_base.copy()
@@ -129,7 +129,6 @@ def exibir_estoque_premium(df_base, termo_busca=""):
         st.warning("Nenhum modelo encontrado.")
         return
 
-    # Funções para separar a Família da Cor
     def extrair_linha(nome):
         if " - " in nome: return nome.rsplit(" - ", 1)[0]
         return nome
@@ -149,7 +148,6 @@ def exibir_estoque_premium(df_base, termo_busca=""):
         total_linha = int(row_total['Quantidade'])
         icone = "🔴" if total_linha == 0 else ("🟡" if total_linha <= 5 else "📦")
         
-        # Cria a aba sanfona (expander)
         with st.expander(f"{icone} {linha} — (Total: {total_linha} un.)"):
             df_linha = df_view[df_view['Linha'] == linha].sort_values(by='Cor')
             cols = st.columns(len(df_linha) if len(df_linha) > 0 else 1)
@@ -157,10 +155,9 @@ def exibir_estoque_premium(df_base, termo_busca=""):
             for i, (_, row) in enumerate(df_linha.iterrows()):
                 cor = row['Cor']
                 qtd = int(row['Quantidade'])
-                cod = row['CodigoBarras'] if 'CodigoBarras' in row and str(row['CodigoBarras']).strip() != "" else "S/ Cód."
+                cod = row['CodigoBarras'] if 'CodigoBarras' in row and str(row['CodigoBarras']).strip() != "nan" and str(row['CodigoBarras']).strip() != "" else "S/ Cód."
                 status = "🔴 Zerado" if qtd == 0 else ("🟡 Baixo" if qtd <= 5 else "🟢 OK")
                 
-                # HTML do card com a cor e o código de barras
                 card_html = f"""
                 <div style="background-color: #1A1A1A; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #333333; margin-bottom: 5px;">
                     <div style="color: #888888; font-size: 14px; font-weight: bold; text-transform: uppercase;">{cor}</div>
@@ -227,7 +224,12 @@ if not (acesso_marcello or acesso_coord):
     exibir_estoque_premium(df_estoque, busca)
 
 else:
-    abas_nomes = ["📤 Operação", "📋 Estoque", "📊 Dashboard", "🕒 Histórico"] if acesso_coord else ["📤 Operação", "📋 Estoque", "📊 Dashboard"]
+    # A MÁGICA ACONTECE AQUI: O Coordenador ganha 5 abas. O Marcello fica com 3.
+    if acesso_coord:
+        abas_nomes = ["📤 Operação", "📋 Estoque", "📊 Dashboard", "🕒 Histórico", "🏷️ Códigos"]
+    else:
+        abas_nomes = ["📤 Operação", "📋 Estoque", "📊 Dashboard"]
+        
     abas = st.tabs(abas_nomes)
 
     with abas[0]: # OPERAÇÃO
@@ -237,7 +239,7 @@ else:
         modelo_detectado = None
         with st.expander("📷 Usar Leitor de Código de Barras", expanded=False):
             st.write("Aponte a câmera para o código da caixa:")
-            foto = st.camera_input("Câmera", label_visibility="collapsed")
+            foto = st.camera_input("Câmera Leitura", label_visibility="collapsed")
             if foto:
                 codigo = ler_codigo_barras(foto)
                 if codigo:
@@ -290,7 +292,6 @@ else:
 
     with abas[1]: # ESTOQUE ATUAL
         st.header("📋 Estoque Atual")
-        st.write("💡 Adicione os números dos Códigos de Barras diretamente na coluna 'CodigoBarras' na sua planilha.")
         busca = st.text_input("🔍 Buscar modelo ou código...", key="busca_admin")
         st.divider()
         exibir_estoque_premium(df_estoque, busca)
@@ -317,7 +318,47 @@ else:
                 st.subheader("👤 Quem Retirou")
                 if not df_saidas.empty: st.bar_chart(df_saidas.groupby("Separador")["Quantidade"].sum(), color="#dc2626")
 
+    # ABAS EXCLUSIVAS DO COORDENADOR
     if acesso_coord and len(abas) > 3:
         with abas[3]: # HISTÓRICO
             st.header("🕒 Histórico Recente")
             st.dataframe(df_historico.drop(columns=["ID"], errors="ignore"), use_container_width=True, hide_index=True)
+            
+        with abas[4]: # CADASTRAR CÓDIGOS DE BARRAS (NOVA ABA)
+            st.header("🏷️ Atrelar Código de Barras")
+            st.write("Use a câmera para ler o código de barras de uma caixa e vinculá-lo permanentemente ao sistema.")
+            
+            modelo_selecionado = st.selectbox("1. Selecione o Modelo:", [""] + lista_modelos, key="select_cadastro")
+            
+            codigo_lido_cadastro = ""
+            foto_cadastro = st.camera_input("2. Aponte a câmera para o código da caixa:", key="cam_cadastro")
+            if foto_cadastro:
+                lido = ler_codigo_barras(foto_cadastro)
+                if lido:
+                    codigo_lido_cadastro = lido
+                    st.success(f"✅ Código lido: {codigo_lido_cadastro}")
+                else:
+                    st.warning("⚠️ Código não reconhecido pela câmera.")
+            
+            codigo_manual = st.text_input("3. Confirme o Código (Lido pela câmera ou digitado):", value=codigo_lido_cadastro)
+            
+            if st.button("💾 Salvar Código no Modelo", type="primary", use_container_width=True):
+                codigo_final = codigo_manual.strip()
+                if not modelo_selecionado:
+                    st.error("⚠️ Você precisa escolher um modelo na lista acima.")
+                elif not codigo_final:
+                    st.error("⚠️ Leia ou digite um código de barras válido.")
+                else:
+                    # Verifica se o código já não foi usado em outro modelo sem querer
+                    conflito = df_estoque[(df_estoque["CodigoBarras"] == codigo_final) & (df_estoque["Modelo"] != modelo_selecionado)]
+                    if not conflito.empty:
+                        mod_conflito = conflito.iloc[0]["Modelo"]
+                        st.error(f"⚠️ ERRO: Este código já está cadastrado no modelo: {mod_conflito}")
+                    else:
+                        # Tudo certo, vamos salvar!
+                        idx = df_estoque[df_estoque["Modelo"] == modelo_selecionado].index[0]
+                        df_estoque.at[idx, "CodigoBarras"] = codigo_final
+                        salvar_estoque(df_estoque)
+                        st.cache_data.clear() # Limpa a memória para aparecer na mesma hora
+                        st.success(f"✅ Sucesso! O código {codigo_final} foi atrelado ao modelo {modelo_selecionado}.")
+                        st.rerun()
