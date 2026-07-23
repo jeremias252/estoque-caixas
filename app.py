@@ -3,8 +3,6 @@ import pandas as pd
 import uuid
 from datetime import datetime
 from streamlit_gsheets import GSheetsConnection
-from pyzbar.pyzbar import decode
-from PIL import Image
 
 # --- CONFIGURAÇÃO DA PÁGINA ---
 st.set_page_config(page_title="Caixas - ESTOQUE", page_icon="📦", layout="centered")
@@ -59,19 +57,34 @@ def carregar_dados():
             precisa_criar_estoque = True
         else:
             df_estoque = df_estoque.dropna(subset=["Modelo"])
-            df_estoque["Quantidade"] = pd.to_numeric(df_estoque["Quantidade"], errors="coerce").fillna(0).astype(int)
-            if "CodigoBarras" not in df_estoque.columns:
-                df_estoque["CodigoBarras"] = ""
+            # Truque: Se a planilha estiver vazia, forçamos a recriação da lista nova
+            if df_estoque.empty:
+                precisa_criar_estoque = True
             else:
-                df_estoque["CodigoBarras"] = df_estoque["CodigoBarras"].astype(str).str.replace(".0", "", regex=False)
+                df_estoque["Quantidade"] = pd.to_numeric(df_estoque["Quantidade"], errors="coerce").fillna(0).astype(int)
+                if "CodigoBarras" not in df_estoque.columns:
+                    df_estoque["CodigoBarras"] = ""
+                else:
+                    df_estoque["CodigoBarras"] = df_estoque["CodigoBarras"].astype(str).str.replace(".0", "", regex=False)
     except:
         precisa_criar_estoque = True
 
     if precisa_criar_estoque:
-        # Modelos base de exemplo (Vocês podem alterar tudo direto na planilha depois)
-        itens = ["Caixa Padrão - Branca", "Caixa Padrão - Preta", "Caixa Dupla - Branca", "Caixa Dupla - Preta"]
-        codigos = ["111111", "222222", "333333", "444444"] # Códigos fictícios
-        df_estoque = pd.DataFrame({"Modelo": itens, "CodigoBarras": codigos, "Quantidade": 0})
+        # LISTA DE MODELOS REAIS
+        modelos_base = [
+            "CXP01T", "CXP01", "CX04S", "CX34ABS", "CX44", "CX23ABS", 
+            "CX01S", "CX02S", "CX03S", "CXEP02", "CXEP03", "CP01A", 
+            "RE04FN", "RE06FN", "CX02Q", "CX02RN"
+        ]
+        cores = ["Branco", "Preto", "Cinza"]
+        
+        # Multiplica os modelos pelas 3 cores
+        itens = [f"{m} - {c}" for m in modelos_base for c in cores]
+        # Adiciona a CX56 que é cor única
+        itens.append("CX56 - Única")
+        
+        # Cria a tabela organizada em ordem alfabética
+        df_estoque = pd.DataFrame({"Modelo": sorted(itens), "CodigoBarras": "", "Quantidade": 0})
         conn.update(spreadsheet=URL_PLANILHA, worksheet="Estoque", data=df_estoque)
 
     precisa_criar_hist = False
@@ -97,10 +110,12 @@ def salvar_historico(df):
     conn.update(spreadsheet=URL_PLANILHA, worksheet="Historico", data=df)
 
 # ==========================================
-# FUNÇÃO LEITOR DE CÓDIGO DE BARRAS
+# FUNÇÃO LEITOR DE CÓDIGO DE BARRAS (OTIMIZADA)
 # ==========================================
 def ler_codigo_barras(foto):
     if foto is not None:
+        from pyzbar.pyzbar import decode
+        from PIL import Image
         img = Image.open(foto)
         codigos = decode(img)
         if codigos:
@@ -119,10 +134,11 @@ def exibir_estoque_premium(df_base, termo_busca=""):
         st.warning("Nenhum modelo encontrado.")
         return
 
+    # Organiza os cards
     for _, row in df_view.iterrows():
         modelo = row['Modelo']
         qtd = int(row['Quantidade'])
-        cod = row['CodigoBarras'] if row['CodigoBarras'] else "Sem código"
+        cod = row['CodigoBarras'] if row['CodigoBarras'] and str(row['CodigoBarras']).strip() != "" else "Sem código"
         status = "🔴 Zerado" if qtd == 0 else ("🟡 Baixo" if qtd <= 5 else "🟢 OK")
         
         card_html = f"""
@@ -141,7 +157,7 @@ def exibir_estoque_premium(df_base, termo_busca=""):
 
 # CARREGA OS DADOS
 df_estoque, df_historico = carregar_dados()
-separadores = ["Fran", "Henrique", "Leonardo", "Patrick"]
+separadores = ["Marcello", "Henrique", "Leonardo", "Patrick"]
 lista_modelos = sorted(df_estoque["Modelo"].tolist())
 
 # --- LOGO SVG E BOTÃO DE ATUALIZAR ---
@@ -166,14 +182,14 @@ st.sidebar.divider()
 
 # --- CONTROLE DE ACESSO ---
 st.sidebar.title("🔐 Acesso Seguro")
-perfil = st.sidebar.radio("Nível de permissão:", ["👀 Visualizador (Equipe)", "⚙️ Controle (Fran)", "👑 Coordenador"])
+perfil = st.sidebar.radio("Nível de permissão:", ["👀 Visualizador (Equipe)", "⚙️ Controle (Marcello)", "👑 Coordenador"])
 
-acesso_fran = False
+acesso_marcello = False
 acesso_coord = False
 
-if perfil == "⚙️ Controle (Fran)":
-    senha = st.sidebar.text_input("Senha da Fran:", type="password")
-    if senha == "fran123": acesso_fran = True
+if perfil == "⚙️ Controle (Marcello)":
+    senha = st.sidebar.text_input("Senha do Marcello:", type="password")
+    if senha == "marcello123": acesso_marcello = True
     elif senha != "": st.sidebar.error("❌ Senha incorreta!")
 
 elif perfil == "👑 Coordenador":
@@ -188,8 +204,8 @@ zerados = df_estoque[df_estoque["Quantidade"] == 0]["Modelo"].tolist()
 if zerados:
     st.markdown(f"<div class='alert-box'>🚨 <b>ATENÇÃO:</b> Há {len(zerados)} modelos com estoque ZERADO!</div>", unsafe_allow_html=True)
 
-if not (acesso_fran or acesso_coord):
-    st.info("👋 Modo Visualização. Solicite retiradas diretamente à Fran.")
+if not (acesso_marcello or acesso_coord):
+    st.info("👋 Modo Visualização. Solicite retiradas diretamente ao Marcello.")
     busca = st.text_input("🔍 Buscar modelo ou código...", key="busca_equipe")
     st.divider()
     exibir_estoque_premium(df_estoque, busca)
@@ -198,11 +214,10 @@ else:
     abas_nomes = ["📤 Operação", "📋 Estoque", "📊 Dashboard", "🕒 Histórico"] if acesso_coord else ["📤 Operação", "📋 Estoque", "📊 Dashboard"]
     abas = st.tabs(abas_nomes)
 
-    with abas[0]: # OPERAÇÃO (SAÍDA / ENTRADA)
+    with abas[0]: # OPERAÇÃO
         tipo_op = st.radio("Selecione o tipo de operação:", ["➖ Registrar Saída", "➕ Lançar Entrada"], horizontal=True)
         st.divider()
         
-        # SISTEMA DE CÂMERA
         modelo_detectado = None
         with st.expander("📷 Usar Leitor de Código de Barras", expanded=False):
             st.write("Aponte a câmera para o código da caixa:")
@@ -219,21 +234,18 @@ else:
                 else:
                     st.warning("⚠️ Não foi possível ler o código. Melhore a iluminação ou aproxime a câmera.")
         
-        # FORMULÁRIO DE REGISTRO
         with st.form("form_operacao", clear_on_submit=True):
             col1, col2 = st.columns(2)
             with col1:
                 sep = st.selectbox("1. Colaborador", [""] + separadores)
             with col2:
-                # Se a câmera achou o modelo, preenche sozinho. Se não, usa a lista normal.
                 index_padrao = 0
                 if modelo_detectado and modelo_detectado in lista_modelos:
                     index_padrao = lista_modelos.index(modelo_detectado) + 1
                 
-                modelo = st.selectbox("2. Modelo (Selecione ou use a câmera acima)", [""] + lista_modelos, index=index_padrao)
+                modelo = st.selectbox("2. Modelo", [""] + lista_modelos, index=index_padrao)
             
             qtd = st.number_input("3. Quantidade", min_value=1, value=1)
-            
             btn_cor = "primary" if "Saída" in tipo_op else "secondary"
             submit_op = st.form_submit_button(f"Confirmar {tipo_op.split(' ')[1]}", type=btn_cor, use_container_width=True)
 
@@ -262,7 +274,7 @@ else:
 
     with abas[1]: # ESTOQUE ATUAL
         st.header("📋 Estoque Atual")
-        st.write("💡 Dica: Para cadastrar novos códigos de barras, edite a coluna 'CodigoBarras' diretamente na sua planilha no Google Drive.")
+        st.write("💡 Adicione os números dos Códigos de Barras diretamente na coluna 'CodigoBarras' na sua planilha.")
         busca = st.text_input("🔍 Buscar modelo ou código...", key="busca_admin")
         st.divider()
         exibir_estoque_premium(df_estoque, busca)
