@@ -57,7 +57,6 @@ def carregar_dados():
             precisa_criar_estoque = True
         else:
             df_estoque = df_estoque.dropna(subset=["Modelo"])
-            # Truque: Se a planilha estiver vazia, forçamos a recriação da lista nova
             if df_estoque.empty:
                 precisa_criar_estoque = True
             else:
@@ -70,7 +69,6 @@ def carregar_dados():
         precisa_criar_estoque = True
 
     if precisa_criar_estoque:
-        # LISTA DE MODELOS REAIS
         modelos_base = [
             "CXP01T", "CXP01", "CX04S", "CX34ABS", "CX44", "CX23ABS", 
             "CX01S", "CX02S", "CX03S", "CXEP02", "CXEP03", "CP01A", 
@@ -78,12 +76,9 @@ def carregar_dados():
         ]
         cores = ["Branco", "Preto", "Cinza"]
         
-        # Multiplica os modelos pelas 3 cores
         itens = [f"{m} - {c}" for m in modelos_base for c in cores]
-        # Adiciona a CX56 que é cor única
         itens.append("CX56 - Única")
         
-        # Cria a tabela organizada em ordem alfabética
         df_estoque = pd.DataFrame({"Modelo": sorted(itens), "CodigoBarras": "", "Quantidade": 0})
         conn.update(spreadsheet=URL_PLANILHA, worksheet="Estoque", data=df_estoque)
 
@@ -110,7 +105,7 @@ def salvar_historico(df):
     conn.update(spreadsheet=URL_PLANILHA, worksheet="Historico", data=df)
 
 # ==========================================
-# FUNÇÃO LEITOR DE CÓDIGO DE BARRAS (OTIMIZADA)
+# FUNÇÃO LEITOR DE CÓDIGO DE BARRAS
 # ==========================================
 def ler_codigo_barras(foto):
     if foto is not None:
@@ -123,7 +118,7 @@ def ler_codigo_barras(foto):
     return None
 
 # ==========================================
-# EXIBIÇÃO DE ESTOQUE
+# EXIBIÇÃO DE ESTOQUE (AGORA IDÊNTICO AO DAS TORRES)
 # ==========================================
 def exibir_estoque_premium(df_base, termo_busca=""):
     df_view = df_base.copy()
@@ -134,26 +129,47 @@ def exibir_estoque_premium(df_base, termo_busca=""):
         st.warning("Nenhum modelo encontrado.")
         return
 
-    # Organiza os cards
-    for _, row in df_view.iterrows():
-        modelo = row['Modelo']
-        qtd = int(row['Quantidade'])
-        cod = row['CodigoBarras'] if row['CodigoBarras'] and str(row['CodigoBarras']).strip() != "" else "Sem código"
-        status = "🔴 Zerado" if qtd == 0 else ("🟡 Baixo" if qtd <= 5 else "🟢 OK")
+    # Funções para separar a Família da Cor
+    def extrair_linha(nome):
+        if " - " in nome: return nome.rsplit(" - ", 1)[0]
+        return nome
         
-        card_html = f"""
-        <div style="background-color: #1A1A1A; padding: 15px; border-radius: 8px; border: 1px solid #333333; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <div style="color: #ffffff; font-size: 16px; font-weight: bold;">{modelo}</div>
-                <div style="color: #888888; font-size: 12px;">Ref/Cód: {cod}</div>
-            </div>
-            <div style="text-align: right;">
-                <div style="color: #F38020; font-size: 24px; font-weight: 900;">{qtd}</div>
-                <div style="font-size: 11px; color: #AAAAAA;">{status}</div>
-            </div>
-        </div>
-        """
-        st.markdown(card_html, unsafe_allow_html=True)
+    def extrair_cor(nome):
+        if " - " in nome: return nome.rsplit(" - ", 1)[1]
+        return "Padrão"
+
+    df_view['Linha'] = df_view['Modelo'].apply(extrair_linha)
+    df_view['Cor'] = df_view['Modelo'].apply(extrair_cor)
+    
+    df_totais = df_view.groupby('Linha')['Quantidade'].sum().reset_index()
+    df_totais = df_totais.sort_values(by='Quantidade', ascending=False)
+    
+    for _, row_total in df_totais.iterrows():
+        linha = row_total['Linha']
+        total_linha = int(row_total['Quantidade'])
+        icone = "🔴" if total_linha == 0 else ("🟡" if total_linha <= 5 else "📦")
+        
+        # Cria a aba sanfona (expander)
+        with st.expander(f"{icone} {linha} — (Total: {total_linha} un.)"):
+            df_linha = df_view[df_view['Linha'] == linha].sort_values(by='Cor')
+            cols = st.columns(len(df_linha) if len(df_linha) > 0 else 1)
+            
+            for i, (_, row) in enumerate(df_linha.iterrows()):
+                cor = row['Cor']
+                qtd = int(row['Quantidade'])
+                cod = row['CodigoBarras'] if 'CodigoBarras' in row and str(row['CodigoBarras']).strip() != "" else "S/ Cód."
+                status = "🔴 Zerado" if qtd == 0 else ("🟡 Baixo" if qtd <= 5 else "🟢 OK")
+                
+                # HTML do card com a cor e o código de barras
+                card_html = f"""
+                <div style="background-color: #1A1A1A; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #333333; margin-bottom: 5px;">
+                    <div style="color: #888888; font-size: 14px; font-weight: bold; text-transform: uppercase;">{cor}</div>
+                    <div style="color: #555555; font-size: 10px; margin-top: -2px;">Ref: {cod}</div>
+                    <div style="color: #F38020; font-size: 26px; font-weight: 900; margin: 8px 0;">{qtd}</div>
+                    <div style="font-size: 12px; color: #AAAAAA;">{status}</div>
+                </div>
+                """
+                cols[i].markdown(card_html, unsafe_allow_html=True)
 
 # CARREGA OS DADOS
 df_estoque, df_historico = carregar_dados()
