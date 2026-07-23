@@ -3,8 +3,8 @@ import pandas as pd
 import uuid
 from datetime import datetime
 from streamlit_gsheets import GSheetsConnection
-from PIL import Image
 from pyzbar.pyzbar import decode
+from PIL import Image
 
 # --- CONFIGURAÇÃO DA PÁGINA ---
 st.set_page_config(page_title="Caixas - ESTOQUE", page_icon="📦", layout="centered")
@@ -14,140 +14,282 @@ st.markdown("""
     <style>
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
-    .stButton>button { border-radius: 8px; font-weight: 600; border: none; }
-    .main-title { text-align: center; font-weight: 800; padding-bottom: 1rem; border-bottom: 2px solid #333333; }
-    .alert-box { background-color: #3f0e0e; border-left: 5px solid #ef4444; padding: 12px; border-radius: 6px; margin-bottom: 15px; color: #fca5a5; }
+    
+    .stButton>button {
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+    }
+    .stButton>button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(243, 128, 32, 0.3);
+    }
+    
+    .main-title {
+        text-align: center;
+        font-weight: 800;
+        padding-bottom: 1rem;
+        margin-bottom: 1rem;
+        border-bottom: 2px solid #333333;
+    }
+    
+    .alert-box {
+        background-color: #3f0e0e;
+        border-left: 5px solid #ef4444;
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 15px;
+        color: #fca5a5;
+    }
     </style>
     """, unsafe_allow_html=True)
 
-# COLOQUE AQUI O LINK DA SUA PLANILHA "Caixas - Estoque" DO GOOGLE DRIVE
-URL_PLANILHA = "COLE_AQUI_O_LINK_DA_SUA_PLANILHA_CAIXAS"
+# URL DA PLANILHA GOOGLE (CAIXAS)
+URL_PLANILHA = "https://docs.google.com/spreadsheets/d/10z1gPJNmHoHO5kj6B4SoXknUNz6MwrQz1NjwkkBatQU/edit?usp=drivesdk"
 
+# --- CONEXÃO COM GOOGLE SHEETS ---
 conn = st.connection("gsheets", type=GSheetsConnection)
 
 def carregar_dados():
+    precisa_criar_estoque = False
     try:
-        df_estoque = conn.read(spreadsheet=URL_PLANILHA, worksheet="Estoque")
+        df_estoque = conn.read(spreadsheet=URL_PLANILHA, worksheet="Estoque", ttl=600).copy()
+        if "Quantidade" not in df_estoque.columns or "Modelo" not in df_estoque.columns:
+            precisa_criar_estoque = True
+        else:
+            df_estoque = df_estoque.dropna(subset=["Modelo"])
+            df_estoque["Quantidade"] = pd.to_numeric(df_estoque["Quantidade"], errors="coerce").fillna(0).astype(int)
+            if "CodigoBarras" not in df_estoque.columns:
+                df_estoque["CodigoBarras"] = ""
+            else:
+                df_estoque["CodigoBarras"] = df_estoque["CodigoBarras"].astype(str).str.replace(".0", "", regex=False)
     except:
-        modelos_com_cor = ["CXP01T", "CXP01", "CX04S", "CX34ABS", "CX44", "CX23ABS", "CX01S", "CX02S", "CX03S", "CXEP02", "CXEP03", "CP01A", "RE04FN", "RE06FN", "CX02Q", "CX02RN"]
-        cores = ["Branco", "Preto", "Cinza"]
-        itens = [f"{modelo} - {cor}" for modelo in modelos_com_cor for cor in cores]
-        itens.append("CX56")
-        df_estoque = pd.DataFrame({"Modelo": itens, "Quantidade": 0})
+        precisa_criar_estoque = True
+
+    if precisa_criar_estoque:
+        # Modelos base de exemplo (Vocês podem alterar tudo direto na planilha depois)
+        itens = ["Caixa Padrão - Branca", "Caixa Padrão - Preta", "Caixa Dupla - Branca", "Caixa Dupla - Preta"]
+        codigos = ["111111", "222222", "333333", "444444"] # Códigos fictícios
+        df_estoque = pd.DataFrame({"Modelo": itens, "CodigoBarras": codigos, "Quantidade": 0})
         conn.update(spreadsheet=URL_PLANILHA, worksheet="Estoque", data=df_estoque)
 
+    precisa_criar_hist = False
     try:
-        df_historico = conn.read(spreadsheet=URL_PLANILHA, worksheet="Historico")
+        df_historico = conn.read(spreadsheet=URL_PLANILHA, worksheet="Historico", ttl=600).copy()
+        if "Ação" not in df_historico.columns or "Separador" not in df_historico.columns:
+            precisa_criar_hist = True
+        else:
+            df_historico = df_historico.dropna(subset=["ID"])
     except:
+        precisa_criar_hist = True
+        
+    if precisa_criar_hist:
         df_historico = pd.DataFrame(columns=["ID", "Data", "Ação", "Separador", "Modelo", "Quantidade"])
         conn.update(spreadsheet=URL_PLANILHA, worksheet="Historico", data=df_historico)
 
     return df_estoque, df_historico
 
-def salvar_estoque(df): conn.update(spreadsheet=URL_PLANILHA, worksheet="Estoque", data=df)
-def salvar_historico(df): conn.update(spreadsheet=URL_PLANILHA, worksheet="Historico", data=df)
+def salvar_estoque(df):
+    conn.update(spreadsheet=URL_PLANILHA, worksheet="Estoque", data=df)
 
+def salvar_historico(df):
+    conn.update(spreadsheet=URL_PLANILHA, worksheet="Historico", data=df)
+
+# ==========================================
+# FUNÇÃO LEITOR DE CÓDIGO DE BARRAS
+# ==========================================
+def ler_codigo_barras(foto):
+    if foto is not None:
+        img = Image.open(foto)
+        codigos = decode(img)
+        if codigos:
+            return codigos[0].data.decode('utf-8')
+    return None
+
+# ==========================================
+# EXIBIÇÃO DE ESTOQUE
+# ==========================================
 def exibir_estoque_premium(df_base, termo_busca=""):
     df_view = df_base.copy()
-    if termo_busca: df_view = df_view[df_view["Modelo"].str.contains(termo_busca, case=False)]
+    if termo_busca:
+        df_view = df_view[df_view["Modelo"].str.contains(termo_busca, case=False) | df_view["CodigoBarras"].str.contains(termo_busca, case=False)]
+        
     if df_view.empty:
         st.warning("Nenhum modelo encontrado.")
         return
 
-    df_view['Linha'] = df_view['Modelo'].apply(lambda x: x.rsplit(" - ", 1)[0] if " - " in x else x)
-    df_view['Cor'] = df_view['Modelo'].apply(lambda x: x.rsplit(" - ", 1)[1] if " - " in x else "Padrão")
-    
-    df_totais = df_view.groupby('Linha')['Quantidade'].sum().reset_index().sort_values(by='Quantidade', ascending=False)
-    
-    for _, row_total in df_totais.iterrows():
-        linha = row_total['Linha']
-        total_linha = int(row_total['Quantidade'])
-        icone = "🔴" if total_linha == 0 else ("🟡" if total_linha <= 5 else "📦")
+    for _, row in df_view.iterrows():
+        modelo = row['Modelo']
+        qtd = int(row['Quantidade'])
+        cod = row['CodigoBarras'] if row['CodigoBarras'] else "Sem código"
+        status = "🔴 Zerado" if qtd == 0 else ("🟡 Baixo" if qtd <= 5 else "🟢 OK")
         
-        with st.expander(f"{icone} {linha} — (Total: {total_linha} un.)"):
-            df_linha = df_view[df_view['Linha'] == linha].sort_values(by='Cor')
-            cols = st.columns(len(df_linha) if len(df_linha) > 0 else 1)
-            
-            for i, (_, row) in enumerate(df_linha.iterrows()):
-                cor = row['Cor']
-                qtd = int(row['Quantidade'])
-                status = "🔴 Zerado" if qtd == 0 else ("🟡 Baixo" if qtd <= 5 else "🟢 OK")
-                card_html = f"""
-                <div style="background-color: #1A1A1A; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #333333;">
-                    <div style="color: #888888; font-size: 14px; font-weight: bold;">{cor}</div>
-                    <div style="color: #F38020; font-size: 26px; font-weight: 900;">{qtd}</div>
-                    <div style="font-size: 12px; color: #AAAAAA;">{status}</div>
-                </div>
-                """
-                cols[i].markdown(card_html, unsafe_allow_html=True)
+        card_html = f"""
+        <div style="background-color: #1A1A1A; padding: 15px; border-radius: 8px; border: 1px solid #333333; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <div style="color: #ffffff; font-size: 16px; font-weight: bold;">{modelo}</div>
+                <div style="color: #888888; font-size: 12px;">Ref/Cód: {cod}</div>
+            </div>
+            <div style="text-align: right;">
+                <div style="color: #F38020; font-size: 24px; font-weight: 900;">{qtd}</div>
+                <div style="font-size: 11px; color: #AAAAAA;">{status}</div>
+            </div>
+        </div>
+        """
+        st.markdown(card_html, unsafe_allow_html=True)
 
+# CARREGA OS DADOS
 df_estoque, df_historico = carregar_dados()
-separadores = ["Fabiano", "Marcello", "Sérgio", "Renan"]
+separadores = ["Fran", "Henrique", "Leonardo", "Patrick"]
+lista_modelos = sorted(df_estoque["Modelo"].tolist())
+
+# --- LOGO SVG E BOTÃO DE ATUALIZAR ---
+logo_svg = """
+<div style="display: flex; justify-content: center; margin-bottom: 20px;">
+    <svg width="100%" viewBox="0 0 400 350" xmlns="http://www.w3.org/2000/svg">
+        <rect width="400" height="350" fill="transparent" rx="12"/>
+        <path d="M 320 180 L 320 50 L 50 50 L 50 300 L 320 300 L 320 250" fill="none" stroke="#ffffff" stroke-width="12" />
+        <text x="75" y="150" fill="#ffffff" font-family="Arial, sans-serif" font-weight="900" font-size="70" letter-spacing="2">SETOR</text>
+        <text x="75" y="235" fill="#ffffff" font-family="Arial, sans-serif" font-weight="900" font-size="60" letter-spacing="1">CAIXAS</text>
+        <text x="325" y="225" fill="#ffffff" font-family="Arial, sans-serif" font-weight="bold" font-size="28">.COM</text>
+        <line x1="290" y1="260" x2="380" y2="260" stroke="#F38020" stroke-width="12" />
+    </svg>
+</div>
+"""
+st.sidebar.markdown(logo_svg, unsafe_allow_html=True)
+
+if st.sidebar.button("🔄 Atualizar Planilha Agora", use_container_width=True):
+    st.cache_data.clear()
+    st.rerun()
+st.sidebar.divider()
 
 # --- CONTROLE DE ACESSO ---
 st.sidebar.title("🔐 Acesso Seguro")
-perfil = st.sidebar.radio("Permissão:", ["👀 Visualizador", "⚙️ Controle (Marcello)", "👑 Coordenador"])
+perfil = st.sidebar.radio("Nível de permissão:", ["👀 Visualizador (Equipe)", "⚙️ Controle (Fran)", "👑 Coordenador"])
 
-acesso_marcello = (perfil == "⚙️ Controle (Marcello)" and st.sidebar.text_input("Senha Marcello:", type="password") == "marcello123")
-acesso_coord = (perfil == "👑 Coordenador" and st.sidebar.text_input("Senha Coordenador:", type="password") == "coord123")
+acesso_fran = False
+acesso_coord = False
 
+if perfil == "⚙️ Controle (Fran)":
+    senha = st.sidebar.text_input("Senha da Fran:", type="password")
+    if senha == "fran123": acesso_fran = True
+    elif senha != "": st.sidebar.error("❌ Senha incorreta!")
+
+elif perfil == "👑 Coordenador":
+    senha = st.sidebar.text_input("Senha do Coordenador:", type="password")
+    if senha == "coord123": acesso_coord = True
+    elif senha != "": st.sidebar.error("❌ Senha incorreta!")
+
+# --- TELA PRINCIPAL ---
 st.markdown("<h1 class='main-title'>📦 Caixas - ESTOQUE</h1>", unsafe_allow_html=True)
 
 zerados = df_estoque[df_estoque["Quantidade"] == 0]["Modelo"].tolist()
 if zerados:
-    st.markdown(f"<div class='alert-box'>🚨 <b>ATENÇÃO:</b> {len(zerados)} caixas estão com estoque ZERADO!</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='alert-box'>🚨 <b>ATENÇÃO:</b> Há {len(zerados)} modelos com estoque ZERADO!</div>", unsafe_allow_html=True)
 
-if not (acesso_marcello or acesso_coord):
-    st.info("Modo Visualização.")
-    busca = st.text_input("🔍 Buscar...", key="busca_equipe")
+if not (acesso_fran or acesso_coord):
+    st.info("👋 Modo Visualização. Solicite retiradas diretamente à Fran.")
+    busca = st.text_input("🔍 Buscar modelo ou código...", key="busca_equipe")
+    st.divider()
     exibir_estoque_premium(df_estoque, busca)
+
 else:
-    abas_nomes = ["📦 Operação", "📷 Leitor Barcode", "📊 Dashboard", "🕒 Histórico"]
+    abas_nomes = ["📤 Operação", "📋 Estoque", "📊 Dashboard", "🕒 Histórico"] if acesso_coord else ["📤 Operação", "📋 Estoque", "📊 Dashboard"]
     abas = st.tabs(abas_nomes)
 
-    with abas[0]: # OPERAÇÃO
-        st.header("📤 Registrar Saída")
-        with st.form("form_saida", clear_on_submit=True):
-            sep = st.selectbox("1. Colaborador", [""] + separadores)
-            modelo = st.selectbox("2. Modelo", [""] + sorted(df_estoque["Modelo"].tolist()))
-            qtd = st.number_input("3. Qtd", min_value=1, value=1)
-            if st.form_submit_button("Confirmar Saída", type="primary"):
+    with abas[0]: # OPERAÇÃO (SAÍDA / ENTRADA)
+        tipo_op = st.radio("Selecione o tipo de operação:", ["➖ Registrar Saída", "➕ Lançar Entrada"], horizontal=True)
+        st.divider()
+        
+        # SISTEMA DE CÂMERA
+        modelo_detectado = None
+        with st.expander("📷 Usar Leitor de Código de Barras", expanded=False):
+            st.write("Aponte a câmera para o código da caixa:")
+            foto = st.camera_input("Câmera", label_visibility="collapsed")
+            if foto:
+                codigo = ler_codigo_barras(foto)
+                if codigo:
+                    match = df_estoque[df_estoque["CodigoBarras"] == codigo]
+                    if not match.empty:
+                        modelo_detectado = match.iloc[0]["Modelo"]
+                        st.success(f"✅ Código {codigo} lido com sucesso!")
+                    else:
+                        st.error(f"❌ O código {codigo} não está cadastrado na planilha!")
+                else:
+                    st.warning("⚠️ Não foi possível ler o código. Melhore a iluminação ou aproxime a câmera.")
+        
+        # FORMULÁRIO DE REGISTRO
+        with st.form("form_operacao", clear_on_submit=True):
+            col1, col2 = st.columns(2)
+            with col1:
+                sep = st.selectbox("1. Colaborador", [""] + separadores)
+            with col2:
+                # Se a câmera achou o modelo, preenche sozinho. Se não, usa a lista normal.
+                index_padrao = 0
+                if modelo_detectado and modelo_detectado in lista_modelos:
+                    index_padrao = lista_modelos.index(modelo_detectado) + 1
+                
+                modelo = st.selectbox("2. Modelo (Selecione ou use a câmera acima)", [""] + lista_modelos, index=index_padrao)
+            
+            qtd = st.number_input("3. Quantidade", min_value=1, value=1)
+            
+            btn_cor = "primary" if "Saída" in tipo_op else "secondary"
+            submit_op = st.form_submit_button(f"Confirmar {tipo_op.split(' ')[1]}", type=btn_cor, use_container_width=True)
+
+        if submit_op:
+            if not sep or not modelo: st.error("⚠️ Preencha Colaborador e Modelo.")
+            else:
                 idx = df_estoque[df_estoque["Modelo"] == modelo].index[0]
-                if df_estoque.at[idx, "Quantidade"] >= qtd:
-                    df_estoque.at[idx, "Quantidade"] -= qtd
+                estoque_atual = df_estoque.at[idx, "Quantidade"]
+                acao_texto = "Saída" if "Saída" in tipo_op else "Entrada"
+                
+                if acao_texto == "Saída" and estoque_atual < qtd:
+                    st.error(f"⚠️ Saldo insuficiente! Temos apenas {estoque_atual} un.")
+                else:
+                    if acao_texto == "Saída":
+                        df_estoque.at[idx, "Quantidade"] -= qtd
+                    else:
+                        df_estoque.at[idx, "Quantidade"] += qtd
+                        
                     salvar_estoque(df_estoque)
-                    novo = pd.DataFrame([{"ID": str(uuid.uuid4()), "Data": datetime.now().strftime("%Y-%m-%d %H:%M"), "Ação": "Saída", "Separador": sep, "Modelo": modelo, "Quantidade": qtd}])
+                    novo = pd.DataFrame([{"ID": str(uuid.uuid4()), "Data": datetime.now().strftime("%Y-%m-%d %H:%M"), "Ação": acao_texto, "Separador": sep, "Modelo": modelo, "Quantidade": qtd}])
                     df_historico = pd.concat([novo, df_historico], ignore_index=True)
                     salvar_historico(df_historico)
-                    st.success("✅ Registrado!")
+                    st.cache_data.clear()
+                    st.success(f"✅ {acao_texto} de {qtd}x '{modelo}' registrada!")
                     st.rerun()
 
-    with abas[1]: # LEITOR DE CÓDIGO DE BARRAS / QR CODE
-        st.header("📷 Leitor de Código de Barras")
-        st.caption("Aponte a câmera do celular ou tablet para a etiqueta da caixa:")
-        foto = st.camera_input("Tirar foto do Código de Barras")
-        
-        if foto is not None:
-            img = Image.open(foto)
-            codigos = decode(img)
-            if codigos:
-                codigo_lido = codigos[0].data.decode('utf-8')
-                st.success(f"🎯 Código Identificado: **{codigo_lido}**")
-                # Filtra automaticamente o modelo encontrado
-                exibir_estoque_premium(df_estoque, codigo_lido)
-            else:
-                st.warning("Nenhum código de barras legível foi encontrado na imagem. Tente aproxima a câmera.")
+    with abas[1]: # ESTOQUE ATUAL
+        st.header("📋 Estoque Atual")
+        st.write("💡 Dica: Para cadastrar novos códigos de barras, edite a coluna 'CodigoBarras' diretamente na sua planilha no Google Drive.")
+        busca = st.text_input("🔍 Buscar modelo ou código...", key="busca_admin")
+        st.divider()
+        exibir_estoque_premium(df_estoque, busca)
 
-    with abas[2]: # DASHBOARD COM FILTRO DE DATA
+    with abas[2]: # DASHBOARD
         st.header("📊 Indicadores")
-        d_inicio = st.date_input("Data Inicial", datetime.now().replace(day=1))
-        d_fim = st.date_input("Data Final", datetime.now())
+        col_m1, col_m2 = st.columns(2)
+        col_m1.metric("📦 Total de Peças", int(df_estoque["Quantidade"].sum()))
+        col_m2.metric("⚠️ Modelos Zerados/Baixos", len(zerados))
+        st.divider()
         
         if not df_historico.empty:
             df_hist_copy = df_historico.copy()
             df_hist_copy['Data_Filtro'] = pd.to_datetime(df_hist_copy['Data']).dt.date
-            df_filtrado = df_hist_copy[(df_hist_copy['Data_Filtro'] >= d_inicio) & (df_hist_copy['Data_Filtro'] <= d_fim)]
-            st.bar_chart(df_filtrado.groupby("Separador")["Quantidade"].sum())
+            
+            df_saidas = df_hist_copy[df_hist_copy["Ação"] == "Saída"]
+            df_entradas = df_hist_copy[df_hist_copy["Ação"] == "Entrada"]
+            
+            col_g1, col_g2 = st.columns(2)
+            with col_g1:
+                st.subheader("🛠️ Quem Produziu")
+                if not df_entradas.empty: st.bar_chart(df_entradas.groupby("Separador")["Quantidade"].sum(), color="#16a34a")
+            with col_g2:
+                st.subheader("👤 Quem Retirou")
+                if not df_saidas.empty: st.bar_chart(df_saidas.groupby("Separador")["Quantidade"].sum(), color="#dc2626")
 
-    with abas[3]: # HISTÓRICO
-        st.dataframe(df_historico.drop(columns=["ID"], errors="ignore"), use_container_width=True, hide_index=True)
+    if acesso_coord and len(abas) > 3:
+        with abas[3]: # HISTÓRICO
+            st.header("🕒 Histórico Recente")
+            st.dataframe(df_historico.drop(columns=["ID"], errors="ignore"), use_container_width=True, hide_index=True)
