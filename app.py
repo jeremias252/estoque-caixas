@@ -151,7 +151,8 @@ def exibir_estoque_premium(df_base, termo_busca=""):
 
 # CARREGA OS DADOS
 df_estoque, df_historico = carregar_dados()
-separadores = ["Marcello", "Henrique", "Leonardo", "Patrick"]
+# === EQUIPE ATUALIZADA AQUI ===
+separadores = ["Marcello", "Fabiano", "Sérgio", "Renan", "Gustavo"]
 lista_modelos = sorted(df_estoque["Modelo"].tolist())
 
 # --- LOGO SVG E BOTÃO DE ATUALIZAR ---
