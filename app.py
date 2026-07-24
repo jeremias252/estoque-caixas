@@ -50,47 +50,22 @@ URL_PLANILHA = "https://docs.google.com/spreadsheets/d/10z1gPJNmHoHO5kj6B4SoXknU
 conn = st.connection("gsheets", type=GSheetsConnection)
 
 def carregar_dados():
-    precisa_criar_estoque = False
+    # --- NOVO SISTEMA BLINDADO CONTRA PERDA DE DADOS ---
     try:
         df_estoque = conn.read(spreadsheet=URL_PLANILHA, worksheet="Estoque", ttl=600).copy()
-        if "Quantidade" not in df_estoque.columns or "Modelo" not in df_estoque.columns:
-            precisa_criar_estoque = True
-        else:
-            df_estoque = df_estoque.dropna(subset=["Modelo"])
-            if df_estoque.empty:
-                precisa_criar_estoque = True
-            else:
-                df_estoque["Quantidade"] = pd.to_numeric(df_estoque["Quantidade"], errors="coerce").fillna(0).astype(int)
-    except:
-        precisa_criar_estoque = True
+        df_estoque = df_estoque.dropna(subset=["Modelo"])
+        df_estoque["Quantidade"] = pd.to_numeric(df_estoque["Quantidade"], errors="coerce").fillna(0).astype(int)
+    except Exception as e:
+        # Se a internet falhar ou o Google travar, ele PARA tudo e não apaga nada!
+        st.error("⚠️ Falha de comunicação com o Google Drive. A internet pode ter oscilado. Tente atualizar a página.")
+        st.stop()
 
-    if precisa_criar_estoque:
-        modelos_base = [
-            "CXP01T", "CXP01", "CX04S", "CX34ABS", "CX44", "CX23ABS", 
-            "CX01S", "CX02S", "CX03S", "CXEP02", "CXEP03", "CP01A", 
-            "RE04FN", "RE06FN", "CX02Q", "CX02RN"
-        ]
-        cores = ["Branco", "Preto", "Cinza"]
-        
-        itens = [f"{m} - {c}" for m in modelos_base for c in cores]
-        itens.append("CX56 - Única")
-        
-        df_estoque = pd.DataFrame({"Modelo": sorted(itens), "Quantidade": 0})
-        conn.update(spreadsheet=URL_PLANILHA, worksheet="Estoque", data=df_estoque)
-
-    precisa_criar_hist = False
     try:
         df_historico = conn.read(spreadsheet=URL_PLANILHA, worksheet="Historico", ttl=600).copy()
-        if "Ação" not in df_historico.columns or "Separador" not in df_historico.columns:
-            precisa_criar_hist = True
-        else:
-            df_historico = df_historico.dropna(subset=["ID"])
+        df_historico = df_historico.dropna(subset=["ID"])
     except:
-        precisa_criar_hist = True
-        
-    if precisa_criar_hist:
+        # Se der erro de leitura no histórico, ele cria um vazio em branco só na memória pra não travar a tela
         df_historico = pd.DataFrame(columns=["ID", "Data", "Ação", "Separador", "Modelo", "Quantidade"])
-        conn.update(spreadsheet=URL_PLANILHA, worksheet="Historico", data=df_historico)
 
     return df_estoque, df_historico
 
@@ -101,7 +76,7 @@ def salvar_historico(df):
     conn.update(spreadsheet=URL_PLANILHA, worksheet="Historico", data=df)
 
 # ==========================================
-# EXIBIÇÃO DE ESTOQUE (ESTILO TORRES)
+# EXIBIÇÃO DE ESTOQUE 
 # ==========================================
 def exibir_estoque_premium(df_base, termo_busca=""):
     df_view = df_base.copy()
@@ -151,7 +126,6 @@ def exibir_estoque_premium(df_base, termo_busca=""):
 
 # CARREGA OS DADOS
 df_estoque, df_historico = carregar_dados()
-# === EQUIPE ATUALIZADA AQUI ===
 separadores = ["Marcello", "Fabiano", "Sérgio", "Renan", "Gustavo"]
 lista_modelos = sorted(df_estoque["Modelo"].tolist())
 
