@@ -292,8 +292,7 @@ def carregar_dados():
          st.error("⚠️ Falha de comunicação com o Google Drive.")
          st.stop()
  
-     try:
-def carregar_dados():
+     try: def carregar_dados():
          df_historico = df_historico.dropna(subset=["ID"])
      except:
          df_historico = pd.DataFrame(columns=["ID", "Data", "Ação", "Separador", "Modelo", "Quantidade"])
