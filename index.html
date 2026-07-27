@@ -31,7 +31,7 @@
         }
 
         /* =========================================
-           MODO CLARO (LIGHT MODE - TOTALMENTE CORRIGIDO)
+           MODO CLARO (LIGHT MODE)
            ========================================= */
         body.light-mode {
             --bg-dark: #f1f5f9;
@@ -53,14 +53,14 @@
             color: #475569 !important;
         }
 
-        body.light-mode .hero, body.light-mode .panel, body.light-mode .kpi, body.light-mode .login-card {
+        body.light-mode .hero, body.light-mode .panel, body.light-mode .kpi, body.light-mode .login-card, body.light-mode .modal {
             background: #ffffff !important;
             box-shadow: 0 10px 25px rgba(0,0,0,0.05) !important;
             border-color: #cbd5e1 !important;
         }
 
-        body.light-mode .history-card {
-            background: #ffffff !important;
+        body.light-mode .history-card, body.light-mode .card-detalhe {
+            background: #f8fafc !important;
             border-color: #cbd5e1 !important;
             color: #0f172a !important;
             box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
@@ -78,10 +78,7 @@
             border-color: #94a3b8 !important;
         }
 
-        body.light-mode select option {
-            background-color: #ffffff !important;
-            color: #0f172a !important;
-        }
+        body.light-mode select option { background-color: #ffffff !important; color: #0f172a !important; }
 
         body.light-mode .btn:not(.btn-primary) {
             background: #e2e8f0 !important;
@@ -90,34 +87,14 @@
             box-shadow: none !important;
         }
 
-        body.light-mode .btn-text, body.light-mode .hist-head {
-            color: #475569 !important;
-        }
-
-        body.light-mode .mobile-header, body.light-mode .sidebar {
-            background: #ffffff !important;
-            border-color: #cbd5e1 !important;
-            color: #0f172a !important;
-        }
-
-        body.light-mode .sidebar .logo span {
-            background: var(--grad-btn) !important;
-            -webkit-background-clip: text !important;
-            color: transparent !important;
-        }
-
-        body.light-mode .profile-pill {
-            background: #f8fafc !important;
-            border-color: #cbd5e1 !important;
-            color: #334155 !important;
-        }
-
+        body.light-mode .btn-text, body.light-mode .hist-head { color: #475569 !important; }
+        body.light-mode .mobile-header, body.light-mode .sidebar { background: #ffffff !important; border-color: #cbd5e1 !important; color: #0f172a !important; }
+        body.light-mode .sidebar .logo span { background: var(--grad-btn) !important; -webkit-background-clip: text !important; color: transparent !important; }
+        body.light-mode .profile-pill { background: #f8fafc !important; border-color: #cbd5e1 !important; color: #334155 !important; }
         body.light-mode .menu-toggle { color: #0f172a !important; }
 
         body.light-mode .danger-glow {
-            background: #fef2f2 !important;
-            border-left: 5px solid #ef4444 !important;
-            color: #991b1b !important;
+            background: #fef2f2 !important; border-left: 5px solid #ef4444 !important; color: #991b1b !important;
         }
 
         /* =========================================
@@ -226,7 +203,7 @@
         .panel p.sub { color: var(--text-sub); font-size: 13px; margin: 0 0 20px; }
 
         /* =========================================
-           NOVOS CARDS DESTACADOS DO CATÁLOGO
+           CARDS DO CATÁLOGO POR MODELO
            ========================================= */
         .grid-catalogo { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 16px; }
         
@@ -234,25 +211,22 @@
             background: var(--card-item-bg);
             border: 2px solid var(--border-color);
             border-radius: 22px; padding: 20px; text-align: center;
-            transition: all 0.3s ease; position: relative; overflow: hidden;
+            transition: all 0.3s ease; position: relative; overflow: hidden; cursor: pointer;
         }
-        .item-card:hover { transform: translateY(-3px); }
+        .item-card:hover { transform: translateY(-4px); border-color: var(--prim); }
         
-        /* ITEM EM ESTOQUE (DESTACADO) */
         .item-card.disponivel {
             border-color: rgba(16, 185, 129, 0.4);
             box-shadow: 0 8px 20px rgba(16, 185, 129, 0.08);
         }
         .item-card.disponivel .qtd-num { color: var(--prim); font-size: 32px; font-weight: 900; margin: 8px 0; }
         
-        /* ITEM ESGOTADO (EM DESTAQUE VERMELHO) */
         .item-card.esgotado {
             border-color: rgba(239, 68, 68, 0.6);
             background: rgba(239, 68, 68, 0.08) !important;
             box-shadow: 0 8px 20px rgba(239, 68, 68, 0.12);
         }
         .item-card.esgotado .qtd-num { color: #ef4444; font-size: 32px; font-weight: 900; margin: 8px 0; }
-        .item-card.esgotado .item-nome { color: var(--text-sub); }
 
         .badge-status {
             font-size: 10px; font-weight: 900; letter-spacing: 0.5px;
@@ -260,6 +234,27 @@
         }
         .status-ok { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.4); }
         .status-off { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.5); }
+
+        /* =========================================
+           POP-UP MODAL DAS CORES
+           ========================================= */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); z-index: 1000;
+            display: none; align-items: center; justify-content: center;
+        }
+        .modal {
+            background: var(--panel-bg); border: 1px solid var(--border-color);
+            border-radius: 28px; padding: 30px; width: 90%; max-width: 480px;
+            max-height: 85vh; overflow-y: auto; box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+            animation: fadeSlideUp 0.3s forwards;
+        }
+        .card-detalhe {
+            background: var(--card-item-bg); border: 1px solid var(--border-color);
+            border-radius: 18px; padding: 16px; text-align: center; margin-bottom: 12px;
+        }
+        .card-detalhe span { font-size: 12px; color: var(--text-sub); text-transform: uppercase; font-weight: 900;}
+        .card-detalhe b { display: block; font-size: 30px; color: var(--prim); font-weight: 900; margin: 5px 0;}
 
         .history-card {
             display: grid; grid-template-columns: 1fr 1fr 1fr 2fr 0.5fr 1fr; gap: 10px; align-items: center;
@@ -395,6 +390,7 @@
             <!-- ABA CATÁLOGO -->
             <div id="tab-catalogo" class="tab-content active panel">
                 <h3>🗂️ Catálogo de Estoque</h3>
+                <p class="sub">Clique em qualquer modelo para abrir o detalhamento das cores.</p>
                 <input type="text" id="busca-cat" placeholder="🔍 Pesquisar modelo..." oninput="renderizarCatalogo(this.value)">
                 <div class="grid-catalogo" id="grid-cat"></div>
             </div>
@@ -432,6 +428,16 @@
                 <p class="sub">Volume de saídas por membro da equipe.</p>
                 <div class="chart-container"><canvas id="graficoEquipe"></canvas></div>
             </div>
+        </div>
+    </div>
+
+    <!-- POP-UP DETALHAMENTO DE CORES -->
+    <div class="modal-overlay" id="modal-detalhe">
+        <div class="modal">
+            <h2 id="modal-titulo" style="text-align:center; margin:0 0 5px;">Modelo</h2>
+            <p id="modal-total" style="text-align:center; color:var(--prim); font-weight:900; margin:0 0 20px;">Total: 0 un.</p>
+            <div id="modal-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;"></div>
+            <button class="btn btn-primary" style="margin-top:20px;" onclick="fecharModal()">Fechar Janela</button>
         </div>
     </div>
 
@@ -502,21 +508,40 @@
             let idxQtd = cabecalhoEst.indexOf("Quantidade"); if(idxQtd === -1) idxQtd = 1;
 
             let htmlModelos = '<option value="">Selecione o Modelo...</option>';
-            let totPecas = 0, zerados = []; estado.catalogoLimpo = []; 
+            let totPecas = 0, zerados = []; 
+            estado.catalogoAgrupado = []; 
 
             for(let i=1; i<est.length; i++) {
-                let nome = est[i][idxMod]; let qtd = Number(est[i][idxQtd]) || 0;
-                if(!nome) continue;
-                totPecas += qtd; if(qtd === 0) zerados.push(nome);
-                htmlModelos += `<option value="${nome}">${nome} (Saldo: ${qtd})</option>`;
+                let nomeCompleto = est[i][idxMod]; 
+                let qtd = Number(est[i][idxQtd]) || 0;
+                if(!nomeCompleto) continue;
                 
-                estado.catalogoLimpo.push({ nomeC: nome, total: qtd });
+                totPecas += qtd; 
+                if(qtd === 0) zerados.push(nomeCompleto);
+                
+                htmlModelos += `<option value="${nomeCompleto}">${nomeCompleto} (Saldo: ${qtd})</option>`;
+                
+                // Separa Nome da Linha/Modelo da Cor (ex: "Modelo X - Azul")
+                let partes = String(nomeCompleto).split(' - ');
+                let linha = partes[0].trim();
+                let cor = partes.length > 1 ? partes[1].trim() : 'Padrão';
+                
+                let modeloExistente = estado.catalogoAgrupado.find(x => x.linha === linha);
+                if(!modeloExistente) {
+                    modeloExistente = { linha: linha, total: 0, detalhes: [] };
+                    estado.catalogoAgrupado.push(modeloExistente);
+                }
+                
+                modeloExistente.total += qtd;
+                modeloExistente.detalhes.push({ nomeC: nomeCompleto, cor: cor, qtd: qtd });
             }
 
-            document.getElementById('s-modelo').innerHTML = htmlModelos; document.getElementById('e-modelo').innerHTML = htmlModelos;
-            document.getElementById('kpi-pecas').innerText = totPecas; document.getElementById('kpi-modelos').innerText = (est.length - 1);
+            document.getElementById('s-modelo').innerHTML = htmlModelos; 
+            document.getElementById('e-modelo').innerHTML = htmlModelos;
+            document.getElementById('kpi-pecas').innerText = totPecas; 
+            document.getElementById('kpi-modelos').innerText = estado.catalogoAgrupado.length;
             document.getElementById('kpi-zerados').innerText = zerados.length;
-            document.getElementById('alerta-zerados').innerHTML = zerados.length > 0 ? `<div class="danger-glow">🚨 <b>ALERTA:</b> Há ${zerados.length} modelo(s) totalmente zerado(s) no estoque.</div>` : '';
+            document.getElementById('alerta-zerados').innerHTML = zerados.length > 0 ? `<div class="danger-glow">🚨 <b>ALERTA:</b> Há ${zerados.length} variação(ões) com estoque zerado.</div>` : '';
 
             renderizarCatalogo('');
             
@@ -558,40 +583,61 @@
             renderizarGraficos();
         }
 
-        /* RENDERIZADOR DE CATÁLOGO COM SEPARAÇÃO E DESTAQUE TOTAL */
+        /* RENDERIZA OS MODELOS AGRUPADOS */
         function renderizarCatalogo(busca) {
             let html = ''; let b = busca.toLowerCase();
             
-            // Separa disponíveis de esgotados
-            let disponiveis = estado.catalogoLimpo.filter(x => x.total > 0 && x.nomeC.toLowerCase().includes(b));
-            let esgotados = estado.catalogoLimpo.filter(x => x.total === 0 && x.nomeC.toLowerCase().includes(b));
+            let modelosFiltrados = estado.catalogoAgrupado.filter(x => x.linha.toLowerCase().includes(b));
 
-            if(disponiveis.length === 0 && esgotados.length === 0) {
+            if(modelosFiltrados.length === 0) {
                 document.getElementById('grid-cat').innerHTML = '<p style="color:var(--text-sub)">Nenhum modelo encontrado.</p>';
                 return;
             }
 
-            // Renderiza Disponíveis
-            disponiveis.forEach(item => {
-                html += `
-                <div class="item-card disponivel">
-                    <span class="badge-status status-ok">✅ Em Estoque</span>
-                    <div class="qtd-num">${item.total} <small style="font-size:12px; font-weight:400; color:var(--text-sub)">un.</small></div>
-                    <div class="item-nome" style="font-weight:700; font-size:14px">${item.nomeC}</div>
-                </div>`;
-            });
+            modelosFiltrados.forEach((item, index) => {
+                let isDisponivel = item.total > 0;
+                let statusClass = isDisponivel ? 'disponivel' : 'esgotado';
+                let badgeText = isDisponivel ? '✅ Em Estoque' : '🔴 Zerado / Esgotado';
+                let badgeClass = isDisponivel ? 'status-ok' : 'status-off';
 
-            // Renderiza Esgotados
-            esgotados.forEach(item => {
+                // Descobre o índice original para abrir o modal correto
+                let idxOriginal = estado.catalogoAgrupado.indexOf(item);
+
                 html += `
-                <div class="item-card esgotado">
-                    <span class="badge-status status-off">🔴 Zerado / Esgotado</span>
-                    <div class="qtd-num">0 <small style="font-size:12px; font-weight:400; color:#ef4444">un.</small></div>
-                    <div class="item-nome" style="font-weight:700; font-size:14px">${item.nomeC}</div>
+                <div class="item-card ${statusClass}" onclick="abrirModal(${idxOriginal})">
+                    <span class="badge-status ${badgeClass}">${badgeText}</span>
+                    <div class="qtd-num">${item.total} <small style="font-size:12px; font-weight:400; color:var(--text-sub)">un.</small></div>
+                    <div style="font-weight:800; font-size:15px; margin-bottom:4px;">${item.linha}</div>
+                    <small style="color:var(--text-sub); font-size:11px;">🔍 Clique para ver as cores</small>
                 </div>`;
             });
 
             document.getElementById('grid-cat').innerHTML = html;
+        }
+
+        /* ABRE O MODAL COM AS CORES DO MODELO */
+        function abrirModal(idx) {
+            let item = estado.catalogoAgrupado[idx];
+            document.getElementById('modal-titulo').innerText = item.linha;
+            document.getElementById('modal-total').innerText = `Estoque Total: ${item.total} un.`;
+            
+            let html = '';
+            item.detalhes.forEach(d => {
+                let statusText = d.qtd === 0 ? '🔴 Zerado' : (d.qtd <= 5 ? '🟡 Baixo' : '🟢 OK');
+                html += `
+                <div class="card-detalhe">
+                    <span>${d.cor}</span>
+                    <b>${d.qtd}</b>
+                    <small style="color:var(--text-sub); font-weight:700;">${statusText}</small>
+                </div>`;
+            });
+
+            document.getElementById('modal-grid').innerHTML = html;
+            document.getElementById('modal-detalhe').style.display = 'flex';
+        }
+
+        function fecharModal() {
+            document.getElementById('modal-detalhe').style.display = 'none';
         }
 
         async function lancar(tipo) {
