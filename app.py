@@ -202,7 +202,7 @@ input, textarea, [data-baseweb="select"] > div {
 # ==========================================
 PLANILHAS = {
     "Caixas": "https://docs.google.com/spreadsheets/d/10z1gPJNmHoHO5kj6B4SoXknUNz6MwrQz1NjwkkBatQU/edit?usp=drivesdk",
-    "Torres": "COLE_O_LINK_DAS_TORRES_AQUI"
+    "Torres": "https://docs.google.com/spreadsheets/d/10h0iFxX_FEvQljPyLHD6IdeOaSYsnvHfkYzK7PcHe1U/edit?usp=sharing"
 }
 
 EQUIPES = {
