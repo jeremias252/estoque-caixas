@@ -279,30 +279,31 @@ if "perfil" not in st.session_state:
 if "dados_carregados" not in st.session_state:
      st.session_state.dados_carregados = False
  
- # URL DA PLANILHA GOOGLE
+# URL DA PLANILHA GOOGLE
 URL_PLANILHA = "https://docs.google.com/spreadsheets/d/10z1gPJNmHoHO5kj6B4SoXknUNz6MwrQz1NjwkkBatQU/edit?usp=drivesdk"
 conn = st.connection("gsheets", type=GSheetsConnection)
- 
+
 def carregar_dados():
-     try:
-         df_estoque = conn.read(spreadsheet=URL_PLANILHA, worksheet="Estoque", ttl=600).copy()
-         df_estoque = df_estoque.dropna(subset=["Modelo"])
-         df_estoque["Quantidade"] = pd.to_numeric(df_estoque["Quantidade"], errors="coerce").fillna(0).astype(int)
-     except Exception as e:
-         st.error("⚠️ Falha de comunicação com o Google Drive.")
-         st.stop()
- 
-     try: def carregar_dados():
-         df_historico = df_historico.dropna(subset=["ID"])
-     except:
-         df_historico = pd.DataFrame(columns=["ID", "Data", "Ação", "Separador", "Modelo", "Quantidade"])
-     return df_estoque, df_historico
- 
- def salvar_estoque(df):
-     conn.update(spreadsheet=URL_PLANILHA, worksheet="Estoque", data=df)
- 
- def salvar_historico(df):
-     conn.update(spreadsheet=URL_PLANILHA, worksheet="Historico", data=df)
+    try:
+        df_estoque = conn.read(spreadsheet=URL_PLANILHA, worksheet="Estoque", ttl=600).copy()
+        df_estoque = df_estoque.dropna(subset=["Modelo"])
+        df_estoque["Quantidade"] = pd.to_numeric(df_estoque["Quantidade"], errors="coerce").fillna(0).astype(int)
+    except Exception as e:
+        st.error("⚠️ Falha de comunicação com o Google Drive.")
+        st.stop()
+
+    try:
+        df_historico = conn.read(spreadsheet=URL_PLANILHA, worksheet="Historico", ttl=600).copy()
+        df_historico = df_historico.dropna(subset=["ID"])
+    except:
+        df_historico = pd.DataFrame(columns=["ID", "Data", "Ação", "Separador", "Modelo", "Quantidade"])
+    return df_estoque, df_historico
+
+def salvar_estoque(df):
+    conn.update(spreadsheet=URL_PLANILHA, worksheet="Estoque", data=df)
+
+def salvar_historico(df):
+    conn.update(spreadsheet=URL_PLANILHA, worksheet="Historico", data=df)
  
  @st.dialog("Detalhes do Modelo")
  def abrir_janela_modelo(linha, df_linha, total):
