@@ -22,60 +22,96 @@ st.markdown("""
 .block-container {max-width:1180px; padding-top:2rem; padding-bottom:3rem;}
 [data-testid="stSidebar"] {background:linear-gradient(180deg,#0b0d14,#171b28); border-right:1px solid rgba(255,255,255,.12);}
 
+/* Fonte premium */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800;900&family=Inter:wght@400;600;700&display=swap');
+
 /* =========================================
-   NOVO VISUAL DAS ABAS (Premium Apple Style)
+   NOVO VISUAL DAS ABAS (Glass Premium 2.0)
    ========================================= */
-/* A cápsula escura em volta de todas as abas */
 .stTabs [data-baseweb="tab-list"] {
-    gap: 8px;
-    background: rgba(10, 12, 16, 0.6);
-    padding: 8px;
-    border-radius: 20px;
-    border: 1px solid rgba(255,255,255,0.05);
-    box-shadow: inset 0 4px 12px rgba(0,0,0,0.5);
-    margin-bottom: 24px;
+    gap: 6px;
+    background: linear-gradient(180deg, rgba(20,22,32,.75), rgba(8,9,14,.85));
+    padding: 10px;
+    border-radius: 22px;
+    border: 1px solid rgba(255,255,255,.08);
+    box-shadow: inset 0 4px 14px rgba(0,0,0,.55), 0 20px 45px rgba(0,0,0,.35);
+    backdrop-filter: blur(22px);
+    margin-bottom: 28px;
+    position: relative;
 }
 
-/* O design de cada botão (aba) */
 .stTabs button[data-baseweb="tab"] {
     background: transparent !important;
     border: none !important;
-    border-radius: 14px !important;
-    padding: 10px 20px !important;
+    border-radius: 16px !important;
+    padding: 12px 22px !important;
     margin: 0 !important;
-    transition: all 0.3s ease !important;
+    transition: all .35s cubic-bezier(.22,1,.36,1) !important;
     box-shadow: none !important;
+    position: relative;
+    overflow: hidden;
 }
 
-/* Efeito ao passar o mouse numa aba solta */
+/* Hover em aba não selecionada */
 .stTabs button[data-baseweb="tab"]:hover {
-    background: rgba(255,255,255,0.05) !important;
+    background: rgba(255,255,255,.06) !important;
+    transform: translateY(-1px);
 }
 
-/* A Aba SELECIONADA (Fica acesa) */
+/* Aba SELECIONADA */
 .stTabs button[data-baseweb="tab"][aria-selected="true"] {
-    background: linear-gradient(145deg, #F38020 0%, #dc2626 100%) !important;
-    box-shadow: 0 4px 15px rgba(243, 128, 32, 0.4) !important;
+    background: linear-gradient(145deg, #ffb15f 0%, #F38020 45%, #dc2626 100%) !important;
+    box-shadow:
+        0 6px 20px rgba(243,128,32,.45),
+        0 2px 0 rgba(255,255,255,.25) inset,
+        0 -6px 14px rgba(127,29,29,.35) inset !important;
+    transform: translateY(-2px) scale(1.03);
+    animation: glowPulse 2.6s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+    0%, 100% { box-shadow: 0 6px 20px rgba(243,128,32,.45), 0 2px 0 rgba(255,255,255,.25) inset, 0 -6px 14px rgba(127,29,29,.35) inset; }
+    50% { box-shadow: 0 8px 28px rgba(243,128,32,.7), 0 2px 0 rgba(255,255,255,.3) inset, 0 -6px 14px rgba(127,29,29,.4) inset; }
 }
 
 /* Texto das abas normais */
 .stTabs button[data-baseweb="tab"] p {
     color: #9ca3af !important;
+    font-family: 'Poppins', sans-serif !important;
     font-weight: 700 !important;
-    font-size: 15px !important;
+    font-size: 14.5px !important;
+    letter-spacing: .01em;
     margin: 0 !important;
+    transition: letter-spacing .3s ease;
 }
 
-/* Texto da aba selecionada (Mais claro e grosso) */
+/* Texto da aba selecionada */
 .stTabs button[data-baseweb="tab"][aria-selected="true"] p {
     color: #ffffff !important;
     font-weight: 900 !important;
+    letter-spacing: .03em;
+    text-shadow: 0 2px 8px rgba(0,0,0,.35);
 }
 
-/* ESCONDE A BARRA LARANJA FINA PADRÃO DO STREAMLIT */
+/* Esconde a barra padrão do Streamlit */
 .stTabs [data-baseweb="tab-highlight"] {
     display: none !important;
     background-color: transparent !important;
+}
+
+/* Separador sutil entre abas */
+.stTabs button[data-baseweb="tab"]:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    right: -3px;
+    top: 25%;
+    height: 50%;
+    width: 1px;
+    background: rgba(255,255,255,.08);
+}
+.stTabs button[data-baseweb="tab"][aria-selected="true"]::after,
+.stTabs button[data-baseweb="tab"][aria-selected="true"] + button::after {
+    display: none;
 }
 
 /* =========================================
