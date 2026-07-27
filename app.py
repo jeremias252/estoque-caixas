@@ -8,7 +8,7 @@ from streamlit_gsheets import GSheetsConnection
 st.set_page_config(page_title="Caixas - Portal", page_icon="📦", layout="centered")
  
  # --- DESIGN ULTRA PREMIUM (CSS HACK) ---
- st.markdown("""
+st.markdown("""
      <style>
 -    /* Esconde elementos padrão do Streamlit */
 +    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
