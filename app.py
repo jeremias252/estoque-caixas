@@ -272,98 +272,55 @@ st.markdown("""
      """, unsafe_allow_html=True)
  
  # --- CONTROLE DE SESSÃO ---
-if "logado" not in st.session_state:
-     st.session_state.logado = False
-if "perfil" not in st.session_state:
-     st.session_state.perfil = ""
-if "dados_carregados" not in st.session_state:
-     st.session_state.dados_carregados = False
- 
-# URL DA PLANILHA GOOGLE
-URL_PLANILHA = "https://docs.google.com/spreadsheets/d/10z1gPJNmHoHO5kj6B4SoXknUNz6MwrQz1NjwkkBatQU/edit?usp=drivesdk"
-conn = st.connection("gsheets", type=GSheetsConnection)
-
-def carregar_dados():
-    try:
-        df_estoque = conn.read(spreadsheet=URL_PLANILHA, worksheet="Estoque", ttl=600).copy()
-        df_estoque = df_estoque.dropna(subset=["Modelo"])
-        df_estoque["Quantidade"] = pd.to_numeric(df_estoque["Quantidade"], errors="coerce").fillna(0).astype(int)
-    except Exception as e:
-        st.error("⚠️ Falha de comunicação com o Google Drive.")
-        st.stop()
-
-    try:
-        df_historico = conn.read(spreadsheet=URL_PLANILHA, worksheet="Historico", ttl=600).copy()
-        df_historico = df_historico.dropna(subset=["ID"])
-    except:
-        df_historico = pd.DataFrame(columns=["ID", "Data", "Ação", "Separador", "Modelo", "Quantidade"])
-    return df_estoque, df_historico
-
-def salvar_estoque(df):
-    conn.update(spreadsheet=URL_PLANILHA, worksheet="Estoque", data=df)
-
-def salvar_historico(df):
-    conn.update(spreadsheet=URL_PLANILHA, worksheet="Historico", data=df)
- 
-@st.dialog("Detalhes do Modelo")
-def abrir_janela_modelo(linha, df_linha, total):
-     st.markdown(f"<h3 style='text-align:center; margin-bottom: 0;'>{linha}</h3>", unsafe_allow_html=True)
-     st.markdown(f"<p style='text-align:center; color:#F38020; font-weight:bold; font-size:18px;'>Estoque Total: {total} un.</p>", unsafe_allow_html=True)
-     st.divider()
-     for i in range(0, len(df_linha), 2):
-         cols = st.columns(2)
-         for j in range(2):
-             if i + j < len(df_linha):
-                 row = df_linha.iloc[i+j]
-                 cor = row['Cor']
-                 qtd = int(row['Quantidade'])
-                 status = "🔴 Zerado" if qtd == 0 else ("🟡 Baixo" if qtd <= 5 else "🟢 OK")
-                 card_html = f"""
--                <div style="background-color: #111; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #333; margin-bottom: 10px;">
--                    <div style="color: #888; font-size: 13px; font-weight: bold; text-transform: uppercase;">{cor}</div>
--                    <div style="color: #F38020; font-size: 28px; font-weight: 900; margin: 5px 0;">{qtd}</div>
--                    <div style="font-size: 11px; color: #AAA;">{status}</div>
-+                <div class="premium-card">
-+                    <div class="label">{cor}</div>
-+                    <div class="value">{qtd}</div>
-+                    <div class="status">{status}</div>
-                 </div>
-                 """
-                 cols[j].markdown(card_html, unsafe_allow_html=True)
- 
-def exibir_estoque_premium(df_base, termo_busca=""):
-    df_view = df_base.copy()
-    if termo_busca:
-        df_view = df_view[df_view["Modelo"].str.contains(termo_busca, case=False)]
-    if df_view.empty:
-        st.warning("Nenhum modelo encontrado.")
-        return
-
-    def extrair_linha(nome): return nome.rsplit(" - ", 1)[0] if " - " in nome else nome
-    def extrair_cor(nome): return nome.rsplit(" - ", 1)[1] if " - " in nome else "Padrão"
-
-    df_view['Linha'] = df_view['Modelo'].apply(extrair_linha)
-    df_view['Cor'] = df_view['Modelo'].apply(extrair_cor)
-    df_totais = df_view.groupby('Linha')['Quantidade'].sum().reset_index().sort_values(by='Quantidade', ascending=False)
+# ==========================================
+# TELA 1: PORTAL DE ACESSO (LOGIN PREMIUM)
+# ==========================================
+if not st.session_state.logado:
+    st.markdown("<div class='login-container'>", unsafe_allow_html=True)
+    st.markdown("<div class='login-box'>", unsafe_allow_html=True)
     
-    st.markdown("<p style='color:#888; font-size:14px; text-align:center;'>Selecione um modelo para ver os detalhes:</p>", unsafe_allow_html=True)
+    st.markdown(logo_svg, unsafe_allow_html=True)
+    st.markdown("<h3 style='margin-bottom: 20px; color: #fff;'>Acesso ao Sistema</h3>", unsafe_allow_html=True)
     
-    for i in range(0, len(df_totais), 2):
-        cols = st.columns(2)
-        for j in range(2):
-            if i + j < len(df_totais):
-                row_total = df_totais.iloc[i+j]
-                linha = row_total['Linha']
-                total = int(row_total['Quantidade'])
-                icone = "🔴" if total == 0 else ("🟡" if total <= 5 else "📦")
+    opcao = st.selectbox("Identifique seu perfil:", ["", "👀 Equipe (Visualização)", "⚙️ Controle (Marcello)", "👑 Coordenador"])
+    
+    if opcao == "👀 Equipe (Visualização)":
+        if st.button("Acessar Estoque Livre", type="primary", use_container_width=True):
+            st.session_state.logado = True
+            st.session_state.perfil = "equipe"
+            st.rerun()
+            
+    elif opcao == "⚙️ Controle (Marcello)":
+        senha = st.text_input("Senha de Acesso:", type="password")
+        if st.button("Entrar no Painel", type="primary", use_container_width=True):
+            if senha == "marcello123":
+                st.session_state.logado = True
+                st.session_state.perfil = "marcello"
+                st.rerun()
+            else:
+                st.error("❌ Senha incorreta!")
                 
-                if cols[j].button(f"{icone} {linha} ({total})", key=f"btn_{linha}", use_container_width=True):
-                    df_linha = df_view[df_view['Linha'] == linha].sort_values(by='Cor')
-                    abrir_janela_modelo(linha, df_linha, total)
+    elif opcao == "👑 Coordenador":
+        senha = st.text_input("Senha da Coordenação:", type="password")
+        if st.button("Entrar no Painel", type="primary", use_container_width=True):
+            if senha == "coord123":
+                st.session_state.logado = True
+                st.session_state.perfil = "coord"
+                st.rerun()
+            else:
+                st.error("❌ Senha incorreta!")
+                
+    st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+# ==========================================
+# TELA 2: DENTRO DO SISTEMA (DASHBOARD)
+# ==========================================
 else:
-             st.session_state.df_estoque = e
-             st.session_state.df_historico = h
-             st.session_state.dados_carregados = True
+    if not st.session_state.dados_carregados:
+        with st.spinner("⏳ Sincronizando com o banco de dados..."):
+            e, h = carregar_dados()
+            st.session_state.df_estoque = e
  
      df_estoque = st.session_state.df_estoque
      df_historico = st.session_state.df_historico
