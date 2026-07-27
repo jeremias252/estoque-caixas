@@ -1,13 +1,8 @@
-diff --git a/app.py b/app.py
-index c72ced4aff56f7849b0f7956afa73aaf093ec47b..2dfa5b6b8e809b21071bd4491f47eb5f4ddabe97 100644
---- a/app.py
-+++ b/app.py
-@@ -1,141 +1,214 @@
- import streamlit as st
- import pandas as pd
- import uuid
- from datetime import datetime
- from streamlit_gsheets import GSheetsConnection
+import streamlit as st
+import pandas as pd
+import uuid
+from datetime import datetime
+from streamlit_gsheets import GSheetsConnection
  
  # --- CONFIGURAÇÃO DA PÁGINA ---
  st.set_page_config(page_title="Caixas - Portal", page_icon="📦", layout="centered")
@@ -298,7 +293,7 @@ index c72ced4aff56f7849b0f7956afa73aaf093ec47b..2dfa5b6b8e809b21071bd4491f47eb5f
          st.stop()
  
      try:
-@@ -143,253 +216,259 @@ def carregar_dados():
+def carregar_dados():
          df_historico = df_historico.dropna(subset=["ID"])
      except:
          df_historico = pd.DataFrame(columns=["ID", "Data", "Ação", "Separador", "Modelo", "Quantidade"])
