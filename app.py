@@ -323,7 +323,7 @@ else:
             st.session_state.df_estoque = e
  
 df_estoque = st.session_state.df_estoque
-     df_historico = st.session_state.df_historico
+df_historico = st.session_state.df_historico
      separadores = ["Marcello", "Fabiano", "Sérgio"]
      lista_modelos = sorted(df_estoque["Modelo"].tolist())
  
