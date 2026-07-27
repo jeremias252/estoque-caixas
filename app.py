@@ -280,7 +280,7 @@ if "dados_carregados" not in st.session_state:
      st.session_state.dados_carregados = False
  
  # URL DA PLANILHA GOOGLE
- URL_PLANILHA = "https://docs.google.com/spreadsheets/d/10z1gPJNmHoHO5kj6B4SoXknUNz6MwrQz1NjwkkBatQU/edit?usp=drivesdk"
+URL_PLANILHA = "https://docs.google.com/spreadsheets/d/10z1gPJNmHoHO5kj6B4SoXknUNz6MwrQz1NjwkkBatQU/edit?usp=drivesdk"
  conn = st.connection("gsheets", type=GSheetsConnection)
  
  def carregar_dados():
