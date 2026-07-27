@@ -332,26 +332,34 @@ def abrir_janela_modelo(linha, df_linha, total):
                  cols[j].markdown(card_html, unsafe_allow_html=True)
  
 def exibir_estoque_premium(df_base, termo_busca=""):
-     df_view = df_base.copy()
-     if termo_busca:
-         df_view = df_view[df_view["Modelo"].str.contains(termo_busca, case=False)]
-     if df_view.empty:
-         st.warning("Nenhum modelo encontrado.")
-         return
- 
-def extrair_linha(nome): return nome.rsplit(" - ", 1)[0] if " - " in nome else nome
-def extrair_cor(nome): return nome.rsplit(" - ", 1)[1] if " - " in nome else "Padrão"
- 
-df_view['Linha'] = df_view['Modelo'].apply(extrair_linha)
-df_view['Cor'] = df_view['Modelo'].apply(extrair_cor)
-df_totais = df_view.groupby('Linha')['Quantidade'].sum().reset_index().sort_values(by='Quantidade', ascending=False)
-     
-     st.markdown("<p style='color:#888; font-size:14px; text-align:center;'>Selecione um modelo para ver os detalhes:</p>", unsafe_allow_html=True)
-     
-     for i in range(0, len(df_totais), 2):
-         cols = st.columns(2)
-         for j in range(2):
-             if i + j < len(df_totais):
+    df_view = df_base.copy()
+    if termo_busca:
+        df_view = df_view[df_view["Modelo"].str.contains(termo_busca, case=False)]
+    if df_view.empty:
+        st.warning("Nenhum modelo encontrado.")
+        return
+
+    def extrair_linha(nome): return nome.rsplit(" - ", 1)[0] if " - " in nome else nome
+    def extrair_cor(nome): return nome.rsplit(" - ", 1)[1] if " - " in nome else "Padrão"
+
+    df_view['Linha'] = df_view['Modelo'].apply(extrair_linha)
+    df_view['Cor'] = df_view['Modelo'].apply(extrair_cor)
+    df_totais = df_view.groupby('Linha')['Quantidade'].sum().reset_index().sort_values(by='Quantidade', ascending=False)
+    
+    st.markdown("<p style='color:#888; font-size:14px; text-align:center;'>Selecione um modelo para ver os detalhes:</p>", unsafe_allow_html=True)
+    
+    for i in range(0, len(df_totais), 2):
+        cols = st.columns(2)
+        for j in range(2):
+            if i + j < len(df_totais):
+                row_total = df_totais.iloc[i+j]
+                linha = row_total['Linha']
+                total = int(row_total['Quantidade'])
+                icone = "🔴" if total == 0 else ("🟡" if total <= 5 else "📦")
+                
+                if cols[j].button(f"{icone} {linha} ({total})", key=f"btn_{linha}", use_container_width=True):
+                    df_linha = df_view[df_view['Linha'] == linha].sort_values(by='Cor')
+                    abrir_janela_modelo(linha, df_linha, total)
 else:
              st.session_state.df_estoque = e
              st.session_state.df_historico = h
