@@ -9,11 +9,11 @@ st.set_page_config(page_title="Caixas - Portal", page_icon="📦", layout="wide"
 st.markdown("""
 <style>
 #MainMenu, header, footer {visibility:hidden;}
-.stApp{background:radial-gradient(circle at top left,#3b1b08 0,#090b12 34rem),linear-gradient(135deg,#07080d,#121827 55%,#050608);color:#f8fafc;}
+.stApp{background:radial-gradient(circle at 12% 8%,rgba(243,128,32,.35),transparent 28rem),radial-gradient(circle at 86% 12%,rgba(220,38,38,.22),transparent 26rem),radial-gradient(circle at 50% 90%,rgba(14,165,233,.10),transparent 30rem),linear-gradient(135deg,#050608,#111827 50%,#050608);color:#f8fafc;}
 .block-container{max-width:1180px;padding-top:2rem;padding-bottom:3rem;}
 [data-testid="stSidebar"]{background:linear-gradient(180deg,#0b0d14,#171b28);border-right:1px solid rgba(255,255,255,.12);}
-.hero,.panel,[data-testid="stForm"]{background:linear-gradient(145deg,rgba(30,34,50,.94),rgba(9,11,18,.96));border:1px solid rgba(255,255,255,.13);border-radius:24px;box-shadow:0 24px 70px rgba(0,0,0,.48),inset 0 1px 0 rgba(255,255,255,.12);padding:24px;margin-bottom:20px;}
-.logo{font-size:34px;font-weight:900;text-align:center;letter-spacing:-1px;margin-bottom:14px}.logo span{color:#F38020}.eyebrow{color:#F38020;font-size:12px;font-weight:900;letter-spacing:.18em;text-transform:uppercase}.title{font-size:clamp(34px,5vw,58px);font-weight:900;line-height:.95;margin:6px 0}.sub{color:#cbd5e1;margin:8px 0 0}
+.hero,.panel,[data-testid="stForm"]{position:relative;overflow:hidden;background:linear-gradient(145deg,rgba(31,36,55,.92),rgba(7,9,16,.96));border:1px solid rgba(255,255,255,.14);border-radius:28px;box-shadow:0 28px 80px rgba(0,0,0,.52),inset 0 1px 0 rgba(255,255,255,.14);padding:26px;margin-bottom:22px;backdrop-filter:blur(18px)}.hero:before,.panel:before,[data-testid="stForm"]:before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(120deg,rgba(255,255,255,.12),transparent 35%,rgba(243,128,32,.12))}.hero>*{position:relative}.hero{padding:32px}.hero-top{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;flex-wrap:wrap}.badge{display:inline-flex;gap:8px;align-items:center;background:rgba(243,128,32,.13);border:1px solid rgba(243,128,32,.42);color:#fed7aa;border-radius:999px;padding:8px 12px;font-weight:900;font-size:12px;letter-spacing:.08em}.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:22px}.kpi{background:rgba(5,7,12,.48);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:14px 16px;box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}.kpi b{display:block;font-size:24px;color:#fff}.kpi span{color:#9ca3af;font-size:12px;font-weight:800;text-transform:uppercase}.danger-glow{border-left:5px solid #ef4444;background:linear-gradient(90deg,rgba(127,29,29,.8),rgba(31,41,55,.75));border-radius:18px;padding:16px;margin-bottom:18px;color:#fecaca}.login-wrap{min-height:82vh;display:flex;align-items:center}.profile-pill{background:rgba(5,7,12,.54);border:1px solid rgba(255,255,255,.13);border-radius:18px;padding:12px;text-align:center;margin:14px 0;color:#cbd5e1}.profile-pill b{color:#F38020}.window-title{margin:0;font-weight:900}.window-sub{color:#cbd5e1;margin:6px 0 0}.divider-glow{height:1px;background:linear-gradient(90deg,transparent,rgba(243,128,32,.8),transparent);margin:18px 0}
+.logo{font-size:34px;font-weight:900;text-align:center;letter-spacing:-1px;margin-bottom:14px;text-shadow:0 10px 30px rgba(0,0,0,.45)}.logo span{background:linear-gradient(90deg,#ffbd77,#F38020,#ef4444);-webkit-background-clip:text;color:transparent}.eyebrow{color:#F38020;font-size:12px;font-weight:900;letter-spacing:.18em;text-transform:uppercase}.title{font-size:clamp(38px,5vw,64px);font-weight:900;line-height:.92;margin:8px 0;letter-spacing:-.05em}.sub{color:#cbd5e1;margin:8px 0 0;max-width:720px}
 div[data-baseweb="tab-list"]{gap:10px;background:rgba(5,6,10,.55);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:10px;margin-bottom:20px}div[data-baseweb="tab"]{background:linear-gradient(145deg,#252b3d,#10131d)!important;border:1px solid rgba(255,255,255,.12)!important;border-radius:15px!important;box-shadow:0 7px 0 #050608,0 14px 28px rgba(0,0,0,.35)!important;padding:10px 16px!important}div[data-baseweb="tab"][aria-selected="true"]{background:linear-gradient(145deg,#ffad55,#F38020,#b91c1c)!important;box-shadow:0 7px 0 #7f1d1d,0 18px 36px rgba(243,128,32,.32)!important}div[data-baseweb="tab"] p{color:white!important;font-weight:900!important}
 .stButton>button,.stDownloadButton>button,[data-testid="stFormSubmitButton"] button{border-radius:15px!important;font-weight:900!important;min-height:45px;background:linear-gradient(145deg,#262b3c,#10131d)!important;color:white!important;border:1px solid rgba(255,255,255,.14)!important;box-shadow:0 7px 0 #050608,0 15px 28px rgba(0,0,0,.35)!important}.stButton>button:hover,.stDownloadButton>button:hover,[data-testid="stFormSubmitButton"] button:hover{transform:translateY(-2px);border-color:#F38020!important}.stButton>button[data-testid="baseButton-primary"],[data-testid="stFormSubmitButton"] button[kind="primary"],.stDownloadButton>button[data-testid="baseButton-primary"]{background:linear-gradient(145deg,#ffb15f,#F38020,#dc2626)!important;box-shadow:0 8px 0 #7f1d1d,0 20px 40px rgba(243,128,32,.32)!important}
 input,textarea,[data-baseweb="select"]>div{background:rgba(5,6,8,.7)!important;border-radius:14px!important;border-color:rgba(255,255,255,.14)!important}.card{background:linear-gradient(145deg,#202638,#0b0d14);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:16px;text-align:center;box-shadow:0 15px 36px rgba(0,0,0,.38);margin-bottom:12px}.card .label{color:#a7adb8;font-size:12px;font-weight:900;text-transform:uppercase}.card .value{color:#F38020;font-size:34px;font-weight:900}.card .status{color:#d1d5db;font-size:12px}[data-testid="stMetric"]{background:#111827;border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:16px}
@@ -28,7 +28,7 @@ for chave, valor in {"logado": False, "perfil": "", "dados_carregados": False}.i
         st.session_state[chave] = valor
 
 def logo():
-    st.markdown("<div class='logo'>📦 SETOR <span>CAIXAS</span></div>", unsafe_allow_html=True)
+    st.markdown("<div class='logo'>⬢ SETOR <span>CAIXAS</span></div>", unsafe_allow_html=True)
 
 def carregar_dados():
     try:
@@ -101,11 +101,12 @@ def registrar_movimento(acao, pessoa, modelo, quantidade, df_estoque, df_histori
     st.rerun()
 
 if not st.session_state.logado:
-    _, centro, _ = st.columns([1, 1.1, 1])
+    _, centro, _ = st.columns([1, 1.05, 1])
+    st.markdown("<div class='login-wrap'>", unsafe_allow_html=True)
     with centro:
         st.markdown("<div class='panel'>", unsafe_allow_html=True)
         logo()
-        st.markdown("<h3 style='text-align:center'>Acesso ao Sistema</h3>", unsafe_allow_html=True)
+        st.markdown("<div class='badge' style='margin:auto;width:max-content'>ACESSO SEGURO</div><h3 style='text-align:center;margin-top:14px'>Acesso ao Sistema</h3><p class='sub' style='text-align:center'>Escolha seu perfil para abrir a janela correta do estoque.</p><div class='divider-glow'></div>", unsafe_allow_html=True)
         opcao = st.selectbox("Identifique seu perfil:", ["", "👀 Equipe (Visualização)", "⚙️ Controle (Marcello)", "👑 Coordenador"])
         if opcao == "👀 Equipe (Visualização)":
             if st.button("Acessar Estoque Livre", type="primary", use_container_width=True):
@@ -131,6 +132,7 @@ if not st.session_state.logado:
                 else:
                     st.error("❌ Senha incorreta!")
         st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
 else:
     if not st.session_state.dados_carregados:
         with st.spinner("⏳ Sincronizando com o banco de dados..."):
@@ -145,7 +147,7 @@ else:
     with st.sidebar:
         logo()
         st.markdown("---")
-        st.markdown(f"<div style='text-align:center;color:#888'>LOGADO COMO</div><div style='text-align:center;font-weight:900;color:#F38020'>{st.session_state.perfil.upper()}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='profile-pill'><span>LOGADO COMO</span><br><b>{st.session_state.perfil.upper()}</b></div>", unsafe_allow_html=True)
         if st.button("🔄 Sincronizar Base", use_container_width=True):
             st.session_state.dados_carregados = False
             st.rerun()
@@ -156,10 +158,28 @@ else:
             st.session_state.dados_carregados = False
             st.rerun()
 
-    st.markdown("<section class='hero'><div class='eyebrow'>Setor Caixas • Portal Premium</div><div class='title'>Painel Operacional</div><p class='sub'>Controle de estoque com janelas independentes, cartões premium e botões 3D.</p></section>", unsafe_allow_html=True)
     zerados = df_estoque[df_estoque["Quantidade"] == 0]["Modelo"].tolist()
+    total_pecas = int(df_estoque["Quantidade"].sum())
+    total_modelos = len(df_estoque)
+    st.markdown(f"""
+    <section class='hero'>
+        <div class='hero-top'>
+            <div>
+                <div class='badge'>⬢ OPERAÇÃO PREMIUM</div>
+                <div class='title'>Painel Operacional</div>
+                <p class='sub'>Controle de estoque com janelas independentes, cartões premium, botões 3D e leitura rápida dos indicadores.</p>
+            </div>
+            <div class='badge'>PERFIL {st.session_state.perfil.upper()}</div>
+        </div>
+        <div class='kpis'>
+            <div class='kpi'><span>Peças em estoque</span><b>{total_pecas}</b></div>
+            <div class='kpi'><span>Modelos cadastrados</span><b>{total_modelos}</b></div>
+            <div class='kpi'><span>Itens zerados</span><b>{len(zerados)}</b></div>
+        </div>
+    </section>
+    """, unsafe_allow_html=True)
     if zerados:
-        st.error(f"🚨 ALERTA: Há {len(zerados)} modelos com estoque totalmente zerado.")
+        st.markdown(f"<div class='danger-glow'>🚨 <b>ALERTA:</b> Há {len(zerados)} modelos com estoque totalmente zerado.</div>", unsafe_allow_html=True)
 
     if st.session_state.perfil == "equipe":
         st.markdown("<div class='panel'>👋 <b>Modo Visualização.</b> Solicite retiradas ao responsável.</div>", unsafe_allow_html=True)
@@ -175,7 +195,7 @@ else:
             busca = st.text_input("🔍 Pesquisar no estoque...")
             exibir_estoque(df_estoque, busca)
         with abas[1]:
-            st.markdown("<div class='panel'><h3>📤 Janela de Saídas</h3><p class='sub'>Registre retiradas com validação automática de saldo.</p></div>", unsafe_allow_html=True)
+            st.markdown("<div class='panel'><h3 class='window-title'>📤 Janela de Saídas</h3><p class='window-sub'>Registre retiradas com validação automática de saldo.</p></div>", unsafe_allow_html=True)
             with st.form("form_saida", clear_on_submit=True):
                 c1, c2, c3 = st.columns([2, 3, 1])
                 pessoa = c1.selectbox("Quem retirou?", [""] + separadores)
@@ -185,7 +205,7 @@ else:
             if enviar:
                 registrar_movimento("Saída", pessoa, modelo, qtd, df_estoque, df_historico) if pessoa and modelo else st.error("⚠️ Preencha os campos.")
         with abas[2]:
-            st.markdown("<div class='panel'><h3>📥 Janela de Entradas</h3><p class='sub'>Lance produção e reposição no estoque conectado.</p></div>", unsafe_allow_html=True)
+            st.markdown("<div class='panel'><h3 class='window-title'>📥 Janela de Entradas</h3><p class='window-sub'>Lance produção e reposição no estoque conectado.</p></div>", unsafe_allow_html=True)
             with st.form("form_entrada", clear_on_submit=True):
                 c1, c2, c3 = st.columns([2, 3, 1])
                 pessoa = c1.selectbox("Quem produziu?", [""] + separadores)
@@ -195,7 +215,7 @@ else:
             if enviar:
                 registrar_movimento("Entrada", pessoa, modelo, qtd, df_estoque, df_historico) if pessoa and modelo else st.error("⚠️ Preencha os campos.")
         with abas[3]:
-            st.markdown("<div class='panel'><h3>📊 Janela de Indicadores</h3><p class='sub'>Acompanhe volume, itens críticos e movimentos por período.</p></div>", unsafe_allow_html=True)
+            st.markdown("<div class='panel'><h3 class='window-title'>📊 Janela de Indicadores</h3><p class='window-sub'>Acompanhe volume, itens críticos e movimentos por período.</p></div>", unsafe_allow_html=True)
             m1, m2 = st.columns(2)
             m1.metric("📦 Peças no Estoque", int(df_estoque["Quantidade"].sum()))
             m2.metric("⚠️ Modelos Críticos", len(zerados))
@@ -210,10 +230,10 @@ else:
                 g1.bar_chart(hist[hist["Ação"] == "Entrada"].groupby("Separador")["Quantidade"].sum(), color="#10b981")
                 g2.bar_chart(hist[hist["Ação"] == "Saída"].groupby("Separador")["Quantidade"].sum(), color="#ef4444")
         with abas[4]:
-            st.markdown("<div class='panel'><h3>🕒 Janela de Histórico</h3><p class='sub'>Últimos lançamentos sincronizados com a planilha.</p></div>", unsafe_allow_html=True)
+            st.markdown("<div class='panel'><h3 class='window-title'>🕒 Janela de Histórico</h3><p class='window-sub'>Últimos lançamentos sincronizados com a planilha.</p></div>", unsafe_allow_html=True)
             st.dataframe(df_historico.drop(columns=["ID"], errors="ignore"), use_container_width=True, hide_index=True)
         if st.session_state.perfil == "coord":
             with abas[5]:
-                st.markdown("<div class='panel'><h3>👑 Janela Executiva</h3><p class='sub'>Exporte os dados para análise e conferência.</p></div>", unsafe_allow_html=True)
+                st.markdown("<div class='panel'><h3 class='window-title'>👑 Janela Executiva</h3><p class='window-sub'>Exporte os dados para análise e conferência.</p></div>", unsafe_allow_html=True)
                 csv = df_historico.drop(columns=["ID"], errors="ignore").to_csv(index=False, sep=";").encode("utf-8-sig")
                 st.download_button("📥 Baixar Excel (CSV)", csv, f"Caixas_{datetime.now().strftime('%d-%m')}.csv", "text/csv", type="primary", use_container_width=True)
