@@ -1,9 +1,3 @@
- (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
-diff --git a/app.py b/app.py
-index c72ced4aff56f7849b0f7956afa73aaf093ec47b..bdafad920aa785fc10c46a73afe0b9e2fb5db5d0 100644
---- a/app.py
-+++ b/app.py
-@@ -1,141 +1,214 @@
  import streamlit as st
  import pandas as pd
  import uuid
