@@ -160,6 +160,62 @@ st.markdown("""
 .title {font-size:clamp(38px,5vw,64px); font-weight:900; line-height:.92; margin:8px 0; letter-spacing:-.05em}
 .sub {color:#cbd5e1; margin:8px 0 0; max-width:720px}
 
+/* =========================================
+   LOGIN PREMIUM (cartão único, mais limpo)
+   ========================================= */
+.login-wrap {min-height:88vh; display:flex; align-items:center; justify-content:center}
+.login-card {
+    position:relative; overflow:hidden;
+    max-width:420px; margin:0 auto;
+    background:linear-gradient(165deg,rgba(28,32,48,.94),rgba(6,7,12,.97));
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:28px;
+    padding:40px 34px 32px;
+    box-shadow:0 30px 90px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.10);
+    backdrop-filter:blur(20px);
+}
+.login-card::before {
+    content:"";
+    position:absolute; inset:-2px;
+    border-radius:30px;
+    padding:2px;
+    background:conic-gradient(from 0deg, rgba(243,128,32,.55), rgba(220,38,38,.4), transparent 35%, transparent 65%, rgba(243,128,32,.55));
+    -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite:xor;
+    mask-composite:exclude;
+    animation:rotateBorder 6s linear infinite;
+    opacity:.55;
+}
+@keyframes rotateBorder { to { transform:rotate(360deg); } }
+.login-icon {
+    width:64px; height:64px; margin:0 auto 14px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:30px;
+    border-radius:20px;
+    background:linear-gradient(150deg,#ffb15f,#F38020 55%,#dc2626);
+    box-shadow:0 14px 34px rgba(243,128,32,.4), inset 0 1px 0 rgba(255,255,255,.35);
+}
+.login-eyebrow {
+    text-align:center; color:#fdba74; font-size:11px; font-weight:800;
+    letter-spacing:.22em; text-transform:uppercase; margin-top:4px;
+}
+.login-title {
+    text-align:center; font-family:'Poppins',sans-serif; font-weight:900;
+    font-size:26px; margin:8px 0 4px; letter-spacing:-.02em; color:#fff;
+}
+.login-sub {
+    text-align:center; color:#9ca3af; font-size:13.5px; margin:0 0 22px; line-height:1.5;
+}
+.login-card [data-testid="stSelectbox"] label,
+.login-card [data-testid="stTextInput"] label {
+    color:#cbd5e1 !important; font-weight:700 !important; font-size:12.5px !important;
+    text-transform:uppercase; letter-spacing:.06em;
+}
+.login-footnote {
+    text-align:center; color:#6b7280; font-size:11.5px; margin-top:18px;
+    display:flex; align-items:center; justify-content:center; gap:6px;
+}
+
 /* Botões do Sistema */
 .stButton>button, .stDownloadButton>button, [data-testid="stFormSubmitButton"] button {
     border-radius:15px !important; font-weight:900 !important; min-height:45px;
@@ -292,27 +348,24 @@ def registrar_movimento(acao, pessoa, modelo, quantidade, df_estoque, df_histori
     st.rerun()
 
 if not st.session_state.logado:
-    _, centro, _ = st.columns([1, 1.05, 1])
+    _, centro, _ = st.columns([1, 1.15, 1])
     st.markdown("<div class='login-wrap'>", unsafe_allow_html=True)
     with centro:
-        st.markdown("<div class='panel'>", unsafe_allow_html=True)
-        logo()
-        st.markdown("<div class='badge' style='margin:auto;width:max-content'>ACESSO SEGURO</div><h3 style='text-align:center;margin-top:14px'>Acesso ao Sistema</h3><p class='sub' style='text-align:center'>Escolha seu perfil para abrir a janela correta do estoque.</p><div class='divider-glow'></div>", unsafe_allow_html=True)
+        st.markdown("<div class='login-card'>", unsafe_allow_html=True)
         st.markdown("""
-        <div class='role-grid'>
-            <div class='role-card'><b>👀 Equipe</b><span>consulta rápida</span></div>
-            <div class='role-card'><b>⚙️ Controle</b><span>entradas e saídas</span></div>
-            <div class='role-card'><b>👑 Coord.</b><span>exportação e gestão</span></div>
-        </div>
+        <div class='login-icon'>⬢</div>
+        <div class='login-eyebrow'>Acesso Seguro</div>
+        <div class='login-title'>Setor Caixas</div>
+        <p class='login-sub'>Selecione seu perfil para abrir o painel correspondente.</p>
         """, unsafe_allow_html=True)
-        opcao = st.selectbox("Identifique seu perfil:", ["", "👀 Equipe (Visualização)", "⚙️ Controle (Marcello)", "👑 Coordenador"])
+        opcao = st.selectbox("Perfil", ["", "👀 Equipe (Visualização)", "⚙️ Controle (Marcello)", "👑 Coordenador"], label_visibility="visible")
         if opcao == "👀 Equipe (Visualização)":
             if st.button("Acessar Estoque Livre", type="primary", use_container_width=True):
                 st.session_state.logado = True
                 st.session_state.perfil = "equipe"
                 st.rerun()
         elif opcao == "⚙️ Controle (Marcello)":
-            senha = st.text_input("Senha de Acesso:", type="password")
+            senha = st.text_input("Senha", type="password")
             if st.button("Entrar no Painel", type="primary", use_container_width=True):
                 if senha == "marcello123":
                     st.session_state.logado = True
@@ -321,7 +374,7 @@ if not st.session_state.logado:
                 else:
                     st.error("❌ Senha incorreta!")
         elif opcao == "👑 Coordenador":
-            senha = st.text_input("Senha da Coordenação:", type="password")
+            senha = st.text_input("Senha", type="password")
             if st.button("Entrar no Painel", type="primary", use_container_width=True):
                 if senha == "coord123":
                     st.session_state.logado = True
@@ -329,6 +382,7 @@ if not st.session_state.logado:
                     st.rerun()
                 else:
                     st.error("❌ Senha incorreta!")
+        st.markdown("<div class='login-footnote'>🔒 Conexão criptografada com o Google Sheets</div>", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 else:
