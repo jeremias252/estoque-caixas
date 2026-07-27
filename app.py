@@ -8,15 +8,146 @@ st.set_page_config(page_title="Caixas - Portal", page_icon="📦", layout="wide"
 
 st.markdown("""
 <style>
+/* Esconde o menu padrão do Streamlit */
 #MainMenu, header, footer {visibility:hidden;}
-.stApp{background:radial-gradient(circle at 12% 8%,rgba(243,128,32,.35),transparent 28rem),radial-gradient(circle at 86% 12%,rgba(220,38,38,.22),transparent 26rem),radial-gradient(circle at 50% 90%,rgba(14,165,233,.10),transparent 30rem),linear-gradient(135deg,#050608,#111827 50%,#050608);color:#f8fafc;}
-.block-container{max-width:1180px;padding-top:2rem;padding-bottom:3rem;}
-[data-testid="stSidebar"]{background:linear-gradient(180deg,#0b0d14,#171b28);border-right:1px solid rgba(255,255,255,.12);}
-.hero,.panel,[data-testid="stForm"]{position:relative;overflow:hidden;background:linear-gradient(145deg,rgba(31,36,55,.92),rgba(7,9,16,.96));border:1px solid rgba(255,255,255,.14);border-radius:28px;box-shadow:0 28px 80px rgba(0,0,0,.52),inset 0 1px 0 rgba(255,255,255,.14);padding:26px;margin-bottom:22px;backdrop-filter:blur(18px)}.hero:before,.panel:before,[data-testid="stForm"]:before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(120deg,rgba(255,255,255,.12),transparent 35%,rgba(243,128,32,.12))}.hero>*{position:relative}.hero{padding:32px}.hero-top{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;flex-wrap:wrap}.badge{display:inline-flex;gap:8px;align-items:center;background:rgba(243,128,32,.13);border:1px solid rgba(243,128,32,.42);color:#fed7aa;border-radius:999px;padding:8px 12px;font-weight:900;font-size:12px;letter-spacing:.08em}.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:22px}.kpi{background:rgba(5,7,12,.48);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:14px 16px;box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}.kpi b{display:block;font-size:24px;color:#fff}.kpi span{color:#9ca3af;font-size:12px;font-weight:800;text-transform:uppercase}.danger-glow{border-left:5px solid #ef4444;background:linear-gradient(90deg,rgba(127,29,29,.8),rgba(31,41,55,.75));border-radius:18px;padding:16px;margin-bottom:18px;color:#fecaca}.login-wrap{min-height:82vh;display:flex;align-items:center}.profile-pill{background:rgba(5,7,12,.54);border:1px solid rgba(255,255,255,.13);border-radius:18px;padding:12px;text-align:center;margin:14px 0;color:#cbd5e1}.profile-pill b{color:#F38020}.window-title{margin:0;font-weight:900}.window-sub{color:#cbd5e1;margin:6px 0 0}.divider-glow{height:1px;background:linear-gradient(90deg,transparent,rgba(243,128,32,.8),transparent);margin:18px 0}.role-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}.role-card{background:rgba(5,7,12,.48);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:12px;text-align:center}.role-card b{display:block;color:#fff}.role-card span{font-size:12px;color:#9ca3af}.history-card{display:grid;grid-template-columns:1.1fr .8fr 1fr 2fr .7fr;gap:10px;align-items:center;background:linear-gradient(145deg,rgba(24,29,43,.92),rgba(8,10,16,.96));border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:12px 14px;margin-bottom:10px;box-shadow:0 12px 30px rgba(0,0,0,.28)}.history-head{color:#9ca3af;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.08em}.history-action{font-weight:900;border-radius:999px;padding:6px 10px;text-align:center}.entrada{background:rgba(16,185,129,.15);color:#86efac;border:1px solid rgba(16,185,129,.35)}.saida{background:rgba(239,68,68,.15);color:#fecaca;border:1px solid rgba(239,68,68,.35)}.qty-badge{font-weight:900;color:#F38020;text-align:center}
-.logo{font-size:34px;font-weight:900;text-align:center;letter-spacing:-1px;margin-bottom:14px;text-shadow:0 10px 30px rgba(0,0,0,.45)}.logo span{background:linear-gradient(90deg,#ffbd77,#F38020,#ef4444);-webkit-background-clip:text;color:transparent}.eyebrow{color:#F38020;font-size:12px;font-weight:900;letter-spacing:.18em;text-transform:uppercase}.title{font-size:clamp(38px,5vw,64px);font-weight:900;line-height:.92;margin:8px 0;letter-spacing:-.05em}.sub{color:#cbd5e1;margin:8px 0 0;max-width:720px}
-div[data-baseweb="tab-list"]{gap:14px;background:linear-gradient(145deg,rgba(3,5,10,.72),rgba(20,24,36,.58));border:1px solid rgba(255,255,255,.14);border-radius:24px;padding:12px;margin-bottom:24px;box-shadow:inset 0 2px 18px rgba(0,0,0,.45),0 18px 45px rgba(0,0,0,.25)}div[data-baseweb="tab"]{min-height:54px;background:linear-gradient(145deg,#2b3145,#0e111a)!important;border:1px solid rgba(255,255,255,.14)!important;border-radius:18px!important;box-shadow:0 8px 0 #050608,0 18px 32px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.12)!important;padding:12px 18px!important;transition:.18s ease!important}div[data-baseweb="tab"]:hover{transform:translateY(-3px);border-color:rgba(243,128,32,.82)!important;filter:brightness(1.12)}div[data-baseweb="tab"][aria-selected="true"]{background:linear-gradient(145deg,#ffc078,#F38020 48%,#991b1b)!important;box-shadow:0 8px 0 #7f1d1d,0 22px 42px rgba(243,128,32,.38),inset 0 1px 0 rgba(255,255,255,.28)!important}div[data-baseweb="tab"] p{color:white!important;font-weight:900!important;letter-spacing:.01em}
-.stButton>button,.stDownloadButton>button,[data-testid="stFormSubmitButton"] button{border-radius:15px!important;font-weight:900!important;min-height:45px;background:linear-gradient(145deg,#262b3c,#10131d)!important;color:white!important;border:1px solid rgba(255,255,255,.14)!important;box-shadow:0 7px 0 #050608,0 15px 28px rgba(0,0,0,.35)!important}.stButton>button:hover,.stDownloadButton>button:hover,[data-testid="stFormSubmitButton"] button:hover{transform:translateY(-2px);border-color:#F38020!important}.stButton>button[data-testid="baseButton-primary"],[data-testid="stFormSubmitButton"] button[kind="primary"],.stDownloadButton>button[data-testid="baseButton-primary"]{background:linear-gradient(145deg,#ffb15f,#F38020,#dc2626)!important;box-shadow:0 8px 0 #7f1d1d,0 20px 40px rgba(243,128,32,.32)!important}
-input,textarea,[data-baseweb="select"]>div{background:rgba(5,6,8,.7)!important;border-radius:14px!important;border-color:rgba(255,255,255,.14)!important}.card{background:linear-gradient(145deg,#202638,#0b0d14);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:16px;text-align:center;box-shadow:0 15px 36px rgba(0,0,0,.38);margin-bottom:12px}.card .label{color:#a7adb8;font-size:12px;font-weight:900;text-transform:uppercase}.card .value{color:#F38020;font-size:34px;font-weight:900}.card .status{color:#d1d5db;font-size:12px}[data-testid="stMetric"]{background:#111827;border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:16px}
+
+/* Fundo Geral Premium */
+.stApp {
+    background: radial-gradient(circle at 12% 8%,rgba(243,128,32,.35),transparent 28rem),
+                radial-gradient(circle at 86% 12%,rgba(220,38,38,.22),transparent 26rem),
+                radial-gradient(circle at 50% 90%,rgba(14,165,233,.10),transparent 30rem),
+                linear-gradient(135deg,#050608,#111827 50%,#050608);
+    color: #f8fafc;
+}
+.block-container {max-width:1180px; padding-top:2rem; padding-bottom:3rem;}
+[data-testid="stSidebar"] {background:linear-gradient(180deg,#0b0d14,#171b28); border-right:1px solid rgba(255,255,255,.12);}
+
+/* =========================================
+   NOVO VISUAL DAS ABAS (Premium Apple Style)
+   ========================================= */
+/* A cápsula escura em volta de todas as abas */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 8px;
+    background: rgba(10, 12, 16, 0.6);
+    padding: 8px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.05);
+    box-shadow: inset 0 4px 12px rgba(0,0,0,0.5);
+    margin-bottom: 24px;
+}
+
+/* O design de cada botão (aba) */
+.stTabs button[data-baseweb="tab"] {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 14px !important;
+    padding: 10px 20px !important;
+    margin: 0 !important;
+    transition: all 0.3s ease !important;
+    box-shadow: none !important;
+}
+
+/* Efeito ao passar o mouse numa aba solta */
+.stTabs button[data-baseweb="tab"]:hover {
+    background: rgba(255,255,255,0.05) !important;
+}
+
+/* A Aba SELECIONADA (Fica acesa) */
+.stTabs button[data-baseweb="tab"][aria-selected="true"] {
+    background: linear-gradient(145deg, #F38020 0%, #dc2626 100%) !important;
+    box-shadow: 0 4px 15px rgba(243, 128, 32, 0.4) !important;
+}
+
+/* Texto das abas normais */
+.stTabs button[data-baseweb="tab"] p {
+    color: #9ca3af !important;
+    font-weight: 700 !important;
+    font-size: 15px !important;
+    margin: 0 !important;
+}
+
+/* Texto da aba selecionada (Mais claro e grosso) */
+.stTabs button[data-baseweb="tab"][aria-selected="true"] p {
+    color: #ffffff !important;
+    font-weight: 900 !important;
+}
+
+/* ESCONDE A BARRA LARANJA FINA PADRÃO DO STREAMLIT */
+.stTabs [data-baseweb="tab-highlight"] {
+    display: none !important;
+    background-color: transparent !important;
+}
+
+/* =========================================
+   RESTANTE DO DESIGN DOS PAINEIS E BOTÕES
+   ========================================= */
+.hero, .panel, [data-testid="stForm"] {
+    position:relative; overflow:hidden;
+    background:linear-gradient(145deg,rgba(31,36,55,.92),rgba(7,9,16,.96));
+    border:1px solid rgba(255,255,255,.14);
+    border-radius:28px;
+    box-shadow:0 28px 80px rgba(0,0,0,.52),inset 0 1px 0 rgba(255,255,255,.14);
+    padding:26px; margin-bottom:22px; backdrop-filter:blur(18px)
+}
+.hero:before, .panel:before, [data-testid="stForm"]:before {
+    content:""; position:absolute; inset:0; pointer-events:none;
+    background:linear-gradient(120deg,rgba(255,255,255,.12),transparent 35%,rgba(243,128,32,.12))
+}
+.hero > * {position:relative}
+.hero {padding:32px}
+.hero-top {display:flex; justify-content:space-between; gap:18px; align-items:flex-start; flex-wrap:wrap}
+.badge {display:inline-flex; gap:8px; align-items:center; background:rgba(243,128,32,.13); border:1px solid rgba(243,128,32,.42); color:#fed7aa; border-radius:999px; padding:8px 12px; font-weight:900; font-size:12px; letter-spacing:.08em}
+.kpis {display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin-top:22px}
+.kpi {background:rgba(5,7,12,.48); border:1px solid rgba(255,255,255,.12); border-radius:20px; padding:14px 16px; box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.kpi b {display:block; font-size:24px; color:#fff}
+.kpi span {color:#9ca3af; font-size:12px; font-weight:800; text-transform:uppercase}
+.danger-glow {border-left:5px solid #ef4444; background:linear-gradient(90deg,rgba(127,29,29,.8),rgba(31,41,55,.75)); border-radius:18px; padding:16px; margin-bottom:18px; color:#fecaca}
+.login-wrap {min-height:82vh; display:flex; align-items:center}
+.profile-pill {background:rgba(5,7,12,.54); border:1px solid rgba(255,255,255,.13); border-radius:18px; padding:12px; text-align:center; margin:14px 0; color:#cbd5e1}
+.profile-pill b {color:#F38020}
+.window-title {margin:0; font-weight:900}
+.window-sub {color:#cbd5e1; margin:6px 0 0}
+.divider-glow {height:1px; background:linear-gradient(90deg,transparent,rgba(243,128,32,.8),transparent); margin:18px 0}
+.role-grid {display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:14px 0}
+.role-card {background:rgba(5,7,12,.48); border:1px solid rgba(255,255,255,.12); border-radius:18px; padding:12px; text-align:center}
+.role-card b {display:block; color:#fff}
+.role-card span {font-size:12px; color:#9ca3af}
+.history-card {display:grid; grid-template-columns:1.1fr .8fr 1fr 2fr .7fr; gap:10px; align-items:center; background:linear-gradient(145deg,rgba(24,29,43,.92),rgba(8,10,16,.96)); border:1px solid rgba(255,255,255,.12); border-radius:18px; padding:12px 14px; margin-bottom:10px; box-shadow:0 12px 30px rgba(0,0,0,.28)}
+.history-head {color:#9ca3af; font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:.08em}
+.history-action {font-weight:900; border-radius:999px; padding:6px 10px; text-align:center}
+.entrada {background:rgba(16,185,129,.15); color:#86efac; border:1px solid rgba(16,185,129,.35)}
+.saida {background:rgba(239,68,68,.15); color:#fecaca; border:1px solid rgba(239,68,68,.35)}
+.qty-badge {font-weight:900; color:#F38020; text-align:center}
+.logo {font-size:34px; font-weight:900; text-align:center; letter-spacing:-1px; margin-bottom:14px; text-shadow:0 10px 30px rgba(0,0,0,.45)}
+.logo span {background:linear-gradient(90deg,#ffbd77,#F38020,#ef4444); -webkit-background-clip:text; color:transparent}
+.eyebrow {color:#F38020; font-size:12px; font-weight:900; letter-spacing:.18em; text-transform:uppercase}
+.title {font-size:clamp(38px,5vw,64px); font-weight:900; line-height:.92; margin:8px 0; letter-spacing:-.05em}
+.sub {color:#cbd5e1; margin:8px 0 0; max-width:720px}
+
+/* Botões do Sistema */
+.stButton>button, .stDownloadButton>button, [data-testid="stFormSubmitButton"] button {
+    border-radius:15px !important; font-weight:900 !important; min-height:45px;
+    background:linear-gradient(145deg,#262b3c,#10131d) !important; color:white !important;
+    border:1px solid rgba(255,255,255,.14) !important; box-shadow:0 7px 0 #050608,0 15px 28px rgba(0,0,0,.35) !important
+}
+.stButton>button:hover, .stDownloadButton>button:hover, [data-testid="stFormSubmitButton"] button:hover {
+    transform:translateY(-2px); border-color:#F38020 !important
+}
+.stButton>button[data-testid="baseButton-primary"], [data-testid="stFormSubmitButton"] button[kind="primary"], .stDownloadButton>button[data-testid="baseButton-primary"] {
+    background:linear-gradient(145deg,#ffb15f,#F38020,#dc2626) !important;
+    box-shadow:0 8px 0 #7f1d1d,0 20px 40px rgba(243,128,32,.32) !important
+}
+input, textarea, [data-baseweb="select"] > div {
+    background:rgba(5,6,8,.7) !important; border-radius:14px !important; border-color:rgba(255,255,255,.14) !important
+}
+.card {
+    background:linear-gradient(145deg,#202638,#0b0d14); border:1px solid rgba(255,255,255,.12);
+    border-radius:18px; padding:16px; text-align:center; box-shadow:0 15px 36px rgba(0,0,0,.38); margin-bottom:12px
+}
+.card .label {color:#a7adb8; font-size:12px; font-weight:900; text-transform:uppercase}
+.card .value {color:#F38020; font-size:34px; font-weight:900}
+.card .status {color:#d1d5db; font-size:12px}
+[data-testid="stMetric"] {background:#111827; border:1px solid rgba(255,255,255,.12); border-radius:18px; padding:16px}
 </style>
 """, unsafe_allow_html=True)
 
