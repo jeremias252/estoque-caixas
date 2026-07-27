@@ -3,145 +3,9 @@ import pandas as pd
 import uuid
 from datetime import datetime
 from streamlit_gsheets import GSheetsConnection
+import time
 
 st.set_page_config(page_title="Portal Logística", page_icon="📦", layout="wide")
-
-st.markdown("""
-<style>
-/* Esconde o menu padrão */
-#MainMenu, header, footer {visibility:hidden;}
-
-/* Fundo Geral Premium */
-.stApp {
-    background: radial-gradient(circle at 12% 8%,rgba(243,128,32,.25),transparent 30rem),
-                radial-gradient(circle at 86% 12%,rgba(220,38,38,.15),transparent 28rem),
-                linear-gradient(135deg,#050608,#111827 50%,#050608);
-    color: #f8fafc;
-}
-.block-container {max-width:1180px; padding-top:1rem; padding-bottom:2rem;}
-[data-testid="stSidebar"] {background:linear-gradient(180deg,#0b0d14,#171b28); border-right:1px solid rgba(255,255,255,.08);}
-
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap');
-
-/* =========================================
-   VISUAL DAS ABAS (Glass Premium)
-   ========================================= */
-.stTabs [data-baseweb="tab-list"] {
-    gap: 6px; background: linear-gradient(180deg, rgba(20,22,32,.75), rgba(8,9,14,.85));
-    padding: 10px; border-radius: 22px; border: 1px solid rgba(255,255,255,.08);
-    box-shadow: inset 0 4px 14px rgba(0,0,0,.55), 0 20px 45px rgba(0,0,0,.35);
-    backdrop-filter: blur(22px); margin-bottom: 28px;
-}
-.stTabs button[data-baseweb="tab"] {
-    background: transparent !important; border: none !important; border-radius: 16px !important;
-    padding: 12px 22px !important; margin: 0 !important; transition: all .35s ease !important;
-}
-.stTabs button[data-baseweb="tab"]:hover {background: rgba(255,255,255,.06) !important;}
-.stTabs button[data-baseweb="tab"][aria-selected="true"] {
-    background: linear-gradient(145deg, #ffb15f 0%, #F38020 45%, #dc2626 100%) !important;
-    box-shadow: 0 6px 20px rgba(243,128,32,.45) !important;
-}
-.stTabs button[data-baseweb="tab"] p {
-    color: #9ca3af !important; font-family: 'Poppins', sans-serif !important;
-    font-weight: 700 !important; font-size: 14.5px !important; margin: 0 !important;
-}
-.stTabs button[data-baseweb="tab"][aria-selected="true"] p {color: #ffffff !important; font-weight: 900 !important;}
-.stTabs [data-baseweb="tab-highlight"] {display: none !important;}
-
-/* =========================================
-   NOVA TELA DE LOGIN (POSICIONAMENTO CORRIGIDO)
-   ========================================= */
-.login-wrap {
-    min-height: 50vh; display: flex; align-items: center; justify-content: center;
-    position: relative; z-index: 1; margin-top: 15px;
-}
-.login-wrap::before {
-    content: ""; position: absolute; width: 380px; height: 380px;
-    background: radial-gradient(circle, rgba(243,128,32,0.18) 0%, transparent 65%);
-    top: 50%; left: 50%; transform: translate(-50%, -50%);
-    z-index: -1; filter: blur(35px);
-}
-.login-card {
-    width: 100%; max-width: 440px; margin: 0 auto;
-    background: rgba(15, 17, 24, 0.65);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 28px; padding: 30px 28px;
-    box-shadow: 0 25px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
-    backdrop-filter: blur(28px);
-}
-.login-icon {
-    width: 60px; height: 60px; margin: 0 auto 12px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 28px; border-radius: 20px;
-    background: linear-gradient(150deg,#ffb15f,#F38020 55%,#dc2626);
-    box-shadow: 0 12px 28px rgba(243,128,32,.35), inset 0 2px 0 rgba(255,255,255,.3);
-}
-.login-title {
-    text-align: center; font-family: 'Poppins', sans-serif; font-weight: 900;
-    font-size: 26px; margin: 0 0 4px; color: #fff; letter-spacing: -0.5px;
-}
-.login-sub {
-    text-align: center; color: #9ca3af; font-size: 13.5px; margin: 0 0 22px; font-weight: 400;
-}
-.login-step-title {
-    text-align: center; font-family: 'Poppins', sans-serif; color: #cbd5e1;
-    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
-    margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;
-}
-
-/* =========================================
-   RESTANTE DO DESIGN (PAINEIS E BOTÕES)
-   ========================================= */
-.hero, .panel, [data-testid="stForm"] {
-    position:relative; overflow:hidden; background:linear-gradient(145deg,rgba(31,36,55,.92),rgba(7,9,16,.96));
-    border:1px solid rgba(255,255,255,.14); border-radius:28px; padding:26px; margin-bottom:22px;
-}
-.hero-top {display:flex; justify-content:space-between; gap:18px; align-items:flex-start; flex-wrap:wrap}
-.badge {display:inline-flex; gap:8px; align-items:center; background:rgba(243,128,32,.13); border:1px solid rgba(243,128,32,.42); color:#fed7aa; border-radius:999px; padding:8px 12px; font-weight:900; font-size:12px; letter-spacing:.08em}
-.kpis {display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin-top:22px}
-.kpi {background:rgba(5,7,12,.48); border:1px solid rgba(255,255,255,.12); border-radius:20px; padding:14px 16px;}
-.kpi b {display:block; font-size:24px; color:#fff}
-.kpi span {color:#9ca3af; font-size:12px; font-weight:800; text-transform:uppercase}
-.danger-glow {border-left:5px solid #ef4444; background:linear-gradient(90deg,rgba(127,29,29,.8),rgba(31,41,55,.75)); border-radius:18px; padding:16px; margin-bottom:18px; color:#fecaca}
-.profile-pill {background:rgba(5,7,12,.54); border:1px solid rgba(255,255,255,.13); border-radius:18px; padding:12px; text-align:center; margin:14px 0; color:#cbd5e1}
-.profile-pill b {color:#F38020}
-.history-card {display:grid; grid-template-columns:1.1fr .8fr 1fr 2fr .7fr; gap:10px; align-items:center; background:linear-gradient(145deg,rgba(24,29,43,.92),rgba(8,10,16,.96)); border:1px solid rgba(255,255,255,.12); border-radius:18px; padding:12px 14px; margin-bottom:10px;}
-.history-head {color:#9ca3af; font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:.08em}
-.history-action {font-weight:900; border-radius:999px; padding:6px 10px; text-align:center}
-.entrada {background:rgba(16,185,129,.15); color:#86efac; border:1px solid rgba(16,185,129,.35)}
-.saida {background:rgba(239,68,68,.15); color:#fecaca; border:1px solid rgba(239,68,68,.35)}
-.qty-badge {font-weight:900; color:#F38020; text-align:center}
-.logo {font-size:34px; font-weight:900; text-align:center; letter-spacing:-1px; margin-bottom:14px; font-family:'Poppins',sans-serif;}
-.logo span {background:linear-gradient(90deg,#ffbd77,#F38020,#ef4444); -webkit-background-clip:text; color:transparent}
-.title {font-size:clamp(38px,5vw,64px); font-weight:900; line-height:.92; margin:8px 0; letter-spacing:-.05em}
-
-/* Botões do Sistema */
-.stButton>button, .stDownloadButton>button, [data-testid="stFormSubmitButton"] button {
-    border-radius:18px !important; font-family:'Poppins',sans-serif !important; font-weight:700 !important; min-height:50px;
-    background:linear-gradient(145deg,#262b3c,#10131d) !important; color:white !important;
-    border:1px solid rgba(255,255,255,.08) !important; box-shadow:0 8px 20px rgba(0,0,0,.3) !important;
-    font-size: 15px !important; transition: all 0.2s ease !important;
-}
-.stButton>button:hover, .stDownloadButton>button:hover, [data-testid="stFormSubmitButton"] button:hover {
-    transform:translateY(-3px); border-color:rgba(243,128,32,.5) !important; background:linear-gradient(145deg,#2a2f42,#141724) !important;
-}
-.stButton>button[data-testid="baseButton-primary"], [data-testid="stFormSubmitButton"] button[kind="primary"], .stDownloadButton>button[data-testid="baseButton-primary"] {
-    background:linear-gradient(145deg,#ffb15f,#F38020,#dc2626) !important;
-    box-shadow:0 8px 20px rgba(243,128,32,.35) !important; border:none !important;
-}
-input, textarea, [data-baseweb="select"] > div {
-    background:rgba(5,6,8,.7) !important; border-radius:14px !important; border-color:rgba(255,255,255,.14) !important;
-    min-height: 48px; font-size: 15px !important;
-}
-.card {
-    background:linear-gradient(145deg,#202638,#0b0d14); border:1px solid rgba(255,255,255,.12);
-    border-radius:18px; padding:16px; text-align:center; box-shadow:0 15px 36px rgba(0,0,0,.38); margin-bottom:12px
-}
-.card .label {color:#a7adb8; font-size:12px; font-weight:900; text-transform:uppercase}
-.card .value {color:#F38020; font-size:34px; font-weight:900}
-.card .status {color:#d1d5db; font-size:12px}
-</style>
-""", unsafe_allow_html=True)
 
 # ==========================================
 # CONFIGURAÇÕES E DICIONÁRIOS
@@ -163,6 +27,7 @@ SENHAS_CONTROLE = {
 
 conn = st.connection("gsheets", type=GSheetsConnection)
 
+# --- GERENCIAMENTO DE ESTADO ---
 for chave in ["logado", "perfil", "setor", "dados_carregados", "login_setor", "login_perfil"]:
     if chave not in st.session_state:
         st.session_state[chave] = ""
@@ -170,6 +35,205 @@ if "logado" not in st.session_state or st.session_state.logado == "":
     st.session_state.logado = False
 if "dados_carregados" not in st.session_state or st.session_state.dados_carregados == "":
     st.session_state.dados_carregados = False
+
+# ==========================================
+# TEMATIZAÇÃO DINÂMICA (O EFEITO UAU)
+# ==========================================
+# Descobre em qual setor o usuário está no momento
+setor_ativo = st.session_state.login_setor if not st.session_state.logado else st.session_state.setor
+
+if setor_ativo == "Torres":
+    # TEMA AZUL/CIANO ELEGANTE
+    c_prim = "#0ea5e9"
+    c_sec = "#3b82f6"
+    c_glow1 = "rgba(14,165,233,0.3)"
+    c_glow2 = "rgba(59,130,246,0.15)"
+    grad_logo = "linear-gradient(90deg, #7dd3fc, #0ea5e9, #2563eb)"
+    grad_btn = "linear-gradient(145deg, #38bdf8, #0ea5e9, #2563eb)"
+else:
+    # TEMA LARANJA/VERMELHO (Padrão/Caixas)
+    c_prim = "#F38020"
+    c_sec = "#dc2626"
+    c_glow1 = "rgba(243,128,32,0.3)"
+    c_glow2 = "rgba(220,38,38,0.15)"
+    grad_logo = "linear-gradient(90deg, #ffbd77, #F38020, #ef4444)"
+    grad_btn = "linear-gradient(145deg, #ffb15f, #F38020, #dc2626)"
+
+# INJEÇÃO DO CSS PREMIUM COM VARIÁVEIS
+st.markdown(f"""
+<style>
+:root {{
+    --prim: {c_prim};
+    --sec: {c_sec};
+    --glow1: {c_glow1};
+    --glow2: {c_glow2};
+    --grad-btn: {grad_btn};
+    --grad-logo: {grad_logo};
+}}
+
+/* Esconde o menu padrão */
+#MainMenu, header, footer {{visibility:hidden;}}
+
+/* Fundo Geral Premium */
+.stApp {{
+    background: radial-gradient(circle at 12% 8%, var(--glow1), transparent 30rem),
+                radial-gradient(circle at 86% 12%, var(--glow2), transparent 28rem),
+                linear-gradient(135deg,#050608,#111827 50%,#050608);
+    color: #f8fafc;
+    transition: background 0.8s ease;
+}}
+.block-container {{max-width:1180px; padding-top:1rem; padding-bottom:2rem;}}
+
+/* Sidebar de Vidro 100% Translúcida */
+[data-testid="stSidebar"] {{
+    background: rgba(10, 12, 18, 0.2) !important;
+    backdrop-filter: blur(25px) !important;
+    -webkit-backdrop-filter: blur(25px) !important;
+    border-right: 1px solid rgba(255,255,255,0.06) !important;
+}}
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap');
+
+/* ANIMAÇÕES FADE & SLIDE UP */
+@keyframes fadeSlideUp {{
+    from {{ opacity: 0; transform: translateY(20px); }}
+    to {{ opacity: 1; transform: translateY(0); }}
+}}
+.hero, .panel, [data-testid="stForm"], .card, div[data-baseweb="tab-list"], .history-card, .login-card {{
+    animation: fadeSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}}
+
+/* =========================================
+   VISUAL DAS ABAS
+   ========================================= */
+.stTabs [data-baseweb="tab-list"] {{
+    gap: 6px; background: linear-gradient(180deg, rgba(20,22,32,.75), rgba(8,9,14,.85));
+    padding: 10px; border-radius: 22px; border: 1px solid rgba(255,255,255,.08);
+    box-shadow: inset 0 4px 14px rgba(0,0,0,.55), 0 20px 45px rgba(0,0,0,.35);
+    backdrop-filter: blur(22px); margin-bottom: 28px;
+}}
+.stTabs button[data-baseweb="tab"] {{
+    background: transparent !important; border: none !important; border-radius: 16px !important;
+    padding: 12px 22px !important; margin: 0 !important; transition: all .35s ease !important;
+}}
+.stTabs button[data-baseweb="tab"]:hover {{background: rgba(255,255,255,.06) !important;}}
+.stTabs button[data-baseweb="tab"][aria-selected="true"] {{
+    background: var(--grad-btn) !important;
+    box-shadow: 0 6px 20px var(--glow1) !important;
+}}
+.stTabs button[data-baseweb="tab"] p {{
+    color: #9ca3af !important; font-family: 'Poppins', sans-serif !important;
+    font-weight: 700 !important; font-size: 14.5px !important; margin: 0 !important;
+}}
+.stTabs button[data-baseweb="tab"][aria-selected="true"] p {{color: #ffffff !important; font-weight: 900 !important;}}
+.stTabs [data-baseweb="tab-highlight"] {{display: none !important;}}
+
+/* =========================================
+   NOVA TELA DE LOGIN 
+   ========================================= */
+.login-wrap {{
+    min-height: 50vh; display: flex; align-items: center; justify-content: center;
+    position: relative; z-index: 1; margin-top: 15px;
+}}
+.login-wrap::before {{
+    content: ""; position: absolute; width: 380px; height: 380px;
+    background: radial-gradient(circle, var(--glow1) 0%, transparent 65%);
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    z-index: -1; filter: blur(35px); transition: all 0.8s ease;
+}}
+.login-card {{
+    width: 100%; max-width: 440px; margin: 0 auto;
+    background: rgba(15, 17, 24, 0.65);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 28px; padding: 30px 28px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+    backdrop-filter: blur(28px);
+}}
+.login-icon {{
+    width: 60px; height: 60px; margin: 0 auto 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; border-radius: 20px;
+    background: var(--grad-btn);
+    box-shadow: 0 12px 28px var(--glow1), inset 0 2px 0 rgba(255,255,255,.3);
+    transition: all 0.8s ease;
+}}
+.login-title {{
+    text-align: center; font-family: 'Poppins', sans-serif; font-weight: 900;
+    font-size: 26px; margin: 0 0 4px; color: #fff; letter-spacing: -0.5px;
+}}
+.login-sub {{
+    text-align: center; color: #9ca3af; font-size: 13.5px; margin: 0 0 22px; font-weight: 400;
+}}
+.login-step-title {{
+    text-align: center; font-family: 'Poppins', sans-serif; color: #cbd5e1;
+    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;
+}}
+
+/* =========================================
+   RESTANTE DO DESIGN E INPUT GLOW
+   ========================================= */
+.hero, .panel, [data-testid="stForm"] {{
+    position:relative; overflow:hidden; background:linear-gradient(145deg,rgba(31,36,55,.92),rgba(7,9,16,.96));
+    border:1px solid rgba(255,255,255,.14); border-radius:28px; padding:26px; margin-bottom:22px;
+}}
+.hero-top {{display:flex; justify-content:space-between; gap:18px; align-items:flex-start; flex-wrap:wrap}}
+.badge {{display:inline-flex; gap:8px; align-items:center; background:var(--glow2); border:1px solid var(--glow1); color:#fff; border-radius:999px; padding:8px 12px; font-weight:900; font-size:12px; letter-spacing:.08em}}
+.kpis {{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin-top:22px}}
+.kpi {{background:rgba(5,7,12,.48); border:1px solid rgba(255,255,255,.12); border-radius:20px; padding:14px 16px;}}
+.kpi b {{display:block; font-size:24px; color:#fff}}
+.kpi span {{color:#9ca3af; font-size:12px; font-weight:800; text-transform:uppercase}}
+.danger-glow {{border-left:5px solid #ef4444; background:linear-gradient(90deg,rgba(127,29,29,.8),rgba(31,41,55,.75)); border-radius:18px; padding:16px; margin-bottom:18px; color:#fecaca}}
+.profile-pill {{background:rgba(5,7,12,.54); border:1px solid rgba(255,255,255,.13); border-radius:18px; padding:12px; text-align:center; margin:14px 0; color:#cbd5e1}}
+.profile-pill b {{color: var(--prim); transition: color 0.5s ease;}}
+.history-card {{display:grid; grid-template-columns:1.1fr .8fr 1fr 2fr .7fr; gap:10px; align-items:center; background:linear-gradient(145deg,rgba(24,29,43,.92),rgba(8,10,16,.96)); border:1px solid rgba(255,255,255,.12); border-radius:18px; padding:12px 14px; margin-bottom:10px;}}
+.history-head {{color:#9ca3af; font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:.08em}}
+.history-action {{font-weight:900; border-radius:999px; padding:6px 10px; text-align:center}}
+.entrada {{background:rgba(16,185,129,.15); color:#86efac; border:1px solid rgba(16,185,129,.35)}}
+.saida {{background:rgba(239,68,68,.15); color:#fecaca; border:1px solid rgba(239,68,68,.35)}}
+.qty-badge {{font-weight:900; color:var(--prim); text-align:center}}
+.logo {{font-size:34px; font-weight:900; text-align:center; letter-spacing:-1px; margin-bottom:14px; font-family:'Poppins',sans-serif;}}
+.logo span {{background:var(--grad-logo); -webkit-background-clip:text; color:transparent; transition: all 0.5s ease;}}
+.title {{font-size:clamp(38px,5vw,64px); font-weight:900; line-height:.92; margin:8px 0; letter-spacing:-.05em}}
+
+/* Botoes Padrão */
+.stButton>button, .stDownloadButton>button, [data-testid="stFormSubmitButton"] button {{
+    border-radius:18px !important; font-family:'Poppins',sans-serif !important; font-weight:700 !important; min-height:50px;
+    background:linear-gradient(145deg,#262b3c,#10131d) !important; color:white !important;
+    border:1px solid rgba(255,255,255,.08) !important; box-shadow:0 8px 20px rgba(0,0,0,.3) !important;
+    font-size: 15px !important; transition: all 0.2s ease !important;
+}}
+.stButton>button:hover, .stDownloadButton>button:hover, [data-testid="stFormSubmitButton"] button:hover {{
+    transform:translateY(-3px); border-color:var(--glow1) !important; background:linear-gradient(145deg,#2a2f42,#141724) !important;
+}}
+
+/* Botão Primário */
+.stButton>button[data-testid="baseButton-primary"], [data-testid="stFormSubmitButton"] button[kind="primary"], .stDownloadButton>button[data-testid="baseButton-primary"] {{
+    background:var(--grad-btn) !important;
+    box-shadow:0 8px 20px var(--glow1) !important; border:none !important;
+}}
+
+/* Inputs com GLOW Effect Focus */
+input, textarea, [data-baseweb="select"] > div {{
+    background:rgba(5,6,8,.7) !important; border-radius:14px !important; border-color:rgba(255,255,255,.14) !important;
+    min-height: 48px; font-size: 15px !important; transition: all 0.3s ease !important;
+}}
+[data-baseweb="input"]:focus-within > div, [data-baseweb="select"]:focus-within > div {{
+    border-color: var(--prim) !important;
+    box-shadow: 0 0 0 2px var(--glow1) !important;
+}}
+
+/* Cards de Estoque */
+.card {{
+    background:linear-gradient(145deg,#202638,#0b0d14); border:1px solid rgba(255,255,255,.12);
+    border-radius:18px; padding:16px; text-align:center; box-shadow:0 15px 36px rgba(0,0,0,.38); margin-bottom:12px;
+}}
+.card .label {{color:#a7adb8; font-size:12px; font-weight:900; text-transform:uppercase}}
+.card .value {{color:var(--prim); font-size:34px; font-weight:900}}
+.card .status {{color:#d1d5db; font-size:12px}}
+</style>
+""", unsafe_allow_html=True)
+
 
 def logo(setor_nome="SISTEMA"):
     st.markdown(f"<div class='logo'>⬢ SETOR <span>{setor_nome.upper()}</span></div>", unsafe_allow_html=True)
@@ -199,7 +263,7 @@ def salvar_historico(df, setor):
 @st.dialog("Detalhes do Modelo")
 def abrir_janela_modelo(linha, df_linha, total):
     st.markdown(f"<h3 style='text-align:center'>{linha}</h3>", unsafe_allow_html=True)
-    st.markdown(f"<p style='text-align:center;color:#F38020;font-weight:900'>Estoque Total: {total} un.</p>", unsafe_allow_html=True)
+    st.markdown(f"<p style='text-align:center;color:{c_prim};font-weight:900'>Estoque Total: {total} un.</p>", unsafe_allow_html=True)
     st.divider()
     for i in range(0, len(df_linha), 2):
         cols = st.columns(2)
@@ -260,17 +324,22 @@ def registrar_movimento(acao, pessoa, modelo, quantidade, df_estoque, df_histori
     if acao == "Saída" and df_estoque.at[idx, "Quantidade"] < quantidade:
         st.error(f"⚠️ Saldo insuficiente! Temos {df_estoque.at[idx, 'Quantidade']} un.")
         return
+    
     df_estoque.at[idx, "Quantidade"] += quantidade if acao == "Entrada" else -quantidade
     novo = pd.DataFrame([{"ID": str(uuid.uuid4()), "Data": datetime.now().strftime("%Y-%m-%d %H:%M"), "Ação": acao, "Separador": pessoa, "Modelo": modelo, "Quantidade": quantidade}])
+    
     st.session_state.df_estoque = df_estoque
     st.session_state.df_historico = pd.concat([novo, df_historico], ignore_index=True)
     salvar_estoque(df_estoque, setor)
     salvar_historico(st.session_state.df_historico, setor)
-    st.success("✅ Movimento registrado com sucesso!")
+    
+    # NOTIFICAÇÃO TOAST 
+    st.toast(f"✅ {acao} de {quantidade}x {modelo} registrada com sucesso!", icon="✅")
+    time.sleep(0.5)
     st.rerun()
 
 # ==========================================
-# WIZARD DE LOGIN (POSIÇÃO CORRIGIDA)
+# WIZARD DE LOGIN
 # ==========================================
 if not st.session_state.logado:
     _, centro, _ = st.columns([1, 1.2, 1])
@@ -339,6 +408,7 @@ if not st.session_state.logado:
                     st.session_state.logado = True
                     st.session_state.perfil = perfil_atual
                     st.session_state.setor = setor_atual
+                    st.toast(f"Bem-vindo(a) ao setor de {setor_atual}!", icon="👋")
                     st.rerun()
                 else:
                     st.error("❌ Senha incorreta!")
@@ -441,9 +511,7 @@ else:
                 
         with abas[3]:
             st.markdown("<div class='panel'><h3 class='window-title'>📊 Janela de Indicadores</h3><p class='window-sub'>Acompanhe volume, itens críticos e movimentos por período.</p></div>", unsafe_allow_html=True)
-            m1, m2 = st.columns(2)
-            m1.metric("📦 Total de Peças", int(df_estoque["Quantidade"].sum()))
-            m2.metric("⚠️ Críticos (Zerados)", len(zerados))
+            
             d1, d2 = st.columns(2)
             inicio = d1.date_input("De:", datetime.now().replace(day=1))
             fim = d2.date_input("Até:", datetime.now())
