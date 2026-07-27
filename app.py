@@ -8,183 +8,131 @@ st.set_page_config(page_title="Portal Logística", page_icon="📦", layout="wid
 
 st.markdown("""
 <style>
-/* Esconde o menu padrão do Streamlit */
+/* Esconde o menu padrão */
 #MainMenu, header, footer {visibility:hidden;}
 
 /* Fundo Geral Premium */
 .stApp {
-    background: radial-gradient(circle at 12% 8%,rgba(243,128,32,.35),transparent 28rem),
-                radial-gradient(circle at 86% 12%,rgba(220,38,38,.22),transparent 26rem),
-                radial-gradient(circle at 50% 90%,rgba(14,165,233,.10),transparent 30rem),
+    background: radial-gradient(circle at 12% 8%,rgba(243,128,32,.25),transparent 30rem),
+                radial-gradient(circle at 86% 12%,rgba(220,38,38,.15),transparent 28rem),
                 linear-gradient(135deg,#050608,#111827 50%,#050608);
     color: #f8fafc;
 }
 .block-container {max-width:1180px; padding-top:2rem; padding-bottom:3rem;}
-[data-testid="stSidebar"] {background:linear-gradient(180deg,#0b0d14,#171b28); border-right:1px solid rgba(255,255,255,.12);}
+[data-testid="stSidebar"] {background:linear-gradient(180deg,#0b0d14,#171b28); border-right:1px solid rgba(255,255,255,.08);}
 
-/* Fonte premium */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800;900&family=Inter:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap');
 
 /* =========================================
-   NOVO VISUAL DAS ABAS (Glass Premium 2.0)
+   VISUAL DAS ABAS (Glass Premium)
    ========================================= */
 .stTabs [data-baseweb="tab-list"] {
-    gap: 6px;
-    background: linear-gradient(180deg, rgba(20,22,32,.75), rgba(8,9,14,.85));
-    padding: 10px;
-    border-radius: 22px;
-    border: 1px solid rgba(255,255,255,.08);
+    gap: 6px; background: linear-gradient(180deg, rgba(20,22,32,.75), rgba(8,9,14,.85));
+    padding: 10px; border-radius: 22px; border: 1px solid rgba(255,255,255,.08);
     box-shadow: inset 0 4px 14px rgba(0,0,0,.55), 0 20px 45px rgba(0,0,0,.35);
-    backdrop-filter: blur(22px);
-    margin-bottom: 28px;
-    position: relative;
+    backdrop-filter: blur(22px); margin-bottom: 28px;
 }
-
 .stTabs button[data-baseweb="tab"] {
-    background: transparent !important;
-    border: none !important;
-    border-radius: 16px !important;
-    padding: 12px 22px !important;
-    margin: 0 !important;
-    transition: all .35s cubic-bezier(.22,1,.36,1) !important;
-    box-shadow: none !important;
-    position: relative;
-    overflow: hidden;
+    background: transparent !important; border: none !important; border-radius: 16px !important;
+    padding: 12px 22px !important; margin: 0 !important; transition: all .35s ease !important;
 }
-
-.stTabs button[data-baseweb="tab"]:hover {
-    background: rgba(255,255,255,.06) !important;
-    transform: translateY(-1px);
-}
-
+.stTabs button[data-baseweb="tab"]:hover {background: rgba(255,255,255,.06) !important;}
 .stTabs button[data-baseweb="tab"][aria-selected="true"] {
     background: linear-gradient(145deg, #ffb15f 0%, #F38020 45%, #dc2626 100%) !important;
-    box-shadow:
-        0 6px 20px rgba(243,128,32,.45),
-        0 2px 0 rgba(255,255,255,.25) inset,
-        0 -6px 14px rgba(127,29,29,.35) inset !important;
-    transform: translateY(-2px) scale(1.03);
-    animation: glowPulse 2.6s ease-in-out infinite;
+    box-shadow: 0 6px 20px rgba(243,128,32,.45) !important;
 }
-
-@keyframes glowPulse {
-    0%, 100% { box-shadow: 0 6px 20px rgba(243,128,32,.45), 0 2px 0 rgba(255,255,255,.25) inset, 0 -6px 14px rgba(127,29,29,.35) inset; }
-    50% { box-shadow: 0 8px 28px rgba(243,128,32,.7), 0 2px 0 rgba(255,255,255,.3) inset, 0 -6px 14px rgba(127,29,29,.4) inset; }
-}
-
 .stTabs button[data-baseweb="tab"] p {
-    color: #9ca3af !important;
-    font-family: 'Poppins', sans-serif !important;
-    font-weight: 700 !important;
-    font-size: 14.5px !important;
-    letter-spacing: .01em;
-    margin: 0 !important;
-    transition: letter-spacing .3s ease;
+    color: #9ca3af !important; font-family: 'Poppins', sans-serif !important;
+    font-weight: 700 !important; font-size: 14.5px !important; margin: 0 !important;
 }
+.stTabs button[data-baseweb="tab"][aria-selected="true"] p {color: #ffffff !important; font-weight: 900 !important;}
+.stTabs [data-baseweb="tab-highlight"] {display: none !important;}
 
-.stTabs button[data-baseweb="tab"][aria-selected="true"] p {
-    color: #ffffff !important;
-    font-weight: 900 !important;
-    letter-spacing: .03em;
-    text-shadow: 0 2px 8px rgba(0,0,0,.35);
+/* =========================================
+   NOVA TELA DE LOGIN (ESTILO WIZARD/APPLE)
+   ========================================= */
+.login-wrap {
+    min-height:85vh; display:flex; align-items:center; justify-content:center;
+    position: relative; z-index: 1;
 }
-
-.stTabs [data-baseweb="tab-highlight"] {
-    display: none !important;
-    background-color: transparent !important;
+/* Brilho laranja de fundo */
+.login-wrap::before {
+    content: ""; position: absolute; width: 450px; height: 450px;
+    background: radial-gradient(circle, rgba(243,128,32,0.15) 0%, transparent 60%);
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    z-index: -1; filter: blur(40px);
 }
-
-.stTabs button[data-baseweb="tab"]:not(:last-child)::after {
-    content: "";
-    position: absolute;
-    right: -3px;
-    top: 25%;
-    height: 50%;
-    width: 1px;
-    background: rgba(255,255,255,.08);
+.login-card {
+    width: 100%; max-width: 440px; margin: 0 auto;
+    background: rgba(15, 17, 24, 0.5);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 32px; padding: 45px 35px;
+    box-shadow: 0 35px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+    backdrop-filter: blur(28px);
 }
-.stTabs button[data-baseweb="tab"][aria-selected="true"]::after,
-.stTabs button[data-baseweb="tab"][aria-selected="true"] + button::after {
-    display: none;
+.login-icon {
+    width: 70px; height: 70px; margin: 0 auto 15px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px; border-radius: 22px;
+    background: linear-gradient(150deg,#ffb15f,#F38020 55%,#dc2626);
+    box-shadow: 0 14px 34px rgba(243,128,32,.4), inset 0 2px 0 rgba(255,255,255,.3);
+}
+.login-title {
+    text-align: center; font-family: 'Poppins', sans-serif; font-weight: 900;
+    font-size: 28px; margin: 0 0 5px; color: #fff; letter-spacing: -0.5px;
+}
+.login-sub {
+    text-align: center; color: #9ca3af; font-size: 14px; margin: 0 0 30px; font-weight: 400;
+}
+.login-step-title {
+    text-align: center; font-family: 'Poppins', sans-serif; color: #cbd5e1;
+    font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px;
 }
 
 /* =========================================
-   RESTANTE DO DESIGN
+   RESTANTE DO DESIGN (PAINEIS E BOTÕES)
    ========================================= */
 .hero, .panel, [data-testid="stForm"] {
-    position:relative; overflow:hidden;
-    background:linear-gradient(145deg,rgba(31,36,55,.92),rgba(7,9,16,.96));
-    border:1px solid rgba(255,255,255,.14);
-    border-radius:28px;
-    box-shadow:0 28px 80px rgba(0,0,0,.52),inset 0 1px 0 rgba(255,255,255,.14);
-    padding:26px; margin-bottom:22px; backdrop-filter:blur(18px)
+    position:relative; overflow:hidden; background:linear-gradient(145deg,rgba(31,36,55,.92),rgba(7,9,16,.96));
+    border:1px solid rgba(255,255,255,.14); border-radius:28px; padding:26px; margin-bottom:22px;
 }
-.hero:before, .panel:before, [data-testid="stForm"]:before {
-    content:""; position:absolute; inset:0; pointer-events:none;
-    background:linear-gradient(120deg,rgba(255,255,255,.12),transparent 35%,rgba(243,128,32,.12))
-}
-.hero > * {position:relative}
-.hero {padding:32px}
 .hero-top {display:flex; justify-content:space-between; gap:18px; align-items:flex-start; flex-wrap:wrap}
 .badge {display:inline-flex; gap:8px; align-items:center; background:rgba(243,128,32,.13); border:1px solid rgba(243,128,32,.42); color:#fed7aa; border-radius:999px; padding:8px 12px; font-weight:900; font-size:12px; letter-spacing:.08em}
 .kpis {display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin-top:22px}
-.kpi {background:rgba(5,7,12,.48); border:1px solid rgba(255,255,255,.12); border-radius:20px; padding:14px 16px; box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.kpi {background:rgba(5,7,12,.48); border:1px solid rgba(255,255,255,.12); border-radius:20px; padding:14px 16px;}
 .kpi b {display:block; font-size:24px; color:#fff}
 .kpi span {color:#9ca3af; font-size:12px; font-weight:800; text-transform:uppercase}
 .danger-glow {border-left:5px solid #ef4444; background:linear-gradient(90deg,rgba(127,29,29,.8),rgba(31,41,55,.75)); border-radius:18px; padding:16px; margin-bottom:18px; color:#fecaca}
-.login-wrap {min-height:88vh; display:flex; align-items:center; justify-content:center}
-.login-card {
-    position:relative; overflow:hidden;
-    max-width:420px; margin:0 auto;
-    background:linear-gradient(165deg,rgba(28,32,48,.94),rgba(6,7,12,.97));
-    border:1px solid rgba(255,255,255,.10);
-    border-radius:28px;
-    padding:40px 34px 32px;
-    box-shadow:0 30px 90px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.10);
-    backdrop-filter:blur(20px);
-}
-.login-icon {
-    width:64px; height:64px; margin:0 auto 14px;
-    display:flex; align-items:center; justify-content:center;
-    font-size:30px;
-    border-radius:20px;
-    background:linear-gradient(150deg,#ffb15f,#F38020 55%,#dc2626);
-    box-shadow:0 14px 34px rgba(243,128,32,.4), inset 0 1px 0 rgba(255,255,255,.35);
-}
-.login-eyebrow {
-    text-align:center; color:#fdba74; font-size:11px; font-weight:800;
-    letter-spacing:.22em; text-transform:uppercase; margin-top:4px;
-}
-.login-title {
-    text-align:center; font-family:'Poppins',sans-serif; font-weight:900;
-    font-size:26px; margin:8px 0 4px; letter-spacing:-.02em; color:#fff;
-}
 .profile-pill {background:rgba(5,7,12,.54); border:1px solid rgba(255,255,255,.13); border-radius:18px; padding:12px; text-align:center; margin:14px 0; color:#cbd5e1}
 .profile-pill b {color:#F38020}
-.window-title {margin:0; font-weight:900}
-.window-sub {color:#cbd5e1; margin:6px 0 0}
-.history-card {display:grid; grid-template-columns:1.1fr .8fr 1fr 2fr .7fr; gap:10px; align-items:center; background:linear-gradient(145deg,rgba(24,29,43,.92),rgba(8,10,16,.96)); border:1px solid rgba(255,255,255,.12); border-radius:18px; padding:12px 14px; margin-bottom:10px; box-shadow:0 12px 30px rgba(0,0,0,.28)}
+.history-card {display:grid; grid-template-columns:1.1fr .8fr 1fr 2fr .7fr; gap:10px; align-items:center; background:linear-gradient(145deg,rgba(24,29,43,.92),rgba(8,10,16,.96)); border:1px solid rgba(255,255,255,.12); border-radius:18px; padding:12px 14px; margin-bottom:10px;}
 .history-head {color:#9ca3af; font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:.08em}
 .history-action {font-weight:900; border-radius:999px; padding:6px 10px; text-align:center}
 .entrada {background:rgba(16,185,129,.15); color:#86efac; border:1px solid rgba(16,185,129,.35)}
 .saida {background:rgba(239,68,68,.15); color:#fecaca; border:1px solid rgba(239,68,68,.35)}
 .qty-badge {font-weight:900; color:#F38020; text-align:center}
-.logo {font-size:34px; font-weight:900; text-align:center; letter-spacing:-1px; margin-bottom:14px; text-shadow:0 10px 30px rgba(0,0,0,.45)}
+.logo {font-size:34px; font-weight:900; text-align:center; letter-spacing:-1px; margin-bottom:14px; font-family:'Poppins',sans-serif;}
 .logo span {background:linear-gradient(90deg,#ffbd77,#F38020,#ef4444); -webkit-background-clip:text; color:transparent}
+.title {font-size:clamp(38px,5vw,64px); font-weight:900; line-height:.92; margin:8px 0; letter-spacing:-.05em}
+
+/* Botões do Sistema (Grandes e clicáveis) */
 .stButton>button, .stDownloadButton>button, [data-testid="stFormSubmitButton"] button {
-    border-radius:15px !important; font-weight:900 !important; min-height:45px;
+    border-radius:18px !important; font-family:'Poppins',sans-serif !important; font-weight:700 !important; min-height:55px;
     background:linear-gradient(145deg,#262b3c,#10131d) !important; color:white !important;
-    border:1px solid rgba(255,255,255,.14) !important; box-shadow:0 7px 0 #050608,0 15px 28px rgba(0,0,0,.35) !important
+    border:1px solid rgba(255,255,255,.08) !important; box-shadow:0 8px 20px rgba(0,0,0,.3) !important;
+    font-size: 15px !important; transition: all 0.2s ease !important;
 }
 .stButton>button:hover, .stDownloadButton>button:hover, [data-testid="stFormSubmitButton"] button:hover {
-    transform:translateY(-2px); border-color:#F38020 !important
+    transform:translateY(-3px); border-color:rgba(243,128,32,.5) !important; background:linear-gradient(145deg,#2a2f42,#141724) !important;
 }
 .stButton>button[data-testid="baseButton-primary"], [data-testid="stFormSubmitButton"] button[kind="primary"], .stDownloadButton>button[data-testid="baseButton-primary"] {
     background:linear-gradient(145deg,#ffb15f,#F38020,#dc2626) !important;
-    box-shadow:0 8px 0 #7f1d1d,0 20px 40px rgba(243,128,32,.32) !important
+    box-shadow:0 8px 20px rgba(243,128,32,.35) !important; border:none !important;
 }
 input, textarea, [data-baseweb="select"] > div {
-    background:rgba(5,6,8,.7) !important; border-radius:14px !important; border-color:rgba(255,255,255,.14) !important
+    background:rgba(5,6,8,.7) !important; border-radius:14px !important; border-color:rgba(255,255,255,.14) !important;
+    min-height: 50px; font-size: 16px !important;
 }
 .card {
     background:linear-gradient(145deg,#202638,#0b0d14); border:1px solid rgba(255,255,255,.12);
@@ -193,7 +141,6 @@ input, textarea, [data-baseweb="select"] > div {
 .card .label {color:#a7adb8; font-size:12px; font-weight:900; text-transform:uppercase}
 .card .value {color:#F38020; font-size:34px; font-weight:900}
 .card .status {color:#d1d5db; font-size:12px}
-[data-testid="stMetric"] {background:#111827; border:1px solid rgba(255,255,255,.12); border-radius:18px; padding:16px}
 </style>
 """, unsafe_allow_html=True)
 
@@ -202,7 +149,7 @@ input, textarea, [data-baseweb="select"] > div {
 # ==========================================
 PLANILHAS = {
     "Caixas": "https://docs.google.com/spreadsheets/d/10z1gPJNmHoHO5kj6B4SoXknUNz6MwrQz1NjwkkBatQU/edit?usp=drivesdk",
-    "Torres": "https://docs.google.com/spreadsheets/d/10h0iFxX_FEvQljPyLHD6IdeOaSYsnvHfkYzK7PcHe1U/edit?usp=sharing"
+    "Torres": "COLE_O_LINK_DAS_TORRES_AQUI"
 }
 
 EQUIPES = {
@@ -217,9 +164,14 @@ SENHAS_CONTROLE = {
 
 conn = st.connection("gsheets", type=GSheetsConnection)
 
-for chave, valor in {"logado": False, "perfil": "", "setor": "", "dados_carregados": False}.items():
+# --- GERENCIAMENTO DE ESTADO ---
+for chave in ["logado", "perfil", "setor", "dados_carregados", "login_setor", "login_perfil"]:
     if chave not in st.session_state:
-        st.session_state[chave] = valor
+        st.session_state[chave] = ""
+if "logado" not in st.session_state or st.session_state.logado == "":
+    st.session_state.logado = False
+if "dados_carregados" not in st.session_state or st.session_state.dados_carregados == "":
+    st.session_state.dados_carregados = False
 
 def logo(setor_nome="SISTEMA"):
     st.markdown(f"<div class='logo'>⬢ SETOR <span>{setor_nome.upper()}</span></div>", unsafe_allow_html=True)
@@ -321,58 +273,80 @@ def registrar_movimento(acao, pessoa, modelo, quantidade, df_estoque, df_histori
 
 
 # ==========================================
-# TELA DE LOGIN INTEGRADA
+# WIZARD DE LOGIN (TELA INICIAL MAGNÍFICA)
 # ==========================================
 if not st.session_state.logado:
-    _, centro, _ = st.columns([1, 1.15, 1])
-    st.markdown("<div class='login-wrap'>", unsafe_allow_html=True)
+    _, centro, _ = st.columns([1, 1.2, 1])
+    
     with centro:
-        st.markdown("<div class='login-card'>", unsafe_allow_html=True)
+        st.markdown("<div class='login-wrap'><div class='login-card'>", unsafe_allow_html=True)
+        
         st.markdown("""
         <div class='login-icon'>⬢</div>
-        <div class='login-eyebrow'>Acesso Seguro ERP</div>
         <div class='login-title'>Portal Logística</div>
+        <div class='login-sub'>Sistema Integrado de Gestão de Estoque</div>
         """, unsafe_allow_html=True)
         
-        escolha_setor = st.selectbox("1. Escolha o Setor", ["", "📦 Caixas", "🗼 Torres"])
-        escolha_perfil = st.selectbox("2. Escolha o Perfil", ["", "👀 Equipe (Visualização)", "⚙️ Controle", "👑 Coordenador"])
-        
-        if escolha_setor and escolha_perfil:
-            setor_limpo = "Caixas" if "Caixas" in escolha_setor else "Torres"
+        # PASSO 1: ESCOLHER SETOR
+        if not st.session_state.login_setor:
+            st.markdown("<div class='login-step-title'>PASSO 1: SELECIONE O SETOR</div>", unsafe_allow_html=True)
+            c1, c2 = st.columns(2)
+            if c1.button("📦 CAIXAS", use_container_width=True):
+                st.session_state.login_setor = "Caixas"
+                st.rerun()
+            if c2.button("🗼 TORRES", use_container_width=True):
+                st.session_state.login_setor = "Torres"
+                st.rerun()
+                
+        # PASSO 2: ESCOLHER PERFIL
+        elif not st.session_state.login_perfil:
+            st.markdown(f"<div class='login-step-title'>SETOR {st.session_state.login_setor.upper()} • SEU PERFIL</div>", unsafe_allow_html=True)
             
-            if escolha_perfil == "👀 Equipe (Visualização)":
-                if st.button(f"Acessar Estoque Livre - {setor_limpo}", type="primary", use_container_width=True):
+            if st.button("👀 Equipe (Apenas Visualização)", use_container_width=True):
+                st.session_state.logado = True
+                st.session_state.perfil = "equipe"
+                st.session_state.setor = st.session_state.login_setor
+                st.rerun()
+                
+            if st.button("⚙️ Controle Operacional", use_container_width=True):
+                st.session_state.login_perfil = "controle"
+                st.rerun()
+                
+            if st.button("👑 Coordenação (Master)", use_container_width=True):
+                st.session_state.login_perfil = "coord"
+                st.rerun()
+                
+            st.markdown("<br>", unsafe_allow_html=True)
+            if st.button("⬅️ Voltar aos Setores", use_container_width=True):
+                st.session_state.login_setor = ""
+                st.rerun()
+
+        # PASSO 3: DIGITAR SENHA (CONTROLE E COORD)
+        else:
+            st.markdown(f"<div class='login-step-title'>ACESSO RESTRITO • {st.session_state.login_perfil.upper()}</div>", unsafe_allow_html=True)
+            
+            senha = st.text_input("Digite sua Senha de Acesso:", type="password", placeholder="••••••••")
+            st.markdown("<br>", unsafe_allow_html=True)
+            
+            c1, c2 = st.columns([1, 1.5])
+            if c1.button("⬅️ Voltar", use_container_width=True):
+                st.session_state.login_perfil = ""
+                st.rerun()
+                
+            if c2.button("Entrar no Sistema", type="primary", use_container_width=True):
+                setor_atual = st.session_state.login_setor
+                perfil_atual = st.session_state.login_perfil
+                senha_correta = "coord123" if perfil_atual == "coord" else SENHAS_CONTROLE[setor_atual]
+                
+                if senha == senha_correta:
                     st.session_state.logado = True
-                    st.session_state.perfil = "equipe"
-                    st.session_state.setor = setor_limpo
+                    st.session_state.perfil = perfil_atual
+                    st.session_state.setor = setor_atual
                     st.rerun()
+                else:
+                    st.error("❌ Senha incorreta!")
                     
-            elif escolha_perfil == "⚙️ Controle":
-                senha = st.text_input("Senha", type="password")
-                if st.button(f"Entrar no Painel - {setor_limpo}", type="primary", use_container_width=True):
-                    senha_correta = SENHAS_CONTROLE[setor_limpo]
-                    if senha == senha_correta:
-                        st.session_state.logado = True
-                        st.session_state.perfil = "controle"
-                        st.session_state.setor = setor_limpo
-                        st.rerun()
-                    else:
-                        st.error("❌ Senha incorreta!")
-                        
-            elif escolha_perfil == "👑 Coordenador":
-                senha = st.text_input("Senha Master", type="password")
-                if st.button("Entrar no Painel Gerencial", type="primary", use_container_width=True):
-                    if senha == "coord123":
-                        st.session_state.logado = True
-                        st.session_state.perfil = "coord"
-                        st.session_state.setor = setor_limpo
-                        st.rerun()
-                    else:
-                        st.error("❌ Senha incorreta!")
-                        
-        st.markdown("<div class='login-footnote'>🔒 Conexão criptografada com o Google Sheets</div>", unsafe_allow_html=True)
-        st.markdown("</div>", unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown("</div></div>", unsafe_allow_html=True)
 
 # ==========================================
 # PAINEL OPERACIONAL (CARREGADO APÓS LOGIN)
@@ -402,6 +376,8 @@ else:
             st.session_state.logado = False
             st.session_state.perfil = ""
             st.session_state.setor = ""
+            st.session_state.login_setor = ""
+            st.session_state.login_perfil = ""
             st.session_state.dados_carregados = False
             st.rerun()
 
