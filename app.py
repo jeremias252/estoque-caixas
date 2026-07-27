@@ -243,11 +243,19 @@ else:
         exibir_estoque_premium(df_estoque, busca)
 
     else:
-        abas_nomes = ["📦 Operação", "📊 Dashboard", "🕒 Histórico", "👑 Fechamento"] if st.session_state.perfil == "coord" else ["📦 Operação", "📊 Dashboard", "🕒 Histórico"]
+        # AGORA SÃO ABAS SEPARADAS PARA CADA AÇÃO
+        abas_nomes = ["🗂️ Catálogo", "📤 Nova Saída", "📥 Nova Entrada", "📊 Dashboard", "🕒 Histórico", "👑 Fechamento"] if st.session_state.perfil == "coord" else ["🗂️ Catálogo", "📤 Nova Saída", "📥 Nova Entrada", "📊 Dashboard", "🕒 Histórico"]
         abas = st.tabs(abas_nomes)
 
-        with abas[0]: 
+        with abas[0]: # ABA 1: SÓ CATÁLOGO
+            st.header("🗂️ Catálogo de Estoque")
+            busca = st.text_input("🔍 Buscar modelo...", key="busca_admin")
+            st.divider()
+            exibir_estoque_premium(df_estoque, busca)
+
+        with abas[1]: # ABA 2: SÓ SAÍDAS
             st.header("📤 Registrar Saída")
+            st.write("Registre as peças retiradas para expedição.")
             with st.form("form_saida", clear_on_submit=True):
                 col1, col2, col3 = st.columns([2, 3, 1])
                 with col1: sep = st.selectbox("1. Colaborador", [""] + separadores)
@@ -261,7 +269,7 @@ else:
                     idx = df_estoque[df_estoque["Modelo"] == modelo].index[0]
                     estoque_atual = df_estoque.at[idx, "Quantidade"]
                     if estoque_atual < qtd:
-                        st.error(f"⚠️ Saldo insuficiente! Temos apenas {estoque_atual} un.")
+                        st.error(f"⚠️ Saldo insuficiente! Temos apenas {estoque_atual} un. deste modelo.")
                     else:
                         with st.spinner("Registrando saída..."):
                             df_estoque.at[idx, "Quantidade"] -= qtd
@@ -270,22 +278,18 @@ else:
                             df_historico = pd.concat([novo, df_historico], ignore_index=True)
                             salvar_historico(df_historico)
                             st.cache_data.clear()
-                        st.success(f"✅ Registrado com sucesso!")
+                        st.success(f"✅ Saída registrada com sucesso!")
                         st.rerun()
 
-            st.divider()
-            st.header("🗂️ Catálogo de Estoque")
-            busca = st.text_input("🔍 Buscar modelo...", key="busca_admin")
-            exibir_estoque_premium(df_estoque, busca)
-
-            st.divider()
-            st.header("📥 Receber Material (Produção)")
+        with abas[2]: # ABA 3: SÓ ENTRADAS
+            st.header("📥 Receber Material")
+            st.write("Adicione peças recém produzidas ao estoque.")
             with st.form("form_entrada", clear_on_submit=True):
                 col1_in, col2_in, col3_in = st.columns([2, 3, 1])
                 with col1_in: quem_fez = st.selectbox("1. Quem produziu?", [""] + separadores)
                 with col2_in: modelo_rep = st.selectbox("2. Modelo", [""] + lista_modelos)
                 with col3_in: qtd_rep = st.number_input("3. Qtd", min_value=1, value=1)
-                submit_entrada = st.form_submit_button("Lançar Entrada")
+                submit_entrada = st.form_submit_button("Lançar Entrada", use_container_width=True)
                 
                 if submit_entrada:
                     if not modelo_rep or not quem_fez: st.error("⚠️ Preencha os campos.")
@@ -298,10 +302,10 @@ else:
                             df_historico = pd.concat([novo, df_historico], ignore_index=True)
                             salvar_historico(df_historico)
                             st.cache_data.clear()
-                        st.success("✅ Entrada Lançada!")
+                        st.success("✅ Entrada Lançada com sucesso!")
                         st.rerun()
 
-        with abas[1]: 
+        with abas[3]: # ABA 4: DASHBOARD
             st.header("📊 Indicadores de Estoque")
             col_m1, col_m2 = st.columns(2)
             col_m1.metric("📦 Total de Peças", int(df_estoque["Quantidade"].sum()))
@@ -329,12 +333,12 @@ else:
                     st.subheader("👤 Quem mais Retirou?")
                     if not df_saidas.empty: st.bar_chart(df_saidas.groupby("Separador")["Quantidade"].sum(), color="#dc2626")
 
-        with abas[2]: 
+        with abas[4]: # ABA 5: HISTÓRICO
             st.header("🕒 Histórico Recente")
             st.dataframe(df_historico.drop(columns=["ID"], errors="ignore"), use_container_width=True, hide_index=True)
 
         if st.session_state.perfil == "coord":
-            with abas[3]: 
+            with abas[5]: # ABA 6: FECHAMENTO
                 st.header("👑 Fechamento e Exportação")
                 st.write("Baixe a planilha completa do histórico de movimentações.")
                 
