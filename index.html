@@ -292,7 +292,7 @@
 
         let estado = { setor: '', perfil: '', dados: null, graficos: {} };
         const EQUIPES = { 'Caixas': ['Marcello', 'Fabiano', 'Sérgio'], 'Torres': ['Fran', 'Henrique', 'Leonardo', 'Patrick'] };
-        const SENHAS = { 'Caixas': 'marcello123', 'Torres': 'fran123', 'coord': 'coord123' };
+        const SENHAS = { 'Caixas': 'marcello123', 'Torres': 'fran123', 'admin': 'coord123' };
 
         function playSomSucesso() {
             try { if (navigator.vibrate) navigator.vibrate([100, 50, 100]); } catch(e){}
@@ -330,11 +330,12 @@
                 <button class="btn" onclick="escolherSetor('Torres')">🗼 TORRES</button>
             </div>
 
+            <!-- PASSO 2: ATUALIZADO (SEPARADORES / CONTROLE OPERACIONAL / ADMINISTRADOR) -->
             <div id="step2" class="step">
                 <div class="step-title">SETOR <span id="lbl-setor"></span> • PERFIL</div>
-                <button class="btn" onclick="logar('equipe')">👀 Equipe (Visualização)</button>
+                <button class="btn" onclick="logar('separadores')">📦 Separadores</button>
                 <button class="btn" onclick="irParaSenha('controle')">⚙️ Controle Operacional</button>
-                <button class="btn" onclick="irParaSenha('coord')">👑 Coordenação Master</button>
+                <button class="btn" onclick="irParaSenha('admin')">👑 Administrador</button>
                 <button class="btn btn-text" onclick="voltar(1)">⬅️ Voltar</button>
             </div>
 
@@ -465,7 +466,8 @@
         
         function validarSenha() {
             let s = document.getElementById('senha-input').value;
-            if(s === (estado.perfil === 'coord' ? SENHAS.coord : SENHAS[estado.setor])) logar(estado.perfil);
+            let senhaCorreta = estado.perfil === 'admin' ? SENHAS.admin : SENHAS[estado.setor];
+            if(s === senhaCorreta) logar(estado.perfil);
             else alert('❌ Senha Incorreta');
         }
 
@@ -474,12 +476,15 @@
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('app-layout').style.display = 'block';
             
+            let rotulosPerfil = { 'separadores': 'SEPARADORES', 'controle': 'CONTROLE OPERACIONAL', 'admin': 'ADMINISTRADOR' };
+            let nomeExibicao = rotulosPerfil[p] || p.toUpperCase();
+
             document.getElementById('side-setor').innerText = estado.setor.toUpperCase();
             document.getElementById('mob-setor').innerText = estado.setor.toUpperCase();
-            document.getElementById('side-perfil').innerText = estado.perfil.toUpperCase();
-            document.getElementById('badge-top').innerText = 'ACESSO ' + estado.perfil.toUpperCase();
+            document.getElementById('side-perfil').innerText = nomeExibicao;
+            document.getElementById('badge-top').innerText = 'ACESSO ' + nomeExibicao;
             
-            if(p === 'equipe') { document.querySelectorAll('.tab-btn').forEach((b,i) => { if(i>0) b.style.display='none'; }); }
+            if(p === 'separadores') { document.querySelectorAll('.tab-btn').forEach((b,i) => { if(i>0) b.style.display='none'; }); }
             carregarDados();
         }
 
@@ -521,7 +526,6 @@
                 
                 htmlModelos += `<option value="${nomeCompleto}">${nomeCompleto} (Saldo: ${qtd})</option>`;
                 
-                // Separa Nome da Linha/Modelo da Cor (ex: "Modelo X - Azul")
                 let partes = String(nomeCompleto).split(' - ');
                 let linha = partes[0].trim();
                 let cor = partes.length > 1 ? partes[1].trim() : 'Padrão';
@@ -583,7 +587,6 @@
             renderizarGraficos();
         }
 
-        /* RENDERIZA OS MODELOS AGRUPADOS */
         function renderizarCatalogo(busca) {
             let html = ''; let b = busca.toLowerCase();
             
@@ -594,13 +597,12 @@
                 return;
             }
 
-            modelosFiltrados.forEach((item, index) => {
+            modelosFiltrados.forEach((item) => {
                 let isDisponivel = item.total > 0;
                 let statusClass = isDisponivel ? 'disponivel' : 'esgotado';
                 let badgeText = isDisponivel ? '✅ Em Estoque' : '🔴 Zerado / Esgotado';
                 let badgeClass = isDisponivel ? 'status-ok' : 'status-off';
 
-                // Descobre o índice original para abrir o modal correto
                 let idxOriginal = estado.catalogoAgrupado.indexOf(item);
 
                 html += `
@@ -615,7 +617,6 @@
             document.getElementById('grid-cat').innerHTML = html;
         }
 
-        /* ABRE O MODAL COM AS CORES DO MODELO */
         function abrirModal(idx) {
             let item = estado.catalogoAgrupado[idx];
             document.getElementById('modal-titulo').innerText = item.linha;
