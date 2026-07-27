@@ -274,9 +274,9 @@ st.markdown("""
  # --- CONTROLE DE SESSÃO ---
 if "logado" not in st.session_state:
      st.session_state.logado = False
- if "perfil" not in st.session_state:
+if "perfil" not in st.session_state:
      st.session_state.perfil = ""
- if "dados_carregados" not in st.session_state:
+if "dados_carregados" not in st.session_state:
      st.session_state.dados_carregados = False
  
  # URL DA PLANILHA GOOGLE
