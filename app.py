@@ -51,7 +51,6 @@ st.markdown("""
         color: #fca5a5;
     }
     
-    /* Novos Banners Premium para as Janelas */
     .banner-saida {
         background: linear-gradient(90deg, #2b1111 0%, #1A1A1A 100%);
         padding: 20px;
@@ -76,11 +75,13 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- CONTROLE DE SESSÃO (LOGIN) ---
+# --- CONTROLE DE SESSÃO (LOGIN E MEMÓRIA RÁPIDA) ---
 if "logado" not in st.session_state:
     st.session_state.logado = False
 if "perfil" not in st.session_state:
     st.session_state.perfil = ""
+if "dados_carregados" not in st.session_state:
+    st.session_state.dados_carregados = False
 
 # URL DA PLANILHA GOOGLE (CAIXAS)
 URL_PLANILHA = "https://docs.google.com/spreadsheets/d/10z1gPJNmHoHO5kj6B4SoXknUNz6MwrQz1NjwkkBatQU/edit?usp=drivesdk"
@@ -94,7 +95,7 @@ def carregar_dados():
         df_estoque = df_estoque.dropna(subset=["Modelo"])
         df_estoque["Quantidade"] = pd.to_numeric(df_estoque["Quantidade"], errors="coerce").fillna(0).astype(int)
     except Exception as e:
-        st.error("⚠️ Falha de comunicação com o Google Drive. A internet pode ter oscilado. Tente atualizar a página.")
+        st.error("⚠️ Falha de comunicação com o Google Drive.")
         st.stop()
 
     try:
@@ -235,7 +236,17 @@ if not st.session_state.logado:
 # TELA 2: DENTRO DO SISTEMA (DASHBOARD)
 # ==========================================
 else:
-    df_estoque, df_historico = carregar_dados()
+    # --- MEMÓRIA RÁPIDA (CARREGA SÓ UMA VEZ) ---
+    if not st.session_state.dados_carregados:
+        with st.spinner("⏳ Sincronizando com o banco de dados..."):
+            e, h = carregar_dados()
+            st.session_state.df_estoque = e
+            st.session_state.df_historico = h
+            st.session_state.dados_carregados = True
+
+    df_estoque = st.session_state.df_estoque
+    df_historico = st.session_state.df_historico
+
     separadores = ["Marcello", "Fabiano", "Sérgio"]
     lista_modelos = sorted(df_estoque["Modelo"].tolist())
 
@@ -243,14 +254,17 @@ else:
     st.sidebar.markdown("---")
     st.sidebar.markdown(f"**👤 Logado como:**<br>{st.session_state.perfil.upper()}", unsafe_allow_html=True)
     
-    if st.sidebar.button("🔄 Atualizar Dados", use_container_width=True):
+    # O BOTÃO DE ATUALIZAR AGORA LIMPA A MEMÓRIA PARA FORÇAR O DOWNLOAD NOVO
+    if st.sidebar.button("🔄 Sincronizar Google Drive", use_container_width=True):
         st.cache_data.clear()
+        st.session_state.dados_carregados = False
         st.rerun()
         
     st.sidebar.markdown("<br><br><br>", unsafe_allow_html=True)
     if st.sidebar.button("🚪 Sair do Sistema (Logout)", type="primary", use_container_width=True):
         st.session_state.logado = False
         st.session_state.perfil = ""
+        st.session_state.dados_carregados = False
         st.rerun()
 
     st.markdown("<h1 class='main-title'>📦 Painel de Controle - CAIXAS</h1>", unsafe_allow_html=True)
@@ -266,7 +280,6 @@ else:
         exibir_estoque_premium(df_estoque, busca)
 
     else:
-        # ABAS COM NOMES ATUALIZADOS
         abas_nomes = ["🗂️ Catálogo", "📤 Pego do Estoque", "📥 Feito de Estoque", "📊 Dashboard", "🕒 Histórico", "👑 Fechamento"] if st.session_state.perfil == "coord" else ["🗂️ Catálogo", "📤 Pego do Estoque", "📥 Feito de Estoque", "📊 Dashboard", "🕒 Histórico"]
         abas = st.tabs(abas_nomes)
 
@@ -277,7 +290,6 @@ else:
             exibir_estoque_premium(df_estoque, busca)
 
         with abas[1]: # ABA 2: PEGO DO ESTOQUE
-            # Banner Customizado Premium
             st.markdown("""
                 <div class="banner-saida">
                     <h3 style="margin:0; color:#ffffff;">📤 Material que foi pego do estoque</h3>
@@ -300,18 +312,23 @@ else:
                     if estoque_atual < qtd:
                         st.error(f"⚠️ Saldo insuficiente! Temos apenas {estoque_atual} un. deste modelo.")
                     else:
-                        with st.spinner("Registrando saída..."):
+                        with st.spinner("Registrando saída no sistema..."):
+                            # Atualiza a memória instantaneamente
                             df_estoque.at[idx, "Quantidade"] -= qtd
-                            salvar_estoque(df_estoque)
+                            st.session_state.df_estoque = df_estoque
+                            
                             novo = pd.DataFrame([{"ID": str(uuid.uuid4()), "Data": datetime.now().strftime("%Y-%m-%d %H:%M"), "Ação": "Saída", "Separador": sep, "Modelo": modelo, "Quantidade": qtd}])
                             df_historico = pd.concat([novo, df_historico], ignore_index=True)
+                            st.session_state.df_historico = df_historico
+                            
+                            # Salva no Google Drive em segundo plano
+                            salvar_estoque(df_estoque)
                             salvar_historico(df_historico)
-                            st.cache_data.clear()
+                            
                         st.success(f"✅ Material pego do estoque registrado com sucesso!")
                         st.rerun()
 
         with abas[2]: # ABA 3: FEITO DE ESTOQUE
-            # Banner Customizado Premium
             st.markdown("""
                 <div class="banner-entrada">
                     <h3 style="margin:0; color:#ffffff;">📥 Material que foi feito de estoque</h3>
@@ -329,14 +346,20 @@ else:
                 if submit_entrada:
                     if not modelo_rep or not quem_fez: st.error("⚠️ Preencha os campos.")
                     else:
-                        with st.spinner("Registrando entrada..."):
+                        with st.spinner("Registrando entrada no sistema..."):
+                            # Atualiza a memória instantaneamente
                             idx = df_estoque[df_estoque["Modelo"] == modelo_rep].index[0]
                             df_estoque.at[idx, "Quantidade"] += qtd_rep
-                            salvar_estoque(df_estoque)
+                            st.session_state.df_estoque = df_estoque
+                            
                             novo = pd.DataFrame([{"ID": str(uuid.uuid4()), "Data": datetime.now().strftime("%Y-%m-%d %H:%M"), "Ação": "Entrada", "Separador": quem_fez, "Modelo": modelo_rep, "Quantidade": qtd_rep}])
                             df_historico = pd.concat([novo, df_historico], ignore_index=True)
+                            st.session_state.df_historico = df_historico
+                            
+                            # Salva no Google Drive em segundo plano
+                            salvar_estoque(df_estoque)
                             salvar_historico(df_historico)
-                            st.cache_data.clear()
+                            
                         st.success("✅ Material feito de estoque lançado com sucesso!")
                         st.rerun()
 
