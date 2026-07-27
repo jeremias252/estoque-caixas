@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Logística</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --prim: #F38020;
+            --glow: rgba(243,128,32,0.35);
+            --bg: #050608;
+        }
+        body, html {
+            margin: 0; padding: 0; font-family: 'Poppins', sans-serif;
+            background-color: var(--bg); color: white;
+            height: 100vh; overflow: hidden; display: flex;
+            align-items: center; justify-content: center;
+        }
+        .bg-glow {
+            position: absolute; width: 60vw; height: 60vw;
+            background: radial-gradient(circle, var(--glow) 0%, transparent 60%);
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            z-index: -1; filter: blur(70px);
+            transition: background 0.8s ease;
+        }
+        .login-card {
+            background: rgba(15, 17, 24, 0.65); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 32px; padding: 45px 35px; width: 85vw; max-width: 400px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1);
+            backdrop-filter: blur(25px); text-align: center;
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(40px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .icon {
+            width: 70px; height: 70px; margin: 0 auto 20px;
+            background: linear-gradient(145deg, #ffb15f, #F38020);
+            border-radius: 22px; display: flex; align-items: center; justify-content: center;
+            font-size: 32px; box-shadow: 0 14px 30px var(--glow);
+            transition: all 0.6s ease;
+        }
+        h1 { font-size: 26px; margin: 0 0 5px; font-weight: 900; letter-spacing: -0.5px;}
+        p { color: #9ca3af; font-size: 13.5px; margin: 0 0 30px; }
+        
+        .btn {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+            color: white; padding: 16px; border-radius: 18px; width: 100%;
+            font-family: inherit; font-weight: 700; font-size: 15px; cursor: pointer;
+            margin-bottom: 12px; transition: all 0.2s ease;
+        }
+        .btn:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
+        .btn:active { transform: translateY(1px); }
+        
+        .btn-primary {
+            background: linear-gradient(145deg, #ffb15f, #F38020); border: none;
+            box-shadow: 0 8px 20px var(--glow);
+        }
+        .btn-primary:hover { box-shadow: 0 12px 25px var(--glow); transform: translateY(-3px); }
+        
+        .step { display: none; }
+        .step.active { display: block; animation: fadeIn 0.3s ease forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.97); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        input {
+            width: 100%; padding: 16px; border-radius: 16px; background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.1); color: white; font-family: inherit; font-size: 16px;
+            margin-bottom: 25px; box-sizing: border-box; outline: none;
+            text-align: center; letter-spacing: 3px; transition: all 0.3s ease;
+        }
+        input:focus { border-color: var(--prim); box-shadow: 0 0 0 2px var(--glow); }
+        .voltar { background: transparent; border: none; color: #6b7280; font-size: 13px; margin-top: 10px; padding: 10px;}
+        .voltar:hover { color: #fff; background: transparent; transform: none;}
+    </style>
+</head>
+<body>
+    <div class="bg-glow"></div>
+    <div class="login-card">
+        <div class="icon" id="logo-icon">⬢</div>
+        <h1>Portal Logística</h1>
+        <p>Acesso Rápido ao Sistema</p>
+
+        <!-- PASSO 1: SETOR -->
+        <div id="step1" class="step active">
+            <div style="font-size:12px; color:#cbd5e1; margin-bottom:15px; letter-spacing:1px; font-weight:700;">PASSO 1: SELECIONE O SETOR</div>
+            <button class="btn" onclick="escolherSetor('Caixas')">📦 CAIXAS</button>
+            <button class="btn" onclick="escolherSetor('Torres')">🗼 TORRES</button>
+        </div>
+
+        <!-- PASSO 2: PERFIL -->
+        <div id="step2" class="step">
+            <div style="font-size:12px; color:#cbd5e1; margin-bottom:15px; letter-spacing:1px; font-weight:700;">
+                SETOR <span id="lbl-setor"></span> • PERFIL
+            </div>
+            <button class="btn" onclick="alert('Logo conectaremos a planilha!')">👀 Equipe (Visualização)</button>
+            <button class="btn" onclick="irParaSenha()">⚙️ Controle Operacional</button>
+            <button class="btn" onclick="irParaSenha()">👑 Coordenação</button>
+            <button class="btn voltar" onclick="voltar(1)">⬅️ Voltar aos Setores</button>
+        </div>
+
+        <!-- PASSO 3: SENHA -->
+        <div id="step3" class="step">
+            <div style="font-size:12px; color:#cbd5e1; margin-bottom:15px; letter-spacing:1px; font-weight:700;">DIGITE SUA SENHA</div>
+            <input type="password" placeholder="••••••••" id="senha">
+            <button class="btn btn-primary" onclick="alert('Aqui carregará o Dashboard instantaneamente!')">ENTRAR</button>
+            <button class="btn voltar" onclick="voltar(2)">⬅️ Voltar ao Perfil</button>
+        </div>
+    </div>
+
+    <script>
+        function escolherSetor(setor) {
+            document.getElementById('step1').classList.remove('active');
+            document.getElementById('step2').classList.add('active');
+            document.getElementById('lbl-setor').innerText = setor.toUpperCase();
+
+            // MÁGICA: Muda o tema da página inteira no Javascript (Instantâneo)
+            const r = document.querySelector(':root');
+            const icon = document.getElementById('logo-icon');
+            
+            if(setor === 'Torres') {
+                r.style.setProperty('--prim', '#0ea5e9');
+                r.style.setProperty('--glow', 'rgba(14,165,233,0.35)');
+                icon.style.background = 'linear-gradient(145deg, #38bdf8, #0ea5e9)';
+            } else {
+                r.style.setProperty('--prim', '#F38020');
+                r.style.setProperty('--glow', 'rgba(243,128,32,0.35)');
+                icon.style.background = 'linear-gradient(145deg, #ffb15f, #F38020)';
+            }
+        }
+
+        function irParaSenha() {
+            document.getElementById('step2').classList.remove('active');
+            document.getElementById('step3').classList.add('active');
+            setTimeout(() => document.getElementById('senha').focus(), 100);
+        }
+
+        function voltar(passo) {
+            document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+            document.getElementById('step' + passo).classList.add('active');
+            if(passo === 1) { // Volta para a cor neutra/Caixas
+                document.querySelector(':root').style.setProperty('--prim', '#F38020');
+                document.querySelector(':root').style.setProperty('--glow', 'rgba(243,128,32,0.35)');
+                document.getElementById('logo-icon').style.background = 'linear-gradient(145deg, #ffb15f, #F38020)';
+            }
+        }
+    </script>
+</body>
+</html>
