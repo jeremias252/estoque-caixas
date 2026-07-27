@@ -21,55 +21,70 @@
             --glow1: rgba(243,128,32,0.3); --glow2: rgba(220,38,38,0.15);
             --grad-btn: linear-gradient(145deg, #ffb15f, #F38020, #dc2626);
             --bg-dark: #050608; 
-            --panel-bg: linear-gradient(145deg, rgba(31,36,55,.92), rgba(7,9,16,.96));
+            --panel-bg: linear-gradient(145deg, rgba(31,36,55,.90), rgba(7,9,16,.95));
             --text-main: #f8fafc;
             --text-sub: #9ca3af;
-            --border-color: rgba(255,255,255,0.08);
+            --border-color: rgba(255,255,255,0.1);
             --input-bg: rgba(5,6,8,0.7);
-            --card-item-bg: rgba(15, 23, 42, 0.6);
+            --card-item-bg: rgba(15, 23, 42, 0.7);
+            --bg-overlay: rgba(5, 6, 8, 0.85);
         }
 
         body.light-mode {
-            --bg-dark: #f1f5f9; --panel-bg: #ffffff;
+            --bg-dark: #f1f5f9; --panel-bg: rgba(255,255,255,0.92);
             --text-main: #0f172a; --text-sub: #475569;
             --border-color: #cbd5e1; --input-bg: #ffffff;
-            --card-item-bg: #f8fafc;
-            background: #f1f5f9 !important; color: #0f172a !important;
+            --card-item-bg: rgba(248, 250, 252, 0.9);
+            --bg-overlay: rgba(241, 245, 249, 0.88);
+            color: #0f172a !important;
         }
 
-        body.light-mode h1, body.light-mode h2, body.light-mode h3, body.light-mode h4, body.light-mode b { color: #0f172a !important; }
-        body.light-mode p, body.light-mode .sub, body.light-mode span:not(.badge-status) { color: #475569 !important; }
-        body.light-mode .hero, body.light-mode .panel, body.light-mode .kpi, body.light-mode .login-card, body.light-mode .modal { background: #ffffff !important; box-shadow: 0 10px 25px rgba(0,0,0,0.05) !important; border-color: #cbd5e1 !important; }
-        body.light-mode .history-card, body.light-mode .card-detalhe { background: #f8fafc !important; border-color: #cbd5e1 !important; color: #0f172a !important; box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important; }
-        body.light-mode .tabs-list { background: #ffffff !important; border-color: #cbd5e1 !important; box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important; }
-        body.light-mode input, body.light-mode select { color: #0f172a !important; background-color: #ffffff !important; border-color: #94a3b8 !important; }
-        body.light-mode select option { background-color: #ffffff !important; color: #0f172a !important; }
-        body.light-mode .btn:not(.btn-primary) { background: #e2e8f0 !important; color: #0f172a !important; border-color: #cbd5e1 !important; box-shadow: none !important; }
-        body.light-mode .btn-text, body.light-mode .hist-head { color: #475569 !important; }
-        body.light-mode .mobile-header, body.light-mode .sidebar { background: #ffffff !important; border-color: #cbd5e1 !important; color: #0f172a !important; }
-        body.light-mode .sidebar .logo span { background: var(--grad-btn) !important; -webkit-background-clip: text !important; color: transparent !important; }
-        body.light-mode .profile-pill { background: #f8fafc !important; border-color: #cbd5e1 !important; color: #334155 !important; }
-        body.light-mode .menu-toggle { color: #0f172a !important; }
-        body.light-mode .danger-glow { background: #fef2f2 !important; border-left: 5px solid #ef4444 !important; color: #991b1b !important; }
-
-        body, html {
+        body {
             margin: 0; padding: 0; font-family: 'Poppins', sans-serif;
             background-color: var(--bg-dark); color: var(--text-main); overflow-x: hidden;
-            background: radial-gradient(circle at 12% 8%, var(--glow1), transparent 30rem),
-                        radial-gradient(circle at 86% 12%, var(--glow2), transparent 28rem),
-                        linear-gradient(135deg, var(--bg-dark), #111827 50%, var(--bg-dark));
-            background-attachment: fixed; min-height: 100vh; transition: all 0.3s ease;
+            background-size: cover; background-position: center; background-repeat: no-repeat;
+            background-attachment: fixed; min-height: 100vh; transition: background 0.8s ease;
+        }
+
+        /* CAMADA DE TRANSPARÊNCIA SOBRE A FOTO DE FUNDO */
+        .bg-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: var(--bg-overlay); z-index: -1;
+            pointer-events: none; transition: background 0.5s ease;
         }
 
         * { box-sizing: border-box; }
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-thumb { background: rgba(150,150,150,0.3); border-radius: 10px; }
 
-        #login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; z-index: 10; }
-        .login-card { width: 90%; max-width: 440px; background: rgba(15, 17, 24, 0.65); border: 1px solid var(--border-color); border-radius: 28px; padding: 30px; box-shadow: 0 25px 60px rgba(0,0,0,0.5); backdrop-filter: blur(28px); text-align: center; }
-        .login-icon { width: 60px; height: 60px; margin: 0 auto 12px; background: var(--grad-btn); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 12px 28px var(--glow1); transition: all 0.5s; color: white; }
-        .login-card h2 { margin: 0 0 5px; font-weight: 900; font-size: 24px; color: var(--text-main); }
-        .login-card p { color: var(--text-sub); font-size: 13px; margin: 0 0 20px; }
+        body.light-mode h1, body.light-mode h2, body.light-mode h3, body.light-mode h4, body.light-mode b { color: #0f172a !important; }
+        body.light-mode p, body.light-mode .sub, body.light-mode span:not(.badge-status) { color: #475569 !important; }
+        body.light-mode .hero, body.light-mode .panel, body.light-mode .kpi, body.light-mode .login-card, body.light-mode .modal { background: var(--panel-bg) !important; box-shadow: 0 10px 25px rgba(0,0,0,0.05) !important; border-color: #cbd5e1 !important; }
+        body.light-mode .history-card, body.light-mode .card-detalhe { background: #f8fafc !important; border-color: #cbd5e1 !important; color: #0f172a !important; box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important; }
+        body.light-mode .tabs-list { background: #ffffff !important; border-color: #cbd5e1 !important; box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important; }
+        body.light-mode input, body.light-mode select { color: #0f172a !important; background-color: #ffffff !important; border-color: #94a3b8 !important; }
+        body.light-mode select option { background-color: #ffffff !important; color: #0f172a !important; }
+        body.light-mode .btn:not(.btn-primary) { background: #e2e8f0 !important; color: #0f172a !important; border-color: #cbd5e1 !important; box-shadow: none !important; }
+        body.light-mode .btn-text, body.light-mode .hist-head { color: #475569 !important; }
+        body.light-mode .mobile-header, body.light-mode .sidebar { background: rgba(255,255,255,0.92) !important; border-color: #cbd5e1 !important; color: #0f172a !important; }
+        body.light-mode .sidebar .logo span { background: var(--grad-btn) !important; -webkit-background-clip: text !important; color: transparent !important; }
+        body.light-mode .profile-pill { background: #f8fafc !important; border-color: #cbd5e1 !important; color: #334155 !important; }
+        body.light-mode .menu-toggle { color: #0f172a !important; }
+        body.light-mode .danger-glow { background: #fef2f2 !important; border-left: 5px solid #ef4444 !important; color: #991b1b !important; }
+
+        #login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; z-index: 10; padding: 20px;}
+        .login-card { width: 100%; max-width: 440px; background: rgba(15, 17, 24, 0.75); border: 1px solid var(--border-color); border-radius: 28px; padding: 40px 30px; box-shadow: 0 25px 60px rgba(0,0,0,0.5); backdrop-filter: blur(28px); text-align: center; }
+        
+        /* CONTAINER DO LOGO DA EMPRESA */
+        .login-logo-container {
+            width: 100%; height: 90px; margin: 0 auto 20px;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden; padding: 5px;
+        }
+        .login-logo-container img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+        .login-card h2 { margin: 0 0 5px; font-weight: 900; font-size: 20px; color: var(--text-main); }
+        .login-card p { color: var(--text-sub); font-size: 13px; margin: 0 0 25px; }
         .step-title { color: var(--text-sub); font-size: 11px; font-weight: 700; letter-spacing: 1px; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
         .step { display: none; }
         .step.active { display: block; animation: fadeSlideUp 0.4s forwards; }
@@ -86,17 +101,21 @@
         input:focus, select:focus { border-color: var(--prim); box-shadow: 0 0 0 2px var(--glow1); }
 
         #app-layout { display: none; height: 100vh; overflow: hidden; }
-        .sidebar { width: 280px; background: rgba(10, 12, 18, 0.4); backdrop-filter: blur(25px); border-right: 1px solid var(--border-color); height: 100%; padding: 20px; display: flex; flex-direction: column; position: fixed; left: 0; top: 0; z-index: 100; transition: transform 0.3s ease; }
-        .sidebar .logo { font-size: 24px; font-weight: 900; text-align: center; margin-bottom: 20px; }
-        .sidebar .logo span { background: var(--grad-btn); -webkit-background-clip: text; color: transparent; }
+        .sidebar { width: 280px; background: rgba(10, 12, 18, 0.6); backdrop-filter: blur(25px); border-right: 1px solid var(--border-color); height: 100%; padding: 20px; display: flex; flex-direction: column; position: fixed; left: 0; top: 0; z-index: 100; transition: transform 0.3s ease; }
+        
+        .sidebar .logo-side-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; margin-bottom: 25px; }
+        .sidebar .logo-side-wrap img { width: 100%; max-height: 70px; object-fit: contain; margin-bottom: 10px;}
+        .sidebar .logo { font-size: 14px; font-weight: 900; text-align: center; color: var(--text-sub); letter-spacing: 2px;}
+        .sidebar .logo span { background: var(--grad-btn); -webkit-background-clip: text; color: transparent; font-size: 20px; letter-spacing: 0;}
+        
         .profile-pill { background: rgba(5,7,12,0.54); border: 1px solid var(--border-color); border-radius: 18px; padding: 12px; text-align: center; color: var(--text-sub); margin-bottom: 20px; }
         .profile-pill b { color: var(--prim); display: block; font-size: 18px;}
         
         .main-content { margin-left: 280px; padding: 30px; height: 100vh; overflow-y: auto; width: calc(100% - 280px); }
-        .mobile-header { display: none; padding: 15px; background: rgba(10,12,18,0.8); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-color); align-items: center; justify-content: space-between;}
+        .mobile-header { display: none; padding: 15px; background: rgba(10,12,18,0.85); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-color); align-items: center; justify-content: space-between;}
         .menu-toggle { background: transparent; border: none; color: white; font-size: 24px; cursor: pointer; }
 
-        .hero { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 28px; padding: 26px; margin-bottom: 22px; animation: fadeSlideUp 0.6s; position:relative;}
+        .hero { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 28px; padding: 26px; margin-bottom: 22px; animation: fadeSlideUp 0.6s; position:relative; backdrop-filter: blur(20px);}
         .badge-status-conn { position: absolute; top: 26px; right: 26px; font-size: 12px; font-weight: 800; padding: 6px 12px; border-radius: 12px; background: rgba(255,255,255,0.05); }
         
         .badge { background: var(--glow2); border: 1px solid var(--glow1); color: var(--text-main); padding: 6px 12px; border-radius: 999px; font-size: 11px; font-weight: 900; display: inline-block; margin-bottom: 10px;}
@@ -116,24 +135,28 @@
         .tab-content { display: none; animation: fadeSlideUp 0.4s; }
         .tab-content.active { display: block; }
         
-        .panel { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 28px; padding: 26px; }
+        .panel { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 28px; padding: 26px; backdrop-filter: blur(20px); }
         .panel h3 { margin: 0 0 5px; font-size: 20px; color: var(--text-main); }
         .panel p.sub { color: var(--text-sub); font-size: 13px; margin: 0 0 20px; }
 
+        /* CARDS DO CATÁLOGO COM FOTO DO PRODUTO */
         .grid-catalogo { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 16px; }
-        .item-card { background: var(--card-item-bg); border: 2px solid var(--border-color); border-radius: 22px; padding: 20px; text-align: center; transition: all 0.3s ease; position: relative; overflow: hidden; cursor: pointer; }
+        .item-card { background: var(--card-item-bg); border: 2px solid var(--border-color); border-radius: 22px; padding: 16px; text-align: center; transition: all 0.3s ease; position: relative; overflow: hidden; cursor: pointer; backdrop-filter: blur(15px); }
         .item-card:hover { transform: translateY(-4px); border-color: var(--prim); }
         .item-card.disponivel { border-color: rgba(16, 185, 129, 0.4); box-shadow: 0 8px 20px rgba(16, 185, 129, 0.08); }
-        .item-card.disponivel .qtd-num { color: var(--prim); font-size: 32px; font-weight: 900; margin: 8px 0; }
+        .item-card.disponivel .qtd-num { color: var(--prim); font-size: 30px; font-weight: 900; margin: 4px 0; }
         .item-card.esgotado { border-color: rgba(239, 68, 68, 0.6); background: rgba(239, 68, 68, 0.08) !important; box-shadow: 0 8px 20px rgba(239, 68, 68, 0.12); }
-        .item-card.esgotado .qtd-num { color: #ef4444; font-size: 32px; font-weight: 900; margin: 8px 0; }
+        .item-card.esgotado .qtd-num { color: #ef4444; font-size: 30px; font-weight: 900; margin: 4px 0; }
         
-        .badge-status { font-size: 10px; font-weight: 900; letter-spacing: 0.5px; padding: 5px 12px; border-radius: 999px; text-transform: uppercase; display: inline-block; }
+        .item-img-wrap { width: 100%; height: 130px; border-radius: 14px; overflow: hidden; margin-bottom: 12px; background: rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: center; }
+        .item-img-wrap img { width: 100%; height: 100%; object-fit: contain; }
+
+        .badge-status { font-size: 10px; font-weight: 900; letter-spacing: 0.5px; padding: 4px 10px; border-radius: 999px; text-transform: uppercase; display: inline-block; }
         .status-ok { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.4); }
         .status-off { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.5); }
-        .status-hot { background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.5); margin-left: 4px; }
+        .status-hot { background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.5); margin-top: 5px; }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); z-index: 1000; display: none; align-items: center; justify-content: center; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 1000; display: none; align-items: center; justify-content: center; }
         .modal { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 28px; padding: 30px; width: 90%; max-width: 480px; max-height: 85vh; overflow-y: auto; box-shadow: 0 25px 60px rgba(0,0,0,0.6); animation: fadeSlideUp 0.3s forwards; }
         .card-detalhe { background: var(--card-item-bg); border: 1px solid var(--border-color); border-radius: 18px; padding: 16px; text-align: center; margin-bottom: 12px; }
         .card-detalhe span { font-size: 12px; color: var(--text-sub); text-transform: uppercase; font-weight: 900;}
@@ -163,9 +186,34 @@
 </head>
 <body>
 
+    <div class="bg-overlay"></div>
+
     <script>
-        // LINK OFICIAL INTEGRADO
+        // ==========================================
+        // 1. LINK DA SUA API DO GOOGLE APPS SCRIPT
+        // ==========================================
         const API_URL = "https://script.google.com/macros/s/AKfycbwRLsipTraGo72XeJTTG-JG_Wt6qzJRJ_iSQ2V2babralKh3aC_n8eNG0oh3b1dOw099g/exec";
+
+        // ==========================================
+        // 2. LINK DO LOGO DA SUA EMPRESA
+        // ==========================================
+        const URL_LOGO_EMPRESA = "https://comprar.caixatomada.com/wp-content/uploads/2026/06/Logo-CaixaTomada-w.png"; 
+
+        // ==========================================
+        // 3. FOTOS DE FUNDO REAIS DOS SETORES E PRODUTOS
+        // ==========================================
+        const BGS_SETORES = {
+            'Caixas': 'https://i0.wp.com/comprar.caixatomada.com/wp-content/uploads/2020/11/CX02Q-02-scaled.jpg?w=1920&ssl=1',
+            'Torres': 'https://i0.wp.com/comprar.caixatomada.com/wp-content/uploads/2021/04/TR03W-scaled.jpg?w=1920&ssl=1'
+        };
+
+        const FOTOS_PADRAO_PRODUTO = {
+            'Caixas': 'https://i0.wp.com/comprar.caixatomada.com/wp-content/uploads/2018/11/CX04FN-scaled.jpg?w=1920&ssl=1',
+            'Torres': 'https://i0.wp.com/comprar.caixatomada.com/wp-content/uploads/2025/06/140511620237872_1751027593293565.jpg?w=1600&ssl=1'
+        };
+
+        // Opcional: Se quiser colocar uma foto diferente para um modelo específico
+        const IMAGENS_MODELOS = {};
 
         let estado = { setor: '', perfil: '', dados: null, graficos: {}, relatorioAtual: null, mapaSaidasPorModelo: {} };
         let filaOffline = JSON.parse(localStorage.getItem('filaLogistica')) || [];
@@ -207,7 +255,13 @@
             localStorage.setItem('temaPortal', document.body.classList.contains('light-mode') ? 'claro' : 'escuro');
             if(estado.dados) renderizarGraficos(); 
         }
-        window.onload = () => { if(localStorage.getItem('temaPortal') === 'claro') document.body.classList.add('light-mode'); }
+        window.onload = () => { 
+            if(localStorage.getItem('temaPortal') === 'claro') document.body.classList.add('light-mode'); 
+            let elLogoLogin = document.getElementById('img-logo-login');
+            if(elLogoLogin && URL_LOGO_EMPRESA) elLogoLogin.src = URL_LOGO_EMPRESA;
+            let elLogoSide = document.getElementById('img-logo-side');
+            if(elLogoSide && URL_LOGO_EMPRESA) elLogoSide.src = URL_LOGO_EMPRESA;
+        }
     </script>
 
     <div id="toast">✅ Operação realizada!</div>
@@ -215,7 +269,9 @@
     <!-- TELA LOGIN -->
     <div id="login-screen">
         <div class="login-card">
-            <div class="login-icon" id="logo-icon">⬢</div>
+            <div class="login-logo-container">
+                <img id="img-logo-login" src="" alt="Logo Empresa">
+            </div>
             <h2>Portal Logística</h2>
             <p>Sistema Integrado de Gestão</p>
 
@@ -250,7 +306,10 @@
         </div>
 
         <div class="sidebar" id="sidebar">
-            <div class="logo">⬢ SETOR <br><span id="side-setor">NOME</span></div>
+            <div class="logo-side-wrap">
+                <img id="img-logo-side" src="" alt="Logo">
+                <div class="logo">SETOR <br><span id="side-setor">NOME</span></div>
+            </div>
             <div class="profile-pill"><span>PERFIL ATIVO</span><br><b id="side-perfil">PERFIL</b></div>
             
             <button class="btn" onclick="toggleTema()">🌓 Alternar Tema</button>
@@ -312,7 +371,7 @@
                 <button class="btn btn-primary" id="btn-entrada" onclick="lancar('Entrada')">Lançar no Estoque</button>
             </div>
 
-            <!-- ABA NOVA: CADASTRO DE NOVO ITEM -->
+            <!-- ABA NOVO ITEM -->
             <div id="tab-novo-item" class="tab-content panel">
                 <h3>➕ Cadastrar Novo Item no Estoque</h3>
                 <p class="sub">Adicione modelos ou variações diretamente pelo aplicativo.</p>
@@ -322,7 +381,7 @@
                 <button class="btn btn-primary" id="btn-cadastrar-item" onclick="cadastrarNovoItem()">✨ Cadastrar Item no Sistema</button>
             </div>
 
-            <!-- ABA NOVA: AUDITORIA E INVENTÁRIO -->
+            <!-- ABA AUDITORIA E INVENTÁRIO -->
             <div id="tab-inventario" class="tab-content panel">
                 <h3>🔎 Modo Auditoria & Inventário Rápido</h3>
                 <p class="sub">Selecione o item e informe a quantidade contada na prateleira para ajuste automático.</p>
@@ -409,6 +468,9 @@
             document.getElementById('step2').classList.add('active');
             document.getElementById('lbl-setor').innerText = s.toUpperCase();
 
+            // APLICA FOTO DE FUNDO REAL DO SETOR
+            document.body.style.backgroundImage = `url('${BGS_SETORES[s]}')`;
+
             const r = document.querySelector(':root');
             if(s === 'Torres') {
                 r.style.setProperty('--prim', '#0ea5e9'); r.style.setProperty('--sec', '#3b82f6');
@@ -452,7 +514,7 @@
                 document.querySelectorAll('.tab-btn').forEach((b,i) => { if(i>0) b.style.display='none'; }); 
             } else if(p === 'controle') {
                 document.querySelectorAll('.tab-btn').forEach(b => b.style.display='inline-block');
-                if(btnRel) btnRel.style.display = 'none'; // Esconde relatório no perfil controle
+                if(btnRel) btnRel.style.display = 'none'; 
             } else if(p === 'admin') {
                 document.querySelectorAll('.tab-btn').forEach(b => b.style.display='inline-block');
             }
@@ -514,7 +576,6 @@
             document.getElementById('e-pessoa').innerHTML = htmlPessoas;
             document.getElementById('rel-pessoa').innerHTML = htmlPessoas;
 
-            // MAPEIA ITENS QUENTES (Mapeia volume de saídas recente por linha)
             estado.mapaSaidasPorModelo = {};
             if(hist && hist.length > 0) {
                 let cH = hist[0].map(h => h.toString().trim());
@@ -571,7 +632,6 @@
             renderizarCatalogo('');
             atualizarPreviewInventario();
             
-            // HISTÓRICO
             let htmlHist = ''; estado.analiseSaidas = {};
             if(hist && hist.length > 0) {
                 let cH = hist[0].map(h => h.toString().trim());
@@ -613,7 +673,6 @@
 
             if(modelosFiltrados.length === 0) { document.getElementById('grid-cat').innerHTML = '<p style="color:var(--text-sub)">Nenhum modelo encontrado.</p>'; return; }
 
-            // Descobre limite para considerar "Item Quente" (Top 3 de saídas)
             let volumes = Object.values(estado.mapaSaidasPorModelo).sort((a,b) => b-a);
             let corteQuente = volumes.length >= 3 ? volumes[2] : (volumes[0] || 999);
 
@@ -624,19 +683,24 @@
                 let badgeClass = isDisponivel ? 'status-ok' : 'status-off';
                 let idxOriginal = estado.catalogoAgrupado.indexOf(item);
 
-                // Verificação de Item Quente 🔥
                 let saidasLinha = estado.mapaSaidasPorModelo[item.linha] || 0;
                 let isQuente = saidasLinha > 0 && saidasLinha >= corteQuente;
-                let badgeHot = isQuente ? `<span class="badge-status status-hot">🔥 Alto Giro</span>` : '';
+                let badgeHot = isQuente ? `<div class="badge-status status-hot">🔥 Alto Giro</div>` : '';
+
+                // APLICAÇÃO DA FOTO PADRÃO CORRETA POR SETOR
+                let fotoItem = IMAGENS_MODELOS[item.linha] || FOTOS_PADRAO_PRODUTO[estado.setor];
 
                 html += `
                 <div class="item-card ${statusClass}" onclick="abrirModal(${idxOriginal})">
+                    <div class="item-img-wrap">
+                        <img src="${fotoItem}" alt="${item.linha}">
+                    </div>
                     <div>
                         <span class="badge-status ${badgeClass}">${badgeText}</span>
                         ${badgeHot}
                     </div>
                     <div class="qtd-num">${item.total} <small style="font-size:12px; font-weight:400; color:var(--text-sub)">un.</small></div>
-                    <div style="font-weight:800; font-size:15px; margin-bottom:4px;">${item.linha}</div>
+                    <div style="font-weight:800; font-size:15px; margin-bottom:2px;">${item.linha}</div>
                     <small style="color:var(--text-sub); font-size:11px;">🔍 Clique para ver as cores</small>
                 </div>`;
             });
@@ -659,9 +723,6 @@
 
         function fecharModal() { document.getElementById('modal-detalhe').style.display = 'none'; }
 
-        /* =========================================
-           CADASTRO DE NOVO ITEM
-           ========================================= */
         async function cadastrarNovoItem() {
             let nome = document.getElementById('ni-nome').value.trim();
             let cor = document.getElementById('ni-cor').value.trim();
@@ -689,9 +750,6 @@
             }
         }
 
-        /* =========================================
-           MODO AUDITORIA E INVENTÁRIO
-           ========================================= */
         function atualizarPreviewInventario() {
             let sel = document.getElementById('inv-modelo').value;
             if(!sel || !estado.dados) {
@@ -753,7 +811,6 @@
             }
         }
 
-        /* LANÇAMENTO DE ENTRADAS / SAÍDAS */
         async function lancar(tipo) {
             let pfx = tipo === 'Entrada' ? 'e' : 's';
             let p = document.getElementById(`${pfx}-pessoa`).value; let m = document.getElementById(`${pfx}-modelo`).value; let q = document.getElementById(`${pfx}-qtd`).value;
@@ -789,7 +846,6 @@
             }
         }
 
-        /* RELATÓRIOS E PDF */
         function parseData(strData) {
             if(!strData) return new Date(0);
             let p = strData.split(' ')[0];
