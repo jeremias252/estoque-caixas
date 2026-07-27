@@ -2,50 +2,98 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#050608">
     <title>Portal Logística</title>
+    
+    <!-- Fontes e Bibliotecas de Gráficos/PDF -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
     <style>
+        /* =========================================
+           VARIÁVEIS DE TEMA (ESCURO PADRÃO)
+           ========================================= */
         :root {
             --prim: #F38020; --sec: #dc2626;
             --glow1: rgba(243,128,32,0.3); --glow2: rgba(220,38,38,0.15);
             --grad-btn: linear-gradient(145deg, #ffb15f, #F38020, #dc2626);
-            --bg-dark: #050608; --panel-bg: linear-gradient(145deg, rgba(31,36,55,.92), rgba(7,9,16,.96));
+            --bg-dark: #050608; 
+            --panel-bg: linear-gradient(145deg, rgba(31,36,55,.92), rgba(7,9,16,.96));
+            --text-color: #f8fafc;
+            --text-muted: #9ca3af;
+            --border-color: rgba(255,255,255,0.08);
+            --input-bg: rgba(5,6,8,0.7);
         }
 
+        /* =========================================
+           MODO CLARO (LIGHT MODE)
+           ========================================= */
+        body.light-mode {
+            --bg-dark: #f3f4f6;
+            --panel-bg: #ffffff;
+            --text-color: #1f2937;
+            --text-muted: #6b7280;
+            --border-color: rgba(0,0,0,0.1);
+            --input-bg: #ffffff;
+            background: #f3f4f6 !important;
+        }
+        body.light-mode .hero, body.light-mode .panel, body.light-mode .kpi, body.light-mode .login-card {
+            background: #ffffff; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-color: var(--border-color);
+        }
+        body.light-mode .history-card, body.light-mode .card-detalhe {
+            background: #f9fafb; border-color: #e5e7eb; color: #1f2937;
+        }
+        body.light-mode .tabs-list {
+            background: #ffffff; border-color: #e5e7eb; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        body.light-mode input, body.light-mode select {
+            color: #111827; background: #f9fafb; border-color: #d1d5db;
+        }
+        body.light-mode .btn:not(.btn-primary) {
+            background: #f3f4f6; color: #374151; border-color: #d1d5db; box-shadow: none;
+        }
+        body.light-mode .btn-text, body.light-mode .hist-head { color: #6b7280; }
+        body.light-mode .mobile-header, body.light-mode .sidebar {
+            background: #ffffff; border-color: #e5e7eb;
+        }
+        body.light-mode .menu-toggle { color: #111827; }
+
+        /* =========================================
+           ESTILOS GERAIS
+           ========================================= */
         body, html {
             margin: 0; padding: 0; font-family: 'Poppins', sans-serif;
-            background-color: var(--bg-dark); color: #f8fafc; overflow-x: hidden;
+            background-color: var(--bg-dark); color: var(--text-color); overflow-x: hidden;
             background: radial-gradient(circle at 12% 8%, var(--glow1), transparent 30rem),
                         radial-gradient(circle at 86% 12%, var(--glow2), transparent 28rem),
-                        linear-gradient(135deg, #050608, #111827 50%, #050608);
-            background-attachment: fixed; min-height: 100vh;
+                        linear-gradient(135deg, var(--bg-dark), #111827 50%, var(--bg-dark));
+            background-attachment: fixed; min-height: 100vh; transition: all 0.3s ease;
         }
 
         * { box-sizing: border-box; }
         ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: rgba(150,150,150,0.3); border-radius: 10px; }
 
-        #login-screen {
-            min-height: 100vh; display: flex; align-items: center; justify-content: center;
-            position: relative; z-index: 10;
-        }
+        #login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; z-index: 10; }
         .login-card {
             width: 90%; max-width: 440px; background: rgba(15, 17, 24, 0.65);
-            border: 1px solid rgba(255,255,255,0.08); border-radius: 28px; padding: 30px;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.5); backdrop-filter: blur(28px);
-            text-align: center;
+            border: 1px solid var(--border-color); border-radius: 28px; padding: 30px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.5); backdrop-filter: blur(28px); text-align: center;
         }
         .login-icon {
             width: 60px; height: 60px; margin: 0 auto 12px; background: var(--grad-btn);
             border-radius: 20px; display: flex; align-items: center; justify-content: center;
-            font-size: 28px; box-shadow: 0 12px 28px var(--glow1); transition: all 0.5s;
+            font-size: 28px; box-shadow: 0 12px 28px var(--glow1); transition: all 0.5s; color: white;
         }
         .login-card h2 { margin: 0 0 5px; font-weight: 900; font-size: 24px; }
-        .login-card p { color: #9ca3af; font-size: 13px; margin: 0 0 20px; }
+        .login-card p { color: var(--text-muted); font-size: 13px; margin: 0 0 20px; }
         .step-title {
-            color: #cbd5e1; font-size: 11px; font-weight: 700; letter-spacing: 1px;
-            margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;
+            color: var(--text-muted); font-size: 11px; font-weight: 700; letter-spacing: 1px;
+            margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;
         }
         .step { display: none; }
         .step.active { display: block; animation: fadeSlideUp 0.4s forwards; }
@@ -53,107 +101,88 @@
         button, input, select { font-family: inherit; outline: none; }
         .btn {
             background: linear-gradient(145deg, #262b3c, #10131d); color: white;
-            border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; padding: 15px;
+            border: 1px solid var(--border-color); border-radius: 18px; padding: 15px;
             width: 100%; font-weight: 700; font-size: 14.5px; cursor: pointer; margin-bottom: 10px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.3); transition: all 0.2s;
         }
         .btn:hover { transform: translateY(-2px); border-color: var(--glow1); }
-        .btn-primary { background: var(--grad-btn); border: none; box-shadow: 0 8px 20px var(--glow1); }
-        .btn-text { background: transparent; border: none; box-shadow: none; color: #9ca3af; font-size: 13px; padding: 5px;}
+        .btn-primary { background: var(--grad-btn) !important; color: white !important; border: none; box-shadow: 0 8px 20px var(--glow1) !important; }
+        .btn-text { background: transparent !important; border: none !important; box-shadow: none !important; color: var(--text-muted); font-size: 13px; padding: 5px;}
+        .btn-pdf { background: #374151 !important; padding: 8px 12px; font-size: 11px; width: auto; margin:0;}
         
         input, select {
-            width: 100%; padding: 15px; border-radius: 14px; background: rgba(5,6,8,0.7);
-            border: 1px solid rgba(255,255,255,0.14); color: white; margin-bottom: 15px; transition: 0.3s;
+            width: 100%; padding: 15px; border-radius: 14px; background: var(--input-bg);
+            border: 1px solid var(--border-color); color: var(--text-color); margin-bottom: 15px; transition: 0.3s;
         }
         input:focus, select:focus { border-color: var(--prim); box-shadow: 0 0 0 2px var(--glow1); }
 
         #app-layout { display: none; height: 100vh; overflow: hidden; }
         
         .sidebar {
-            width: 280px; background: rgba(10, 12, 18, 0.2); backdrop-filter: blur(25px);
-            border-right: 1px solid rgba(255,255,255,0.06); height: 100%; padding: 20px;
+            width: 280px; background: rgba(10, 12, 18, 0.4); backdrop-filter: blur(25px);
+            border-right: 1px solid var(--border-color); height: 100%; padding: 20px;
             display: flex; flex-direction: column; position: fixed; left: 0; top: 0; z-index: 100;
             transition: transform 0.3s ease;
         }
         .sidebar .logo { font-size: 24px; font-weight: 900; text-align: center; margin-bottom: 20px; }
         .sidebar .logo span { background: var(--grad-btn); -webkit-background-clip: text; color: transparent; }
         .profile-pill {
-            background: rgba(5,7,12,0.54); border: 1px solid rgba(255,255,255,0.13);
-            border-radius: 18px; padding: 12px; text-align: center; color: #cbd5e1; margin-bottom: 20px;
+            background: rgba(5,7,12,0.54); border: 1px solid var(--border-color);
+            border-radius: 18px; padding: 12px; text-align: center; color: var(--text-muted); margin-bottom: 20px;
         }
         .profile-pill b { color: var(--prim); display: block; font-size: 18px;}
         
-        .main-content {
-            margin-left: 280px; padding: 30px; height: 100vh; overflow-y: auto; width: calc(100% - 280px);
-        }
+        .main-content { margin-left: 280px; padding: 30px; height: 100vh; overflow-y: auto; width: calc(100% - 280px); }
 
-        .mobile-header { display: none; padding: 15px; background: rgba(10,12,18,0.8); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.08); align-items: center; justify-content: space-between;}
+        .mobile-header { display: none; padding: 15px; background: rgba(10,12,18,0.8); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-color); align-items: center; justify-content: space-between;}
         .menu-toggle { background: transparent; border: none; color: white; font-size: 24px; cursor: pointer; }
 
-        .hero { background: var(--panel-bg); border: 1px solid rgba(255,255,255,0.14); border-radius: 28px; padding: 26px; margin-bottom: 22px; animation: fadeSlideUp 0.6s; }
+        .hero { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 28px; padding: 26px; margin-bottom: 22px; animation: fadeSlideUp 0.6s; }
         .badge { background: var(--glow2); border: 1px solid var(--glow1); color: #fff; padding: 6px 12px; border-radius: 999px; font-size: 11px; font-weight: 900; display: inline-block; margin-bottom: 10px;}
         .hero h1 { margin: 0 0 5px; font-size: 32px; font-weight: 900; }
-        .hero p { margin: 0; color: #9ca3af; font-size: 14px; }
+        .hero p { margin: 0; color: var(--text-muted); font-size: 14px; }
         
         .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-top: 20px; }
-        .kpi { background: rgba(5,7,12,0.48); border: 1px solid rgba(255,255,255,0.12); border-radius: 20px; padding: 15px; }
-        .kpi span { font-size: 11px; color: #9ca3af; font-weight: 800; text-transform: uppercase; }
+        .kpi { background: rgba(5,7,12,0.48); border: 1px solid var(--border-color); border-radius: 20px; padding: 15px; }
+        .kpi span { font-size: 11px; color: var(--text-muted); font-weight: 800; text-transform: uppercase; }
         .kpi b { display: block; font-size: 24px; margin-top: 5px; }
 
         .danger-glow { border-left: 5px solid #ef4444; background: linear-gradient(90deg, rgba(127,29,29,0.8), rgba(31,41,55,0.75)); padding: 15px; border-radius: 18px; margin-bottom: 20px; color: #fecaca; font-size: 14px;}
 
         .tabs-list {
             display: flex; gap: 6px; background: linear-gradient(180deg, rgba(20,22,32,0.75), rgba(8,9,14,0.85));
-            padding: 10px; border-radius: 22px; border: 1px solid rgba(255,255,255,0.08);
+            padding: 10px; border-radius: 22px; border: 1px solid var(--border-color);
             box-shadow: inset 0 4px 14px rgba(0,0,0,0.55); backdrop-filter: blur(22px); margin-bottom: 25px;
             overflow-x: auto; white-space: nowrap;
         }
         .tab-btn {
-            background: transparent; border: none; color: #9ca3af; font-weight: 700; padding: 12px 22px;
+            background: transparent; border: none; color: var(--text-muted); font-weight: 700; padding: 12px 22px;
             border-radius: 16px; cursor: pointer; transition: 0.3s;
         }
         .tab-btn.active { background: var(--grad-btn); color: white; box-shadow: 0 6px 20px var(--glow1); font-weight: 900;}
         .tab-content { display: none; animation: fadeSlideUp 0.4s; }
         .tab-content.active { display: block; }
         
-        .panel { background: var(--panel-bg); border: 1px solid rgba(255,255,255,0.14); border-radius: 28px; padding: 26px; }
+        .panel { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 28px; padding: 26px; }
         .panel h3 { margin: 0 0 5px; font-size: 20px; }
-        .panel p.sub { color: #9ca3af; font-size: 13px; margin: 0 0 20px; }
+        .panel p.sub { color: var(--text-muted); font-size: 13px; margin: 0 0 20px; }
 
         .grid-catalogo { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
         
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 1000;
-            display: none; align-items: center; justify-content: center;
-        }
-        .modal {
-            background: var(--panel-bg); border: 1px solid rgba(255,255,255,0.14);
-            border-radius: 28px; padding: 30px; width: 90%; max-width: 500px;
-            max-height: 80vh; overflow-y: auto; box-shadow: 0 25px 60px rgba(0,0,0,0.6);
-            animation: fadeSlideUp 0.3s;
-        }
-        .card-detalhe {
-            background: linear-gradient(145deg,#202638,#0b0d14); border: 1px solid rgba(255,255,255,.12);
-            border-radius: 18px; padding: 16px; text-align: center; margin-bottom: 12px;
-        }
-        .card-detalhe span { font-size: 12px; color: #a7adb8; text-transform: uppercase; font-weight: 900;}
-        .card-detalhe b { display: block; font-size: 30px; color: var(--prim); font-weight: 900; margin: 5px 0;}
-        .card-detalhe small { font-size: 12px; color: #d1d5db; }
-
         .history-card {
-            display: grid; grid-template-columns: 1.2fr 1fr 1fr 2fr 0.5fr; gap: 10px; align-items: center;
+            display: grid; grid-template-columns: 1fr 1fr 1fr 2fr 0.5fr 1fr; gap: 10px; align-items: center;
             background: linear-gradient(145deg,rgba(24,29,43,.92),rgba(8,10,16,.96));
-            border: 1px solid rgba(255,255,255,.12); border-radius: 18px; padding: 12px 14px; margin-bottom: 10px;
-            font-size: 13px;
+            border: 1px solid var(--border-color); border-radius: 18px; padding: 12px 14px; margin-bottom: 10px;
+            font-size: 13px; text-align: center;
         }
-        .hist-head { color: #9ca3af; font-size: 11px; font-weight: 900; text-transform: uppercase; border: none; background: transparent; padding: 0 14px;}
-        .badge-acao { font-weight: 900; border-radius: 99px; padding: 5px 10px; text-align: center; font-size: 11px; }
-        .acao-entrada { background: rgba(16,185,129,.15); color: #86efac; border: 1px solid rgba(16,185,129,.35); }
-        .acao-saida { background: rgba(239,68,68,.15); color: #fecaca; border: 1px solid rgba(239,68,68,.35); }
+        .hist-head { color: var(--text-muted); font-size: 11px; font-weight: 900; text-transform: uppercase; border: none; background: transparent; padding: 0 14px;}
+        .badge-acao { font-weight: 900; border-radius: 99px; padding: 5px 10px; font-size: 11px; }
+        .acao-entrada { background: rgba(16,185,129,.15); color: #10b981; border: 1px solid rgba(16,185,129,.35); }
+        .acao-saida { background: rgba(239,68,68,.15); color: #ef4444; border: 1px solid rgba(239,68,68,.35); }
+
+        .chart-container { position: relative; height: 300px; width: 100%; margin-top:20px; }
 
         @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        
         #toast { position: fixed; bottom: 20px; right: 20px; background: #10b981; color: white; padding: 15px 25px; border-radius: 16px; font-weight: 700; z-index: 2000; display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.4); animation: fadeSlideUp 0.3s;}
 
         @media (max-width: 768px) {
@@ -161,7 +190,7 @@
             .sidebar.open { transform: translateX(0); }
             .main-content { margin-left: 0; width: 100%; padding: 15px; }
             .mobile-header { display: flex; }
-            .history-card { grid-template-columns: 1fr; gap: 5px; text-align: center; padding: 15px;}
+            .history-card { grid-template-columns: 1fr; gap: 5px; padding: 15px;}
             .hist-head { display: none; }
         }
     </style>
@@ -170,17 +199,40 @@
 
     <script>
         // ==========================================
-        // COLE O SEU LINK DO GOOGLE APPS SCRIPT AQUI
+        // COLE O SEU NOVO LINK DA API AQUI ABAIXO
         // ==========================================
         const API_URL = "https://script.google.com/macros/s/AKfycbwRLsipTraGo72XeJTTG-JG_Wt6qzJRJ_iSQ2V2babralKh3aC_n8eNG0oh3b1dOw099g/exec";
 
-        let estado = { setor: '', perfil: '', dados: null };
+        let estado = { setor: '', perfil: '', dados: null, graficos: {} };
         const EQUIPES = { 'Caixas': ['Marcello', 'Fabiano', 'Sérgio'], 'Torres': ['Fran', 'Henrique', 'Leonardo', 'Patrick'] };
         const SENHAS = { 'Caixas': 'marcello123', 'Torres': 'fran123', 'coord': 'coord123' };
+
+        // Toca Beep e Vibra (Opcional)
+        function playSomSucesso() {
+            try { if (navigator.vibrate) navigator.vibrate([100, 50, 100]); } catch(e){}
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator(); const gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.type = 'sine'; osc.frequency.value = 850;
+                gain.gain.setValueAtTime(0.5, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+                osc.start(); osc.stop(ctx.currentTime + 0.15);
+            } catch(e){}
+        }
+
+        // Alternar Tema (Escuro/Claro)
+        function toggleTema() {
+            document.body.classList.toggle('light-mode');
+            localStorage.setItem('temaPortal', document.body.classList.contains('light-mode') ? 'claro' : 'escuro');
+            if(estado.dados) renderizarGraficos(); // Atualiza cores do gráfico
+        }
+        window.onload = () => { if(localStorage.getItem('temaPortal') === 'claro') document.body.classList.add('light-mode'); }
     </script>
 
     <div id="toast">✅ Operação realizada!</div>
 
+    <!-- TELA LOGIN -->
     <div id="login-screen">
         <div class="login-card">
             <div class="login-icon" id="logo-icon">⬢</div>
@@ -198,7 +250,7 @@
                 <button class="btn" onclick="logar('equipe')">👀 Equipe (Visualização)</button>
                 <button class="btn" onclick="irParaSenha('controle')">⚙️ Controle Operacional</button>
                 <button class="btn" onclick="irParaSenha('coord')">👑 Coordenação Master</button>
-                <button class="btn btn-text" onclick="voltar(1)">⬅️ Voltar aos Setores</button>
+                <button class="btn btn-text" onclick="voltar(1)">⬅️ Voltar</button>
             </div>
 
             <div id="step3" class="step">
@@ -210,6 +262,7 @@
         </div>
     </div>
 
+    <!-- SISTEMA -->
     <div id="app-layout">
         <div class="mobile-header">
             <div style="font-weight: 900; font-size: 18px;">⬢ <span id="mob-setor">SISTEMA</span></div>
@@ -219,8 +272,11 @@
         <div class="sidebar" id="sidebar">
             <div class="logo">⬢ SETOR <br><span id="side-setor">NOME</span></div>
             <div class="profile-pill"><span>PERFIL ATIVO</span><br><b id="side-perfil">PERFIL</b></div>
+            
+            <button class="btn" onclick="toggleTema()">🌓 Alternar Tema</button>
+            
             <div style="flex:1"></div>
-            <button class="btn" onclick="carregarDados()">🔄 Sincronizar Base</button>
+            <button class="btn" onclick="carregarDados()">🔄 Sincronizar</button>
             <button class="btn btn-primary" onclick="location.reload()">🚪 Sair (Logout)</button>
         </div>
 
@@ -228,7 +284,7 @@
             <div class="hero">
                 <div class="badge" id="badge-top">SETOR</div>
                 <h1>Painel Operacional</h1>
-                <p>Controle unificado de estoque com validação de saldo em tempo real.</p>
+                <p>Controle de estoque conectado à nuvem.</p>
                 <div id="alerta-zerados"></div>
                 
                 <div class="kpis">
@@ -243,53 +299,53 @@
                 <button class="tab-btn" onclick="abrirAba('saida', this)">📤 Saídas</button>
                 <button class="tab-btn" onclick="abrirAba('entrada', this)">📥 Entradas</button>
                 <button class="tab-btn" onclick="abrirAba('historico', this)">🕒 Histórico</button>
+                <button class="tab-btn" onclick="abrirAba('stats', this)">📊 Estatísticas</button>
             </div>
 
+            <!-- ABA CATÁLOGO -->
             <div id="tab-catalogo" class="tab-content active panel">
                 <h3>🗂️ Catálogo de Estoque</h3>
-                <p class="sub">Selecione um modelo para ver os detalhes de cores e tamanhos.</p>
                 <input type="text" id="busca-cat" placeholder="🔍 Pesquisar modelo..." oninput="renderizarCatalogo(this.value)">
                 <div class="grid-catalogo" id="grid-cat"></div>
             </div>
 
+            <!-- ABA SAÍDA -->
             <div id="tab-saida" class="tab-content panel">
-                <h3>📤 Janela de Saídas</h3>
-                <p class="sub">Registre retiradas com validação automática de saldo.</p>
+                <h3>📤 Registrar Saída</h3>
                 <select id="s-pessoa"></select>
                 <select id="s-modelo"></select>
                 <input type="number" id="s-qtd" value="1" min="1">
                 <button class="btn btn-primary" onclick="lancar('Saída')">Confirmar Retirada</button>
             </div>
 
+            <!-- ABA ENTRADA -->
             <div id="tab-entrada" class="tab-content panel">
-                <h3>📥 Janela de Entradas</h3>
-                <p class="sub">Lance produção e reposição no estoque conectado.</p>
+                <h3>📥 Registrar Entrada</h3>
                 <select id="e-pessoa"></select>
                 <select id="e-modelo"></select>
                 <input type="number" id="e-qtd" value="1" min="1">
                 <button class="btn btn-primary" onclick="lancar('Entrada')">Lançar no Estoque</button>
             </div>
 
+            <!-- ABA HISTÓRICO E PDF -->
             <div id="tab-historico" class="tab-content panel">
-                <h3>🕒 Janela de Histórico</h3>
-                <p class="sub">Últimos lançamentos sincronizados com a planilha.</p>
+                <h3>🕒 Histórico Recente</h3>
                 <div class="history-card hist-head">
-                    <div>Data</div><div>Ação</div><div>Separador</div><div>Modelo</div><div>Qtd</div>
+                    <div>Data</div><div>Ação</div><div>Pessoa</div><div>Modelo</div><div>Qtd</div><div>Doc</div>
                 </div>
                 <div id="lista-historico"></div>
+            </div>
+
+            <!-- ABA ESTATÍSTICAS (GRÁFICOS) -->
+            <div id="tab-stats" class="tab-content panel">
+                <h3>📊 Análise de Retiradas</h3>
+                <p class="sub">Volume de saídas por membro da equipe.</p>
+                <div class="chart-container"><canvas id="graficoEquipe"></canvas></div>
             </div>
         </div>
     </div>
 
-    <div class="modal-overlay" id="modal-detalhe">
-        <div class="modal">
-            <h2 id="modal-titulo" style="text-align:center; margin:0 0 5px;">Modelo</h2>
-            <p id="modal-total" style="text-align:center; color:var(--prim); font-weight:900; margin:0 0 20px;">Total: 0 un.</p>
-            <div id="modal-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;"></div>
-            <button class="btn" style="margin-top:20px;" onclick="fecharModal()">Fechar</button>
-        </div>
-    </div>
-
+    <!-- SCRIPT PRINCIPAL -->
     <script>
         function escolherSetor(s) {
             estado.setor = s;
@@ -333,168 +389,191 @@
         }
 
         async function carregarDados() {
-            toast('⏳ Sincronizando com o Google Sheets...');
+            toast('⏳ Sincronizando com o Google...');
             try {
                 let r = await fetch(`${API_URL}?setor=${estado.setor}`);
                 let json = await r.json();
-                
-                if(json.erro) {
-                    alert("⚠️ Erro no Google Apps Script:\n" + json.erro);
-                    return;
-                }
-                
+                if(json.erro) return alert("⚠️ Erro API:\n" + json.erro);
                 estado.dados = json;
                 renderizarInterface();
-                toast('✅ Base de dados atualizada!');
-            } catch(e) { alert('Erro de conexão! Verifique se a URL do Apps Script está correta.'); }
+                toast('✅ Base atualizada!');
+            } catch(e) { alert('Erro de conexão com o banco.'); }
         }
 
         function renderizarInterface() {
-            let est = estado.dados.estoque;
-            let hist = estado.dados.historico;
+            let est = estado.dados.estoque; let hist = estado.dados.historico;
             
-            let htmlPessoas = '<option value="">Selecione o Separador...</option>';
+            // Popula selects de Equipe
+            let htmlPessoas = '<option value="">Selecione a pessoa...</option>';
             EQUIPES[estado.setor].forEach(p => htmlPessoas += `<option value="${p}">${p}</option>`);
             document.getElementById('s-pessoa').innerHTML = htmlPessoas;
             document.getElementById('e-pessoa').innerHTML = htmlPessoas;
 
+            // ESTOQUE
             let cabecalhoEst = est[0].map(h => h.toString().trim());
             let idxMod = cabecalhoEst.indexOf("Modelo"); if(idxMod === -1) idxMod = 0;
             let idxQtd = cabecalhoEst.indexOf("Quantidade"); if(idxQtd === -1) idxQtd = 1;
 
             let htmlModelos = '<option value="">Selecione o Modelo...</option>';
-            let totPecas = 0, zerados = [];
-            estado.catalogoLimpo = []; 
+            let totPecas = 0, zerados = []; estado.catalogoLimpo = []; 
 
             for(let i=1; i<est.length; i++) {
-                let nome = est[i][idxMod]; 
-                let qtd = Number(est[i][idxQtd]) || 0;
-                
+                let nome = est[i][idxMod]; let qtd = Number(est[i][idxQtd]) || 0;
                 if(!nome) continue;
-                totPecas += qtd;
-                if(qtd === 0) zerados.push(nome);
-                
-                htmlModelos += `<option value="${nome}">${nome} (Estoque: ${qtd})</option>`;
+                totPecas += qtd; if(qtd === 0) zerados.push(nome);
+                htmlModelos += `<option value="${nome}">${nome} (Saldo: ${qtd})</option>`;
                 
                 let partes = String(nome).split(' - ');
-                let linha = partes[0];
-                let cor = partes.length > 1 ? partes[1] : 'Padrão';
-                
-                let item = estado.catalogoLimpo.find(x => x.linha === linha);
-                if(!item) { item = { linha: linha, total: 0, detalhes: [] }; estado.catalogoLimpo.push(item); }
-                item.total += qtd;
-                item.detalhes.push({ nomeC: nome, cor: cor, qtd: qtd });
+                estado.catalogoLimpo.push({ nomeC: nome, linha: partes[0], cor: partes[1]||'', total: qtd });
             }
 
-            document.getElementById('s-modelo').innerHTML = htmlModelos;
-            document.getElementById('e-modelo').innerHTML = htmlModelos;
-            document.getElementById('kpi-pecas').innerText = totPecas;
-            document.getElementById('kpi-modelos').innerText = (est.length - 1);
+            document.getElementById('s-modelo').innerHTML = htmlModelos; document.getElementById('e-modelo').innerHTML = htmlModelos;
+            document.getElementById('kpi-pecas').innerText = totPecas; document.getElementById('kpi-modelos').innerText = (est.length - 1);
             document.getElementById('kpi-zerados').innerText = zerados.length;
-            
-            let divAlerta = document.getElementById('alerta-zerados');
-            divAlerta.innerHTML = zerados.length > 0 ? `<div class="danger-glow">🚨 <b>ALERTA:</b> Há ${zerados.length} modelos totalmente zerados.</div>` : '';
+            document.getElementById('alerta-zerados').innerHTML = zerados.length > 0 ? `<div class="danger-glow">🚨 ${zerados.length} modelos totalmente zerados.</div>` : '';
 
             renderizarCatalogo('');
             
-            let htmlHist = '';
+            // HISTÓRICO & PDF
+            let htmlHist = ''; estado.analiseSaidas = {};
             if(hist && hist.length > 0) {
-                let cabecalhoHist = hist[0].map(h => h.toString().trim());
-                let hData = cabecalhoHist.indexOf("Data"); if(hData === -1) hData = 1;
-                let hAcao = cabecalhoHist.indexOf("Ação"); if(hAcao === -1) hAcao = 2;
-                let hPess = cabecalhoHist.indexOf("Separador"); if(hPess === -1) hPess = 3;
-                let hMod = cabecalhoHist.indexOf("Modelo"); if(hMod === -1) hMod = 4;
-                let hQtd = cabecalhoHist.indexOf("Quantidade"); if(hQtd === -1) hQtd = 5;
+                let cH = hist[0].map(h => h.toString().trim());
+                let hData = cH.indexOf("Data"); if(hData === -1) hData = 1;
+                let hAcao = cH.indexOf("Ação"); if(hAcao === -1) hAcao = 2;
+                let hPess = cH.indexOf("Separador"); if(hPess === -1) hPess = 3;
+                let hMod = cH.indexOf("Modelo"); if(hMod === -1) hMod = 4;
+                let hQtd = cH.indexOf("Quantidade"); if(hQtd === -1) hQtd = 5;
+
+                EQUIPES[estado.setor].forEach(p => estado.analiseSaidas[p] = 0); // Zera gráfico
 
                 for(let i = hist.length - 1; i > 0; i--) { 
                     if(!hist[i][hMod]) continue; 
-                    let data = String(hist[i][hData]).split(' ')[0];
-                    let acao = hist[i][hAcao]; 
-                    let pess = hist[i][hPess]; 
-                    let mod = hist[i][hMod]; 
-                    let qt = hist[i][hQtd];
+                    let d = String(hist[i][hData]); let a = hist[i][hAcao]; 
+                    let p = hist[i][hPess]; let m = hist[i][hMod]; let q = Number(hist[i][hQtd]);
                     
-                    let classeAcao = acao === 'Entrada' ? 'acao-entrada' : 'acao-saida';
-                    let icone = acao === 'Entrada' ? '📥' : '📤';
+                    if(a === 'Saída' && estado.analiseSaidas[p] !== undefined) estado.analiseSaidas[p] += q;
+
+                    let isSaida = a === 'Saída';
+                    let cAcao = isSaida ? 'acao-saida' : 'acao-entrada';
+                    let icone = isSaida ? '📤' : '📥';
                     
+                    // BOTÃO GERAR PDF (Só p/ saídas)
+                    let btnPDF = isSaida ? `<button class="btn btn-pdf" onclick="gerarPDF('${d}','${p}','${m}','${q}')">📄 PDF</button>` : '';
+
                     htmlHist += `<div class='history-card'>
-                        <div>${data}</div>
-                        <div class='badge-acao ${classeAcao}'>${icone} ${acao}</div>
-                        <div>${pess}</div>
-                        <div>${mod}</div>
-                        <div style="font-weight:900; color:var(--prim); text-align:center">${qt}</div>
+                        <div>${d.split(' ')[0]}</div>
+                        <div class='badge-acao ${cAcao}'>${icone} ${a}</div>
+                        <div>${p}</div>
+                        <div>${m}</div>
+                        <div style="font-weight:900; color:var(--prim)">${q}</div>
+                        <div>${btnPDF}</div>
                     </div>`;
                 }
             }
-            document.getElementById('lista-historico').innerHTML = htmlHist || '<p>Nenhum histórico encontrado.</p>';
+            document.getElementById('lista-historico').innerHTML = htmlHist || '<p>Nenhum histórico.</p>';
+            renderizarGraficos();
         }
 
         function renderizarCatalogo(busca) {
-            let html = '';
-            let b = busca.toLowerCase();
-            estado.catalogoLimpo.forEach((item, index) => {
-                if(item.linha.toLowerCase().includes(b)) {
-                    let icone = item.total === 0 ? '🔴' : (item.total <= 5 ? '🟡' : '📦');
-                    html += `<button class="btn" style="min-height:70px" onclick="abrirModal(${index})">${icone} ${item.linha} <br><span style="font-size:12px; font-weight:400">Total: ${item.total} un.</span></button>`;
+            let html = ''; let b = busca.toLowerCase();
+            estado.catalogoLimpo.forEach(item => {
+                if(item.nomeC.toLowerCase().includes(b)) {
+                    let ic = item.total === 0 ? '🔴' : (item.total <= 5 ? '🟡' : '📦');
+                    html += `<div class="btn" style="text-align:center; padding:20px; cursor:default;">
+                        ${ic} ${item.nomeC} <br><span style="color:var(--prim); font-size:24px; font-weight:900;">${item.total}</span>
+                    </div>`;
                 }
             });
-            document.getElementById('grid-cat').innerHTML = html || '<p style="color:#9ca3af">Nenhum modelo encontrado.</p>';
+            document.getElementById('grid-cat').innerHTML = html;
         }
 
-        function abrirModal(idx) {
-            let item = estado.catalogoLimpo[idx];
-            document.getElementById('modal-titulo').innerText = item.linha;
-            document.getElementById('modal-total').innerText = `Estoque Total: ${item.total} un.`;
-            
-            let html = '';
-            item.detalhes.forEach(d => {
-                let status = d.qtd === 0 ? '🔴 Zerado' : (d.qtd <= 5 ? '🟡 Baixo' : '🟢 OK');
-                html += `<div class="card-detalhe">
-                    <span>${d.cor}</span>
-                    <b>${d.qtd}</b>
-                    <small>${status}</small>
-                </div>`;
-            });
-            document.getElementById('modal-grid').innerHTML = html;
-            document.getElementById('modal-detalhe').style.display = 'flex';
-        }
-        function fecharModal() { document.getElementById('modal-detalhe').style.display = 'none'; }
-
-        /* FUNÇÃO CORRIGIDA DE RETIRADA / ENTRADA */
         async function lancar(tipo) {
-            let isSaida = tipo === 'Saída';
-            let pfx = isSaida ? 's' : 'e';
-            let tabId = isSaida ? 'saida' : 'entrada';
-
-            let p = document.getElementById(`${pfx}-pessoa`).value;
-            let m = document.getElementById(`${pfx}-modelo`).value;
-            let q = document.getElementById(`${pfx}-qtd`).value;
-
-            if(!p || !m) return alert('⚠️ Preencha Separador e Modelo!');
+            let pfx = tipo === 'Entrada' ? 'e' : 's';
+            let p = document.getElementById(`${pfx}-pessoa`).value; let m = document.getElementById(`${pfx}-modelo`).value; let q = document.getElementById(`${pfx}-qtd`).value;
+            if(!p || !m) return alert('⚠️ Preencha todos os campos!');
             
-            let btnEl = document.querySelector(`#tab-${tabId} .btn-primary`);
-            if(btnEl) btnEl.innerText = 'Gravando...';
+            let btn = document.querySelector(`#tab-${tipo.toLowerCase()} .btn-primary`);
+            btn.innerText = 'Gravando...';
             
             try {
-                await fetch(API_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'text/plain' },
-                    body: JSON.stringify({ setor: estado.setor, acao: tipo, pessoa: p, modelo: m, quantidade: q })
-                });
-                
-                if(btnEl) btnEl.innerText = 'Sucesso!';
-                toast(`✅ ${tipo} de ${q}x registrada!`);
-                
-                setTimeout(() => {
-                    if(btnEl) btnEl.innerText = isSaida ? 'Confirmar Retirada' : 'Lançar no Estoque';
-                    carregarDados();
-                    abrirAba('catalogo', document.querySelectorAll('.tab-btn')[0]);
-                }, 1200);
-            } catch(e) {
-                alert('❌ Erro ao salvar lançamento. Tente novamente.');
-                if(btnEl) btnEl.innerText = isSaida ? 'Confirmar Retirada' : 'Lançar no Estoque';
-            }
+                await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ setor: estado.setor, acao: tipo, pessoa: p, modelo: m, quantidade: q }) });
+                playSomSucesso(); // SOM E VIBRAÇÃO AQUI!
+                btn.innerText = 'Sucesso!'; toast(`✅ ${tipo} registrada!`);
+                setTimeout(() => { btn.innerText = tipo==='Entrada'?'Lançar no Estoque':'Confirmar Retirada'; carregarDados(); document.querySelectorAll('.tab-btn')[0].click(); }, 1200);
+            } catch(e) { btn.innerText = 'Erro!'; alert('Falha ao salvar.'); }
+        }
+
+        // ==========================================
+        // GERADOR DE COMPROVANTE PDF (jsPDF)
+        // ==========================================
+        function gerarPDF(data, pessoa, modelo, qtd) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ format: 'a5' }); // Formato A5 pequeno
+            
+            // Layout do PDF
+            doc.setFillColor(30, 30, 30);
+            doc.rect(0, 0, 210, 30, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(16);
+            doc.setFont("helvetica", "bold");
+            doc.text("COMPROVANTE DE RETIRADA", 15, 20);
+            
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(12);
+            doc.text(`Setor: LOGÍSTICA - ${estado.setor.toUpperCase()}`, 15, 50);
+            doc.setFont("helvetica", "normal");
+            doc.text(`Data/Hora da Baixa: ${data}`, 15, 60);
+            
+            doc.setFillColor(245, 245, 245);
+            doc.rect(15, 75, 118, 40, 'F'); // Box de Informações
+            doc.setFont("helvetica", "bold");
+            doc.text(`Membro da Equipe:`, 20, 85); doc.setFont("helvetica", "normal"); doc.text(pessoa, 65, 85);
+            doc.setFont("helvetica", "bold");
+            doc.text(`Modelo:`, 20, 95); doc.setFont("helvetica", "normal"); doc.text(modelo, 40, 95);
+            doc.setFont("helvetica", "bold");
+            doc.text(`Quantidade:`, 20, 105); doc.setFont("helvetica", "normal"); doc.text(`${qtd} unidades`, 50, 105);
+            
+            doc.text("________________________________________", 25, 150);
+            doc.setFontSize(10);
+            doc.text("Assinatura do Solicitante", 45, 155);
+            
+            doc.save(`Vale_Ret_${pessoa}_${data.split(' ')[0].replace(/\//g,'-')}.pdf`);
+        }
+
+        // ==========================================
+        // GRÁFICOS (Chart.js)
+        // ==========================================
+        function renderizarGraficos() {
+            let ctx = document.getElementById('graficoEquipe').getContext('2d');
+            let isLight = document.body.classList.contains('light-mode');
+            let textColor = isLight ? '#374151' : '#cbd5e1';
+            let gridColor = isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)';
+
+            let labels = Object.keys(estado.analiseSaidas);
+            let data = Object.values(estado.analiseSaidas);
+
+            if(estado.graficos.saidas) estado.graficos.saidas.destroy();
+
+            estado.graficos.saidas = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Total de Peças Retiradas',
+                        data: data,
+                        backgroundColor: (estado.setor === 'Caixas' ? '#F38020' : '#0ea5e9'),
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: textColor } } },
+                    scales: {
+                        y: { ticks: { color: textColor }, grid: { color: gridColor } },
+                        x: { ticks: { color: textColor }, grid: { display: false } }
+                    }
+                }
+            });
         }
 
         function abrirAba(id, btn) {
@@ -503,13 +582,8 @@
             document.getElementById('tab-' + id).classList.add('active');
             btn.classList.add('active');
         }
-
         function toggleMenu() { document.getElementById('sidebar').classList.toggle('open'); }
-        function toast(msg) {
-            let t = document.getElementById('toast');
-            t.innerText = msg; t.style.display = 'block';
-            setTimeout(() => t.style.display = 'none', 3000);
-        }
+        function toast(msg) { let t = document.getElementById('toast'); t.innerText = msg; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 3000); }
     </script>
 </body>
 </html>
