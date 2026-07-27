@@ -1,8 +1,8 @@
- import streamlit as st
- import pandas as pd
- import uuid
- from datetime import datetime
- from streamlit_gsheets import GSheetsConnection
+import streamlit as st
+import pandas as pd
+import uuid
+from datetime import datetime
+from streamlit_gsheets import GSheetsConnection
  
  # --- CONFIGURAÇÃO DA PÁGINA ---
  st.set_page_config(page_title="Caixas - Portal", page_icon="📦", layout="centered")
