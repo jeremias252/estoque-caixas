@@ -8,14 +8,13 @@
     <meta name="theme-color" content="#050608">
     <title>Portal Logística</title>
     
-    <!-- Fontes e Bibliotecas de Gráficos/PDF -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
         /* =========================================
-           VARIÁVEIS DE TEMA (MODO ESCURO - PADRÃO)
+           VARIÁVEIS DE TEMA E CORES PREMIUM
            ========================================= */
         :root {
             --prim: #F38020; --sec: #dc2626;
@@ -30,76 +29,29 @@
             --card-item-bg: rgba(15, 23, 42, 0.6);
         }
 
-        /* =========================================
-           MODO CLARO (LIGHT MODE)
-           ========================================= */
         body.light-mode {
-            --bg-dark: #f1f5f9;
-            --panel-bg: #ffffff;
-            --text-main: #0f172a;
-            --text-sub: #475569;
-            --border-color: #cbd5e1;
-            --input-bg: #ffffff;
+            --bg-dark: #f1f5f9; --panel-bg: #ffffff;
+            --text-main: #0f172a; --text-sub: #475569;
+            --border-color: #cbd5e1; --input-bg: #ffffff;
             --card-item-bg: #f8fafc;
-            background: #f1f5f9 !important;
-            color: #0f172a !important;
+            background: #f1f5f9 !important; color: #0f172a !important;
         }
 
-        body.light-mode h1, body.light-mode h2, body.light-mode h3, body.light-mode h4, body.light-mode b {
-            color: #0f172a !important;
-        }
-
-        body.light-mode p, body.light-mode .sub, body.light-mode span:not(.badge-status) {
-            color: #475569 !important;
-        }
-
-        body.light-mode .hero, body.light-mode .panel, body.light-mode .kpi, body.light-mode .login-card, body.light-mode .modal {
-            background: #ffffff !important;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05) !important;
-            border-color: #cbd5e1 !important;
-        }
-
-        body.light-mode .history-card, body.light-mode .card-detalhe {
-            background: #f8fafc !important;
-            border-color: #cbd5e1 !important;
-            color: #0f172a !important;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
-        }
-
-        body.light-mode .tabs-list {
-            background: #ffffff !important;
-            border-color: #cbd5e1 !important;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;
-        }
-
-        body.light-mode input, body.light-mode select {
-            color: #0f172a !important;
-            background-color: #ffffff !important;
-            border-color: #94a3b8 !important;
-        }
-
+        body.light-mode h1, body.light-mode h2, body.light-mode h3, body.light-mode h4, body.light-mode b { color: #0f172a !important; }
+        body.light-mode p, body.light-mode .sub, body.light-mode span:not(.badge-status) { color: #475569 !important; }
+        body.light-mode .hero, body.light-mode .panel, body.light-mode .kpi, body.light-mode .login-card, body.light-mode .modal { background: #ffffff !important; box-shadow: 0 10px 25px rgba(0,0,0,0.05) !important; border-color: #cbd5e1 !important; }
+        body.light-mode .history-card, body.light-mode .card-detalhe { background: #f8fafc !important; border-color: #cbd5e1 !important; color: #0f172a !important; box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important; }
+        body.light-mode .tabs-list { background: #ffffff !important; border-color: #cbd5e1 !important; box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important; }
+        body.light-mode input, body.light-mode select { color: #0f172a !important; background-color: #ffffff !important; border-color: #94a3b8 !important; }
         body.light-mode select option { background-color: #ffffff !important; color: #0f172a !important; }
-
-        body.light-mode .btn:not(.btn-primary) {
-            background: #e2e8f0 !important;
-            color: #0f172a !important;
-            border-color: #cbd5e1 !important;
-            box-shadow: none !important;
-        }
-
+        body.light-mode .btn:not(.btn-primary) { background: #e2e8f0 !important; color: #0f172a !important; border-color: #cbd5e1 !important; box-shadow: none !important; }
         body.light-mode .btn-text, body.light-mode .hist-head { color: #475569 !important; }
         body.light-mode .mobile-header, body.light-mode .sidebar { background: #ffffff !important; border-color: #cbd5e1 !important; color: #0f172a !important; }
         body.light-mode .sidebar .logo span { background: var(--grad-btn) !important; -webkit-background-clip: text !important; color: transparent !important; }
         body.light-mode .profile-pill { background: #f8fafc !important; border-color: #cbd5e1 !important; color: #334155 !important; }
         body.light-mode .menu-toggle { color: #0f172a !important; }
+        body.light-mode .danger-glow { background: #fef2f2 !important; border-left: 5px solid #ef4444 !important; color: #991b1b !important; }
 
-        body.light-mode .danger-glow {
-            background: #fef2f2 !important; border-left: 5px solid #ef4444 !important; color: #991b1b !important;
-        }
-
-        /* =========================================
-           ESTILOS BASE E LAYOUT
-           ========================================= */
         body, html {
             margin: 0; padding: 0; font-family: 'Poppins', sans-serif;
             background-color: var(--bg-dark); color: var(--text-main); overflow-x: hidden;
@@ -114,65 +66,39 @@
         ::-webkit-scrollbar-thumb { background: rgba(150,150,150,0.3); border-radius: 10px; }
 
         #login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; z-index: 10; }
-        .login-card {
-            width: 90%; max-width: 440px; background: rgba(15, 17, 24, 0.65);
-            border: 1px solid var(--border-color); border-radius: 28px; padding: 30px;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.5); backdrop-filter: blur(28px); text-align: center;
-        }
-        .login-icon {
-            width: 60px; height: 60px; margin: 0 auto 12px; background: var(--grad-btn);
-            border-radius: 20px; display: flex; align-items: center; justify-content: center;
-            font-size: 28px; box-shadow: 0 12px 28px var(--glow1); transition: all 0.5s; color: white;
-        }
+        .login-card { width: 90%; max-width: 440px; background: rgba(15, 17, 24, 0.65); border: 1px solid var(--border-color); border-radius: 28px; padding: 30px; box-shadow: 0 25px 60px rgba(0,0,0,0.5); backdrop-filter: blur(28px); text-align: center; }
+        .login-icon { width: 60px; height: 60px; margin: 0 auto 12px; background: var(--grad-btn); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 12px 28px var(--glow1); transition: all 0.5s; color: white; }
         .login-card h2 { margin: 0 0 5px; font-weight: 900; font-size: 24px; color: var(--text-main); }
         .login-card p { color: var(--text-sub); font-size: 13px; margin: 0 0 20px; }
-        .step-title {
-            color: var(--text-sub); font-size: 11px; font-weight: 700; letter-spacing: 1px;
-            margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;
-        }
+        .step-title { color: var(--text-sub); font-size: 11px; font-weight: 700; letter-spacing: 1px; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
         .step { display: none; }
         .step.active { display: block; animation: fadeSlideUp 0.4s forwards; }
 
         button, input, select { font-family: inherit; outline: none; }
-        .btn {
-            background: linear-gradient(145deg, #262b3c, #10131d); color: white;
-            border: 1px solid var(--border-color); border-radius: 18px; padding: 15px;
-            width: 100%; font-weight: 700; font-size: 14.5px; cursor: pointer; margin-bottom: 10px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3); transition: all 0.2s;
-        }
-        .btn:hover { transform: translateY(-2px); border-color: var(--glow1); }
+        .btn { background: linear-gradient(145deg, #262b3c, #10131d); color: white; border: 1px solid var(--border-color); border-radius: 18px; padding: 15px; width: 100%; font-weight: 700; font-size: 14.5px; cursor: pointer; margin-bottom: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); transition: all 0.2s; }
+        .btn:hover:not(:disabled) { transform: translateY(-2px); border-color: var(--glow1); }
+        .btn:disabled { opacity: 0.7; cursor: not-allowed; }
         .btn-primary { background: var(--grad-btn) !important; color: white !important; border: none !important; box-shadow: 0 8px 20px var(--glow1) !important; }
         .btn-text { background: transparent !important; border: none !important; box-shadow: none !important; color: var(--text-sub); font-size: 13px; padding: 5px;}
         .btn-pdf { background: #374151 !important; color: white !important; padding: 8px 12px; font-size: 11px; width: auto; margin:0;}
         
-        input, select {
-            width: 100%; padding: 15px; border-radius: 14px; background: var(--input-bg);
-            border: 1px solid var(--border-color); color: var(--text-main); margin-bottom: 15px; transition: 0.3s;
-        }
+        input, select { width: 100%; padding: 15px; border-radius: 14px; background: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-main); margin-bottom: 15px; transition: 0.3s; }
         input:focus, select:focus { border-color: var(--prim); box-shadow: 0 0 0 2px var(--glow1); }
 
         #app-layout { display: none; height: 100vh; overflow: hidden; }
-        
-        .sidebar {
-            width: 280px; background: rgba(10, 12, 18, 0.4); backdrop-filter: blur(25px);
-            border-right: 1px solid var(--border-color); height: 100%; padding: 20px;
-            display: flex; flex-direction: column; position: fixed; left: 0; top: 0; z-index: 100;
-            transition: transform 0.3s ease;
-        }
+        .sidebar { width: 280px; background: rgba(10, 12, 18, 0.4); backdrop-filter: blur(25px); border-right: 1px solid var(--border-color); height: 100%; padding: 20px; display: flex; flex-direction: column; position: fixed; left: 0; top: 0; z-index: 100; transition: transform 0.3s ease; }
         .sidebar .logo { font-size: 24px; font-weight: 900; text-align: center; margin-bottom: 20px; }
         .sidebar .logo span { background: var(--grad-btn); -webkit-background-clip: text; color: transparent; }
-        .profile-pill {
-            background: rgba(5,7,12,0.54); border: 1px solid var(--border-color);
-            border-radius: 18px; padding: 12px; text-align: center; color: var(--text-sub); margin-bottom: 20px;
-        }
+        .profile-pill { background: rgba(5,7,12,0.54); border: 1px solid var(--border-color); border-radius: 18px; padding: 12px; text-align: center; color: var(--text-sub); margin-bottom: 20px; }
         .profile-pill b { color: var(--prim); display: block; font-size: 18px;}
         
         .main-content { margin-left: 280px; padding: 30px; height: 100vh; overflow-y: auto; width: calc(100% - 280px); }
-
         .mobile-header { display: none; padding: 15px; background: rgba(10,12,18,0.8); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-color); align-items: center; justify-content: space-between;}
         .menu-toggle { background: transparent; border: none; color: white; font-size: 24px; cursor: pointer; }
 
-        .hero { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 28px; padding: 26px; margin-bottom: 22px; animation: fadeSlideUp 0.6s; }
+        .hero { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 28px; padding: 26px; margin-bottom: 22px; animation: fadeSlideUp 0.6s; position:relative;}
+        .badge-status-conn { position: absolute; top: 26px; right: 26px; font-size: 12px; font-weight: 800; padding: 6px 12px; border-radius: 12px; background: rgba(255,255,255,0.05); }
+        
         .badge { background: var(--glow2); border: 1px solid var(--glow1); color: var(--text-main); padding: 6px 12px; border-radius: 999px; font-size: 11px; font-weight: 900; display: inline-block; margin-bottom: 10px;}
         .hero h1 { margin: 0 0 5px; font-size: 32px; font-weight: 900; color: var(--text-main); }
         .hero p { margin: 0; color: var(--text-sub); font-size: 14px; }
@@ -184,16 +110,8 @@
 
         .danger-glow { border-left: 5px solid #ef4444; background: linear-gradient(90deg, rgba(127,29,29,0.8), rgba(31,41,55,0.75)); padding: 15px; border-radius: 18px; margin-bottom: 20px; color: #fecaca; font-size: 14px;}
 
-        .tabs-list {
-            display: flex; gap: 6px; background: linear-gradient(180deg, rgba(20,22,32,0.75), rgba(8,9,14,0.85));
-            padding: 10px; border-radius: 22px; border: 1px solid var(--border-color);
-            box-shadow: inset 0 4px 14px rgba(0,0,0,0.55); backdrop-filter: blur(22px); margin-bottom: 25px;
-            overflow-x: auto; white-space: nowrap;
-        }
-        .tab-btn {
-            background: transparent; border: none; color: var(--text-sub); font-weight: 700; padding: 12px 22px;
-            border-radius: 16px; cursor: pointer; transition: 0.3s;
-        }
+        .tabs-list { display: flex; gap: 6px; background: linear-gradient(180deg, rgba(20,22,32,0.75), rgba(8,9,14,0.85)); padding: 10px; border-radius: 22px; border: 1px solid var(--border-color); box-shadow: inset 0 4px 14px rgba(0,0,0,0.55); backdrop-filter: blur(22px); margin-bottom: 25px; overflow-x: auto; white-space: nowrap; }
+        .tab-btn { background: transparent; border: none; color: var(--text-sub); font-weight: 700; padding: 12px 22px; border-radius: 16px; cursor: pointer; transition: 0.3s; }
         .tab-btn.active { background: var(--grad-btn); color: white !important; box-shadow: 0 6px 20px var(--glow1); font-weight: 900;}
         .tab-content { display: none; animation: fadeSlideUp 0.4s; }
         .tab-content.active { display: block; }
@@ -203,59 +121,25 @@
         .panel p.sub { color: var(--text-sub); font-size: 13px; margin: 0 0 20px; }
 
         .grid-catalogo { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 16px; }
-        
-        .item-card {
-            background: var(--card-item-bg);
-            border: 2px solid var(--border-color);
-            border-radius: 22px; padding: 20px; text-align: center;
-            transition: all 0.3s ease; position: relative; overflow: hidden; cursor: pointer;
-        }
+        .item-card { background: var(--card-item-bg); border: 2px solid var(--border-color); border-radius: 22px; padding: 20px; text-align: center; transition: all 0.3s ease; position: relative; overflow: hidden; cursor: pointer; }
         .item-card:hover { transform: translateY(-4px); border-color: var(--prim); }
-        
-        .item-card.disponivel {
-            border-color: rgba(16, 185, 129, 0.4);
-            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.08);
-        }
+        .item-card.disponivel { border-color: rgba(16, 185, 129, 0.4); box-shadow: 0 8px 20px rgba(16, 185, 129, 0.08); }
         .item-card.disponivel .qtd-num { color: var(--prim); font-size: 32px; font-weight: 900; margin: 8px 0; }
-        
-        .item-card.esgotado {
-            border-color: rgba(239, 68, 68, 0.6);
-            background: rgba(239, 68, 68, 0.08) !important;
-            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.12);
-        }
+        .item-card.esgotado { border-color: rgba(239, 68, 68, 0.6); background: rgba(239, 68, 68, 0.08) !important; box-shadow: 0 8px 20px rgba(239, 68, 68, 0.12); }
         .item-card.esgotado .qtd-num { color: #ef4444; font-size: 32px; font-weight: 900; margin: 8px 0; }
-
-        .badge-status {
-            font-size: 10px; font-weight: 900; letter-spacing: 0.5px;
-            padding: 5px 12px; border-radius: 999px; text-transform: uppercase; display: inline-block;
-        }
+        
+        .badge-status { font-size: 10px; font-weight: 900; letter-spacing: 0.5px; padding: 5px 12px; border-radius: 999px; text-transform: uppercase; display: inline-block; }
         .status-ok { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.4); }
         .status-off { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.5); }
+        .status-hot { background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.5); margin-left: 4px; }
 
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); z-index: 1000;
-            display: none; align-items: center; justify-content: center;
-        }
-        .modal {
-            background: var(--panel-bg); border: 1px solid var(--border-color);
-            border-radius: 28px; padding: 30px; width: 90%; max-width: 480px;
-            max-height: 85vh; overflow-y: auto; box-shadow: 0 25px 60px rgba(0,0,0,0.6);
-            animation: fadeSlideUp 0.3s forwards;
-        }
-        .card-detalhe {
-            background: var(--card-item-bg); border: 1px solid var(--border-color);
-            border-radius: 18px; padding: 16px; text-align: center; margin-bottom: 12px;
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); z-index: 1000; display: none; align-items: center; justify-content: center; }
+        .modal { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 28px; padding: 30px; width: 90%; max-width: 480px; max-height: 85vh; overflow-y: auto; box-shadow: 0 25px 60px rgba(0,0,0,0.6); animation: fadeSlideUp 0.3s forwards; }
+        .card-detalhe { background: var(--card-item-bg); border: 1px solid var(--border-color); border-radius: 18px; padding: 16px; text-align: center; margin-bottom: 12px; }
         .card-detalhe span { font-size: 12px; color: var(--text-sub); text-transform: uppercase; font-weight: 900;}
         .card-detalhe b { display: block; font-size: 30px; color: var(--prim); font-weight: 900; margin: 5px 0;}
 
-        .history-card {
-            display: grid; grid-template-columns: 1fr 1fr 1fr 2fr 0.5fr 1fr; gap: 10px; align-items: center;
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid var(--border-color); border-radius: 18px; padding: 12px 14px; margin-bottom: 10px;
-            font-size: 13px; text-align: center; color: var(--text-main);
-        }
+        .history-card { display: grid; grid-template-columns: 1fr 1fr 1fr 2fr 0.5fr 1fr; gap: 10px; align-items: center; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-color); border-radius: 18px; padding: 12px 14px; margin-bottom: 10px; font-size: 13px; text-align: center; color: var(--text-main); }
         .hist-head { color: var(--text-sub); font-size: 11px; font-weight: 900; text-transform: uppercase; border: none; background: transparent; padding: 0 14px;}
         .badge-acao { font-weight: 900; border-radius: 99px; padding: 5px 10px; font-size: 11px; }
         .acao-entrada { background: rgba(16,185,129,.15); color: #10b981; border: 1px solid rgba(16,185,129,.35); }
@@ -271,6 +155,7 @@
             .sidebar.open { transform: translateX(0); }
             .main-content { margin-left: 0; width: 100%; padding: 15px; }
             .mobile-header { display: flex; }
+            .badge-status-conn { position: static; display: inline-block; margin-top: 10px;}
             .history-card { grid-template-columns: 1fr; gap: 5px; padding: 15px;}
             .hist-head { display: none; }
         }
@@ -282,9 +167,27 @@
         // LINK OFICIAL INTEGRADO
         const API_URL = "https://script.google.com/macros/s/AKfycbwRLsipTraGo72XeJTTG-JG_Wt6qzJRJ_iSQ2V2babralKh3aC_n8eNG0oh3b1dOw099g/exec";
 
-        let estado = { setor: '', perfil: '', dados: null, graficos: {}, relatorioAtual: null };
+        let estado = { setor: '', perfil: '', dados: null, graficos: {}, relatorioAtual: null, mapaSaidasPorModelo: {} };
+        let filaOffline = JSON.parse(localStorage.getItem('filaLogistica')) || [];
         const EQUIPES = { 'Caixas': ['Marcello', 'Fabiano', 'Sérgio'], 'Torres': ['Fran', 'Henrique', 'Leonardo', 'Patrick'] };
         const SENHAS = { 'Caixas': 'marcello123', 'Torres': 'fran123', 'admin': 'coord123' };
+
+        function atualizarStatusRede() {
+            let badge = document.getElementById('status-rede');
+            if(!badge) return;
+            if (navigator.onLine) {
+                if (filaOffline.length > 0) {
+                    badge.innerHTML = '🔄 Sincronizando...'; badge.style.color = 'var(--prim)';
+                    sincronizarFila();
+                } else {
+                    badge.innerHTML = '🟢 Online'; badge.style.color = '#10b981';
+                }
+            } else {
+                badge.innerHTML = `🔴 Offline (${filaOffline.length} pendentes)`; badge.style.color = '#ef4444';
+            }
+        }
+        window.addEventListener('online', atualizarStatusRede);
+        window.addEventListener('offline', atualizarStatusRede);
 
         function playSomSucesso() {
             try { if (navigator.vibrate) navigator.vibrate([100, 50, 100]); } catch(e){}
@@ -339,7 +242,7 @@
         </div>
     </div>
 
-    <!-- SISTEMA -->
+    <!-- SISTEMA PRINCIPAL -->
     <div id="app-layout">
         <div class="mobile-header">
             <div style="font-weight: 900; font-size: 18px;">⬢ <span id="mob-setor">SISTEMA</span></div>
@@ -353,12 +256,13 @@
             <button class="btn" onclick="toggleTema()">🌓 Alternar Tema</button>
             
             <div style="flex:1"></div>
-            <button class="btn" onclick="carregarDados()">🔄 Sincronizar</button>
+            <button class="btn" onclick="carregarDados(true)">🔄 Sincronizar</button>
             <button class="btn btn-primary" onclick="location.reload()">🚪 Sair (Logout)</button>
         </div>
 
         <div class="main-content">
             <div class="hero">
+                <div class="badge-status-conn" id="status-rede">🟢 Online</div>
                 <div class="badge" id="badge-top">SETOR</div>
                 <h1>Painel Operacional</h1>
                 <p>Controle de estoque conectado à nuvem.</p>
@@ -375,6 +279,8 @@
                 <button class="tab-btn active" onclick="abrirAba('catalogo', this)">🗂️ Catálogo</button>
                 <button class="tab-btn" onclick="abrirAba('saida', this)">📤 Saídas</button>
                 <button class="tab-btn" onclick="abrirAba('entrada', this)">📥 Entradas</button>
+                <button class="tab-btn" id="btn-tab-novo" onclick="abrirAba('novo-item', this)">➕ Novo Item</button>
+                <button class="tab-btn" id="btn-tab-inv" onclick="abrirAba('inventario', this)">🔎 Inventário</button>
                 <button class="tab-btn" onclick="abrirAba('historico', this)">🕒 Histórico</button>
                 <button class="tab-btn" onclick="abrirAba('stats', this)">📊 Estatísticas</button>
                 <button class="tab-btn" id="btn-tab-relatorio" onclick="abrirAba('relatorio', this)">📋 Relatório Feedback</button>
@@ -394,7 +300,7 @@
                 <select id="s-pessoa"></select>
                 <select id="s-modelo"></select>
                 <input type="number" id="s-qtd" value="1" min="1">
-                <button class="btn btn-primary" onclick="lancar('Saída')">Confirmar Retirada</button>
+                <button class="btn btn-primary" id="btn-saida" onclick="lancar('Saída')">Confirmar Retirada</button>
             </div>
 
             <!-- ABA ENTRADA -->
@@ -403,10 +309,38 @@
                 <select id="e-pessoa"></select>
                 <select id="e-modelo"></select>
                 <input type="number" id="e-qtd" value="1" min="1">
-                <button class="btn btn-primary" onclick="lancar('Entrada')">Lançar no Estoque</button>
+                <button class="btn btn-primary" id="btn-entrada" onclick="lancar('Entrada')">Lançar no Estoque</button>
             </div>
 
-            <!-- ABA HISTÓRICO E PDF -->
+            <!-- ABA NOVA: CADASTRO DE NOVO ITEM -->
+            <div id="tab-novo-item" class="tab-content panel">
+                <h3>➕ Cadastrar Novo Item no Estoque</h3>
+                <p class="sub">Adicione modelos ou variações diretamente pelo aplicativo.</p>
+                <input type="text" id="ni-nome" placeholder="Nome do Modelo / Linha (Ex: Caixa P, Torre Prata)">
+                <input type="text" id="ni-cor" placeholder="Cor / Variação (Ex: Preta, Azul, Padrão)">
+                <input type="number" id="ni-qtd" placeholder="Estoque Inicial" value="0" min="0">
+                <button class="btn btn-primary" id="btn-cadastrar-item" onclick="cadastrarNovoItem()">✨ Cadastrar Item no Sistema</button>
+            </div>
+
+            <!-- ABA NOVA: AUDITORIA E INVENTÁRIO -->
+            <div id="tab-inventario" class="tab-content panel">
+                <h3>🔎 Modo Auditoria & Inventário Rápido</h3>
+                <p class="sub">Selecione o item e informe a quantidade contada na prateleira para ajuste automático.</p>
+                
+                <select id="inv-modelo" onchange="atualizarPreviewInventario()"></select>
+                
+                <div class="kpis" style="margin-top:0; margin-bottom: 20px;">
+                    <div class="kpi"><span>Saldo Cadastrado no Sistema</span><b id="inv-saldo-sistema">0</b></div>
+                    <div class="kpi"><span>Diferença / Ajuste</span><b id="inv-diferenca" style="color:var(--text-sub)">0</b></div>
+                </div>
+
+                <label style="font-size: 12px; color: var(--text-sub); font-weight: 700; display: block; margin-bottom: 6px;">Quantidade Contada Fisicamente:</label>
+                <input type="number" id="inv-qtd-fisica" value="0" min="0" oninput="atualizarPreviewInventario()">
+                
+                <button class="btn btn-primary" id="btn-inv-ajustar" onclick="confirmarAjusteInventario()">⚙️ Confirmar Ajuste de Inventário</button>
+            </div>
+
+            <!-- ABA HISTÓRICO -->
             <div id="tab-historico" class="tab-content panel">
                 <h3>🕒 Histórico Recente</h3>
                 <div class="history-card hist-head">
@@ -422,7 +356,7 @@
                 <div class="chart-container"><canvas id="graficoEquipe"></canvas></div>
             </div>
 
-            <!-- ABA NOVA: RELATÓRIO DO ADMINISTRADOR PARA FEEDBACK -->
+            <!-- ABA RELATÓRIO DO ADMINISTRADOR -->
             <div id="tab-relatorio" class="tab-content panel">
                 <h3>📋 Relatório de Desempenho por Separador</h3>
                 <p class="sub">Gere o relatório consolidado do dia ou da semana para alinhamento e feedback individual.</p>
@@ -511,27 +445,64 @@
             document.getElementById('badge-top').innerText = 'ACESSO ' + nomeExibicao;
             
             let btnRel = document.getElementById('btn-tab-relatorio');
+            let btnNovo = document.getElementById('btn-tab-novo');
+            let btnInv = document.getElementById('btn-tab-inv');
+
             if(p === 'separadores') { 
                 document.querySelectorAll('.tab-btn').forEach((b,i) => { if(i>0) b.style.display='none'; }); 
             } else if(p === 'controle') {
                 document.querySelectorAll('.tab-btn').forEach(b => b.style.display='inline-block');
-                if(btnRel) btnRel.style.display = 'none'; // Esconde aba de relatório do controle
+                if(btnRel) btnRel.style.display = 'none'; // Esconde relatório no perfil controle
             } else if(p === 'admin') {
                 document.querySelectorAll('.tab-btn').forEach(b => b.style.display='inline-block');
             }
+            
+            atualizarStatusRede();
             carregarDados();
         }
 
-        async function carregarDados() {
-            toast('⏳ Sincronizando com o Google...');
+        async function carregarDados(forcarSync = false) {
+            if(!navigator.onLine && !forcarSync) {
+                toast('📶 Sem internet. Usando estoque salvo.');
+                let cache = localStorage.getItem('cachePortal_' + estado.setor);
+                if(cache) { estado.dados = JSON.parse(cache); renderizarInterface(); }
+                return;
+            }
+
+            if(forcarSync) toast('⏳ Sincronizando com o servidor...');
             try {
                 let r = await fetch(`${API_URL}?setor=${estado.setor}`);
                 let json = await r.json();
                 if(json.erro) return alert("⚠️ Erro API:\n" + json.erro);
                 estado.dados = json;
+                localStorage.setItem('cachePortal_' + estado.setor, JSON.stringify(json));
                 renderizarInterface();
-                toast('✅ Base atualizada!');
-            } catch(e) { alert('Erro de conexão com o banco.'); }
+                if(forcarSync) toast('✅ Base 100% atualizada!');
+                sincronizarFila();
+            } catch(e) { 
+                toast('📶 Conexão falhou. Mostrando dados salvos.');
+                let cache = localStorage.getItem('cachePortal_' + estado.setor);
+                if(cache) { estado.dados = JSON.parse(cache); renderizarInterface(); }
+            }
+        }
+
+        async function sincronizarFila() {
+            if (filaOffline.length === 0 || !navigator.onLine) return;
+            toast(`Sincronizando ${filaOffline.length} envios pendentes...`);
+            
+            while(filaOffline.length > 0) {
+                let req = filaOffline[0];
+                try {
+                    await fetch(API_URL, { 
+                        method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, 
+                        body: JSON.stringify(req) 
+                    });
+                    filaOffline.shift();
+                    localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
+                } catch(e) { break; }
+            }
+            atualizarStatusRede();
+            if(filaOffline.length === 0) { toast('✅ Fila limpa com sucesso!'); carregarDados(); }
         }
 
         function renderizarInterface() {
@@ -543,22 +514,36 @@
             document.getElementById('e-pessoa').innerHTML = htmlPessoas;
             document.getElementById('rel-pessoa').innerHTML = htmlPessoas;
 
+            // MAPEIA ITENS QUENTES (Mapeia volume de saídas recente por linha)
+            estado.mapaSaidasPorModelo = {};
+            if(hist && hist.length > 0) {
+                let cH = hist[0].map(h => h.toString().trim());
+                let hAcao = cH.indexOf("Ação"); if(hAcao === -1) hAcao = 2;
+                let hMod = cH.indexOf("Modelo"); if(hMod === -1) hMod = 4;
+                let hQtd = cH.indexOf("Quantidade"); if(hQtd === -1) hQtd = 5;
+
+                for(let i = 1; i < hist.length; i++) {
+                    if(hist[i][hAcao] === 'Saída' && hist[i][hMod]) {
+                        let nomeLinha = String(hist[i][hMod]).split(' - ')[0].trim();
+                        let q = Number(hist[i][hQtd]) || 0;
+                        estado.mapaSaidasPorModelo[nomeLinha] = (estado.mapaSaidasPorModelo[nomeLinha] || 0) + q;
+                    }
+                }
+            }
+
             let cabecalhoEst = est[0].map(h => h.toString().trim());
             let idxMod = cabecalhoEst.indexOf("Modelo"); if(idxMod === -1) idxMod = 0;
             let idxQtd = cabecalhoEst.indexOf("Quantidade"); if(idxQtd === -1) idxQtd = 1;
 
             let htmlModelos = '<option value="">Selecione o Modelo...</option>';
-            let totPecas = 0, zerados = []; 
-            estado.catalogoAgrupado = []; 
+            let totPecas = 0, zerados = []; estado.catalogoAgrupado = []; 
 
             for(let i=1; i<est.length; i++) {
                 let nomeCompleto = est[i][idxMod]; 
                 let qtd = Number(est[i][idxQtd]) || 0;
                 if(!nomeCompleto) continue;
                 
-                totPecas += qtd; 
-                if(qtd === 0) zerados.push(nomeCompleto);
-                
+                totPecas += qtd; if(qtd === 0) zerados.push(nomeCompleto);
                 htmlModelos += `<option value="${nomeCompleto}">${nomeCompleto} (Saldo: ${qtd})</option>`;
                 
                 let partes = String(nomeCompleto).split(' - ');
@@ -566,23 +551,25 @@
                 let cor = partes.length > 1 ? partes[1].trim() : 'Padrão';
                 
                 let modeloExistente = estado.catalogoAgrupado.find(x => x.linha === linha);
-                if(!modeloExistente) {
-                    modeloExistente = { linha: linha, total: 0, detalhes: [] };
-                    estado.catalogoAgrupado.push(modeloExistente);
+                if(!modeloExistente) { 
+                    modeloExistente = { linha: linha, total: 0, detalhes: [] }; 
+                    estado.catalogoAgrupado.push(modeloExistente); 
                 }
-                
                 modeloExistente.total += qtd;
                 modeloExistente.detalhes.push({ nomeC: nomeCompleto, cor: cor, qtd: qtd });
             }
 
             document.getElementById('s-modelo').innerHTML = htmlModelos; 
             document.getElementById('e-modelo').innerHTML = htmlModelos;
+            document.getElementById('inv-modelo').innerHTML = htmlModelos;
+            
             document.getElementById('kpi-pecas').innerText = totPecas; 
             document.getElementById('kpi-modelos').innerText = estado.catalogoAgrupado.length;
             document.getElementById('kpi-zerados').innerText = zerados.length;
             document.getElementById('alerta-zerados').innerHTML = zerados.length > 0 ? `<div class="danger-glow">🚨 <b>ALERTA:</b> Há ${zerados.length} variação(ões) com estoque zerado.</div>` : '';
 
             renderizarCatalogo('');
+            atualizarPreviewInventario();
             
             // HISTÓRICO
             let htmlHist = ''; estado.analiseSaidas = {};
@@ -600,12 +587,9 @@
                     if(!hist[i][hMod]) continue; 
                     let d = String(hist[i][hData]); let a = hist[i][hAcao]; 
                     let p = hist[i][hPess]; let m = hist[i][hMod]; let q = Number(hist[i][hQtd]);
-                    
                     if(a === 'Saída' && estado.analiseSaidas[p] !== undefined) estado.analiseSaidas[p] += q;
 
-                    let isSaida = a === 'Saída';
-                    let cAcao = isSaida ? 'acao-saida' : 'acao-entrada';
-                    let icone = isSaida ? '📤' : '📥';
+                    let isSaida = a === 'Saída'; let cAcao = isSaida ? 'acao-saida' : 'acao-entrada'; let icone = isSaida ? '📤' : '📥';
                     let btnPDF = isSaida ? `<button class="btn btn-pdf" onclick="gerarPDF('${d}','${p}','${m}','${q}')">📄 PDF</button>` : '';
 
                     htmlHist += `<div class='history-card'>
@@ -627,10 +611,11 @@
             let html = ''; let b = busca.toLowerCase();
             let modelosFiltrados = estado.catalogoAgrupado.filter(x => x.linha.toLowerCase().includes(b));
 
-            if(modelosFiltrados.length === 0) {
-                document.getElementById('grid-cat').innerHTML = '<p style="color:var(--text-sub)">Nenhum modelo encontrado.</p>';
-                return;
-            }
+            if(modelosFiltrados.length === 0) { document.getElementById('grid-cat').innerHTML = '<p style="color:var(--text-sub)">Nenhum modelo encontrado.</p>'; return; }
+
+            // Descobre limite para considerar "Item Quente" (Top 3 de saídas)
+            let volumes = Object.values(estado.mapaSaidasPorModelo).sort((a,b) => b-a);
+            let corteQuente = volumes.length >= 3 ? volumes[2] : (volumes[0] || 999);
 
             modelosFiltrados.forEach((item) => {
                 let isDisponivel = item.total > 0;
@@ -639,51 +624,176 @@
                 let badgeClass = isDisponivel ? 'status-ok' : 'status-off';
                 let idxOriginal = estado.catalogoAgrupado.indexOf(item);
 
+                // Verificação de Item Quente 🔥
+                let saidasLinha = estado.mapaSaidasPorModelo[item.linha] || 0;
+                let isQuente = saidasLinha > 0 && saidasLinha >= corteQuente;
+                let badgeHot = isQuente ? `<span class="badge-status status-hot">🔥 Alto Giro</span>` : '';
+
                 html += `
                 <div class="item-card ${statusClass}" onclick="abrirModal(${idxOriginal})">
-                    <span class="badge-status ${badgeClass}">${badgeText}</span>
+                    <div>
+                        <span class="badge-status ${badgeClass}">${badgeText}</span>
+                        ${badgeHot}
+                    </div>
                     <div class="qtd-num">${item.total} <small style="font-size:12px; font-weight:400; color:var(--text-sub)">un.</small></div>
                     <div style="font-weight:800; font-size:15px; margin-bottom:4px;">${item.linha}</div>
                     <small style="color:var(--text-sub); font-size:11px;">🔍 Clique para ver as cores</small>
                 </div>`;
             });
-
             document.getElementById('grid-cat').innerHTML = html;
         }
 
         function abrirModal(idx) {
             let item = estado.catalogoAgrupado[idx];
-            document.getElementById('modal-titulo').innerText = item.linha;
-            document.getElementById('modal-total').innerText = `Estoque Total: ${item.total} un.`;
-            
+            document.getElementById('modal-titulo').innerText = item.linha; document.getElementById('modal-total').innerText = `Estoque Total: ${item.total} un.`;
             let html = '';
             item.detalhes.forEach(d => {
                 let statusText = d.qtd === 0 ? '🔴 Zerado' : (d.qtd <= 5 ? '🟡 Baixo' : '🟢 OK');
                 html += `
                 <div class="card-detalhe">
-                    <span>${d.cor}</span>
-                    <b>${d.qtd}</b>
-                    <small style="color:var(--text-sub); font-weight:700;">${statusText}</small>
+                    <span>${d.cor}</span><b>${d.qtd}</b><small style="color:var(--text-sub); font-weight:700;">${statusText}</small>
                 </div>`;
             });
-
-            document.getElementById('modal-grid').innerHTML = html;
-            document.getElementById('modal-detalhe').style.display = 'flex';
+            document.getElementById('modal-grid').innerHTML = html; document.getElementById('modal-detalhe').style.display = 'flex';
         }
 
         function fecharModal() { document.getElementById('modal-detalhe').style.display = 'none'; }
 
         /* =========================================
-           SISTEMA DE RELATÓRIO E FEEDBACK (ADMIN)
+           CADASTRO DE NOVO ITEM
            ========================================= */
+        async function cadastrarNovoItem() {
+            let nome = document.getElementById('ni-nome').value.trim();
+            let cor = document.getElementById('ni-cor').value.trim();
+            let qtd = Number(document.getElementById('ni-qtd').value) || 0;
+
+            if(!nome) return alert('⚠️ Digite o nome do modelo/linha!');
+
+            let modeloCompleto = cor ? `${nome} - ${cor}` : nome;
+            let btn = document.getElementById('btn-cadastrar-item');
+            btn.disabled = true; btn.innerText = 'Cadastrando...';
+
+            let payload = { setor: estado.setor, acao: 'Entrada', pessoa: 'Cadastro', modelo: modeloCompleto, quantidade: qtd };
+
+            try {
+                await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
+                playSomSucesso();
+                toast(`✨ Item "${modeloCompleto}" cadastrado com sucesso!`);
+                document.getElementById('ni-nome').value = '';
+                document.getElementById('ni-cor').value = '';
+                document.getElementById('ni-qtd').value = '0';
+                setTimeout(() => { btn.innerText = '✨ Cadastrar Item no Sistema'; btn.disabled = false; carregarDados(true); abrirAba('catalogo', document.querySelectorAll('.tab-btn')[0]); }, 1200);
+            } catch(e) {
+                alert('Erro ao cadastrar novo item.');
+                btn.innerText = '✨ Cadastrar Item no Sistema'; btn.disabled = false;
+            }
+        }
+
+        /* =========================================
+           MODO AUDITORIA E INVENTÁRIO
+           ========================================= */
+        function atualizarPreviewInventario() {
+            let sel = document.getElementById('inv-modelo').value;
+            if(!sel || !estado.dados) {
+                document.getElementById('inv-saldo-sistema').innerText = '0';
+                document.getElementById('inv-diferenca').innerText = '0';
+                return;
+            }
+
+            let est = estado.dados.estoque;
+            let cabecalhoEst = est[0].map(h => h.toString().trim());
+            let idxMod = cabecalhoEst.indexOf("Modelo"); if(idxMod === -1) idxMod = 0;
+            let idxQtd = cabecalhoEst.indexOf("Quantidade"); if(idxQtd === -1) idxQtd = 1;
+
+            let saldoSistema = 0;
+            for(let i=1; i<est.length; i++) {
+                if(est[i][idxMod] === sel) { saldoSistema = Number(est[i][idxQtd]) || 0; break; }
+            }
+
+            let qtdFisica = Number(document.getElementById('inv-qtd-fisica').value) || 0;
+            let diff = qtdFisica - saldoSistema;
+
+            document.getElementById('inv-saldo-sistema').innerText = saldoSistema;
+            let elDiff = document.getElementById('inv-diferenca');
+            if(diff > 0) {
+                elDiff.innerText = `+${diff} un (Entrada)`; elDiff.style.color = '#10b981';
+            } else if(diff < 0) {
+                elDiff.innerText = `${diff} un (Saída)`; elDiff.style.color = '#ef4444';
+            } else {
+                elDiff.innerText = '0 (Sem alteração)'; elDiff.style.color = 'var(--text-sub)';
+            }
+        }
+
+        async function confirmarAjusteInventario() {
+            let modelo = document.getElementById('inv-modelo').value;
+            let qtdFisica = Number(document.getElementById('inv-qtd-fisica').value);
+            let saldoSistema = Number(document.getElementById('inv-saldo-sistema').innerText) || 0;
+
+            if(!modelo) return alert('⚠️ Selecione um modelo para ajustar!');
+
+            let diff = qtdFisica - saldoSistema;
+            if(diff === 0) return alert('ℹ️ A quantidade física é idêntica ao sistema. Nenhum ajuste necessário.');
+
+            let tipoAcao = diff > 0 ? 'Entrada' : 'Saída';
+            let qtdAjuste = Math.abs(diff);
+
+            let btn = document.getElementById('btn-inv-ajustar');
+            btn.disabled = true; btn.innerText = 'Processando Ajuste...';
+
+            let payload = { setor: estado.setor, acao: tipoAcao, pessoa: 'Ajuste Inventário', modelo: modelo, quantidade: qtdAjuste };
+
+            try {
+                await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
+                playSomSucesso();
+                toast(`⚙️ Ajuste de Inventário de ${qtdAjuste}x para "${modelo}" concluído!`);
+                setTimeout(() => { btn.innerText = '⚙️ Confirmar Ajuste de Inventário'; btn.disabled = false; carregarDados(true); abrirAba('catalogo', document.querySelectorAll('.tab-btn')[0]); }, 1200);
+            } catch(e) {
+                alert('Erro ao salvar ajuste.');
+                btn.innerText = '⚙️ Confirmar Ajuste de Inventário'; btn.disabled = false;
+            }
+        }
+
+        /* LANÇAMENTO DE ENTRADAS / SAÍDAS */
+        async function lancar(tipo) {
+            let pfx = tipo === 'Entrada' ? 'e' : 's';
+            let p = document.getElementById(`${pfx}-pessoa`).value; let m = document.getElementById(`${pfx}-modelo`).value; let q = document.getElementById(`${pfx}-qtd`).value;
+            if(!p || !m) return alert('⚠️ Preencha todos os campos!');
+            
+            let btn = document.getElementById(tipo === 'Entrada' ? 'btn-entrada' : 'btn-saida');
+            let nomeOriginal = btn.innerText;
+            
+            btn.disabled = true; btn.innerText = 'Processando...';
+            let payload = { setor: estado.setor, acao: tipo, pessoa: p, modelo: m, quantidade: q };
+
+            if (!navigator.onLine) {
+                filaOffline.push(payload);
+                localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
+                playSomSucesso(); toast(`📶 Sem internet. Salvo para enviar depois!`);
+                btn.innerText = nomeOriginal; btn.disabled = false;
+                atualizarStatusRede();
+                document.querySelectorAll('.tab-btn')[0].click();
+                return;
+            }
+
+            try {
+                await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
+                playSomSucesso(); 
+                btn.innerText = 'Sucesso!'; toast(`✅ ${tipo} registrada!`);
+                setTimeout(() => { btn.innerText = nomeOriginal; btn.disabled = false; carregarDados(true); document.querySelectorAll('.tab-btn')[0].click(); }, 1200);
+            } catch(e) { 
+                filaOffline.push(payload);
+                localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
+                toast(`📶 Queda de rede. Salvo offline!`);
+                btn.innerText = nomeOriginal; btn.disabled = false;
+                atualizarStatusRede(); document.querySelectorAll('.tab-btn')[0].click();
+            }
+        }
+
+        /* RELATÓRIOS E PDF */
         function parseData(strData) {
             if(!strData) return new Date(0);
             let p = strData.split(' ')[0];
-            if(p.includes('/')) {
-                let [d,m,y] = p.split('/'); return new Date(y, m-1, d);
-            } else if(p.includes('-')) {
-                let [y,m,d] = p.split('-'); return new Date(y, m-1, d);
-            }
+            if(p.includes('/')) { let [d,m,y] = p.split('/'); return new Date(y, m-1, d); } else if(p.includes('-')) { let [y,m,d] = p.split('-'); return new Date(y, m-1, d); }
             return new Date(strData);
         }
 
@@ -693,24 +803,19 @@
             let hist = estado.dados ? estado.dados.historico : [];
             
             if(!pessoa) {
-                document.getElementById('rel-kpi-pecas').innerText = '0';
-                document.getElementById('rel-kpi-ops').innerText = '0';
+                document.getElementById('rel-kpi-pecas').innerText = '0'; document.getElementById('rel-kpi-ops').innerText = '0';
                 document.getElementById('rel-lista-detalhada').innerHTML = '<p style="color:var(--text-sub)">Selecione um separador acima para carregar o relatório.</p>';
-                estado.relatorioAtual = null;
-                return;
+                estado.relatorioAtual = null; return;
             }
 
             let hoje = new Date(); hoje.setHours(0,0,0,0);
             let limiteDias = periodo === 'hoje' ? 0 : (periodo === 'semana' ? 7 : 30);
-            
             let totalPecas = 0; let totalOps = 0; let listaSaidas = [];
 
             if(hist && hist.length > 0) {
                 let cH = hist[0].map(h => h.toString().trim());
-                let hData = cH.indexOf("Data"); if(hData === -1) hData = 1;
-                let hAcao = cH.indexOf("Ação"); if(hAcao === -1) hAcao = 2;
-                let hPess = cH.indexOf("Separador"); if(hPess === -1) hPess = 3;
-                let hMod = cH.indexOf("Modelo"); if(hMod === -1) hMod = 4;
+                let hData = cH.indexOf("Data"); if(hData === -1) hData = 1; let hAcao = cH.indexOf("Ação"); if(hAcao === -1) hAcao = 2;
+                let hPess = cH.indexOf("Separador"); if(hPess === -1) hPess = 3; let hMod = cH.indexOf("Modelo"); if(hMod === -1) hMod = 4;
                 let hQtd = cH.indexOf("Quantidade"); if(hQtd === -1) hQtd = 5;
 
                 for(let i = 1; i < hist.length; i++) {
@@ -718,7 +823,6 @@
                     if(a === 'Saída' && p === pessoa) {
                         let dt = parseData(hist[i][hData]); dt.setHours(0,0,0,0);
                         let diffDias = Math.floor((hoje - dt) / (1000 * 60 * 60 * 24));
-
                         if(diffDias <= limiteDias) {
                             let q = Number(hist[i][hQtd]) || 0;
                             totalPecas += q; totalOps++;
@@ -727,175 +831,77 @@
                     }
                 }
             }
-
-            document.getElementById('rel-kpi-pecas').innerText = totalPecas;
-            document.getElementById('rel-kpi-ops').innerText = totalOps;
-
+            document.getElementById('rel-kpi-pecas').innerText = totalPecas; document.getElementById('rel-kpi-ops').innerText = totalOps;
             estado.relatorioAtual = { pessoa, periodo, totalPecas, totalOps, listaSaidas };
-
             let htmlList = '';
             listaSaidas.reverse().forEach(item => {
                 htmlList += `
                 <div class="history-card" style="grid-template-columns: 1.2fr 2fr 1fr;">
-                    <div>${item.data}</div>
-                    <div style="font-weight:700;">${item.modelo}</div>
-                    <div style="font-weight:900; color:var(--prim);">${item.qtd} un.</div>
+                    <div>${item.data}</div><div style="font-weight:700;">${item.modelo}</div><div style="font-weight:900; color:var(--prim);">${item.qtd} un.</div>
                 </div>`;
             });
-
             document.getElementById('rel-lista-detalhada').innerHTML = htmlList || '<p style="color:var(--text-sub)">Nenhum lançamento de saída encontrado para este período.</p>';
         }
 
         function exportarPDFRelatorioFeedback() {
-            if(!estado.relatorioAtual || !estado.relatorioAtual.pessoa) {
-                return alert('⚠️ Selecione um separador para gerar o relatório em PDF!');
-            }
+            if(!estado.relatorioAtual || !estado.relatorioAtual.pessoa) return alert('⚠️ Selecione um separador para gerar o relatório em PDF!');
+            let r = estado.relatorioAtual; const { jsPDF } = window.jspdf; const doc = new jsPDF({ format: 'a4' });
 
-            let r = estado.relatorioAtual;
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({ format: 'a4' });
-
-            // Cabeçalho Oficial
-            doc.setFillColor(30, 41, 59);
-            doc.rect(0, 0, 210, 35, 'F');
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(18); doc.setFont("helvetica", "bold");
-            doc.text("RELATÓRIO DE DESEMPENHO E FEEDBACK", 15, 22);
-
-            // Informações
-            doc.setTextColor(15, 23, 42); doc.setFontSize(11);
-            doc.text(`Setor: ${estado.setor.toUpperCase()}`, 15, 48);
+            doc.setFillColor(30, 41, 59); doc.rect(0, 0, 210, 35, 'F'); doc.setTextColor(255, 255, 255);
+            doc.setFontSize(18); doc.setFont("helvetica", "bold"); doc.text("RELATÓRIO DE DESEMPENHO E FEEDBACK", 15, 22);
+            doc.setTextColor(15, 23, 42); doc.setFontSize(11); doc.text(`Setor: ${estado.setor.toUpperCase()}`, 15, 48);
             doc.text(`Separador Avaliado: ${r.pessoa}`, 15, 56);
             doc.text(`Período de Análise: ${r.periodo === 'hoje' ? 'Hoje' : (r.periodo === 'semana' ? 'Últimos 7 dias' : 'Últimos 30 dias')}`, 15, 64);
             doc.text(`Data de Emissão: ${new Date().toLocaleDateString('pt-BR')}`, 130, 48);
 
-            // Box de Resumo KPI
-            doc.setFillColor(241, 245, 249);
-            doc.roundedRect(15, 72, 180, 25, 3, 3, 'F');
+            doc.setFillColor(241, 245, 249); doc.roundedRect(15, 72, 180, 25, 3, 3, 'F');
             doc.setFont("helvetica", "bold"); doc.setFontSize(12);
-            doc.text(`TOTAL DE PEÇAS RETIRADAS: ${r.totalPecas} unidades`, 22, 88);
-            doc.text(`REGISTROS DE SAÍDA: ${r.totalOps}`, 120, 88);
+            doc.text(`TOTAL DE PEÇAS RETIRADAS: ${r.totalPecas} unidades`, 22, 88); doc.text(`REGISTROS DE SAÍDA: ${r.totalOps}`, 120, 88);
 
-            // Tabela de Lançamentos
-            doc.setFontSize(11); doc.setFont("helvetica", "bold");
-            doc.text("Histórico de Detalhado de Saídas:", 15, 110);
-            
-            doc.setFillColor(226, 232, 240);
-            doc.rect(15, 115, 180, 8, 'F');
-            doc.setFontSize(9);
-            doc.text("DATA / HORA", 20, 120);
-            doc.text("MODELO / PEÇA", 70, 120);
-            doc.text("QUANTIDADE", 160, 120);
+            doc.setFontSize(11); doc.setFont("helvetica", "bold"); doc.text("Histórico de Detalhado de Saídas:", 15, 110);
+            doc.setFillColor(226, 232, 240); doc.rect(15, 115, 180, 8, 'F'); doc.setFontSize(9);
+            doc.text("DATA / HORA", 20, 120); doc.text("MODELO / PEÇA", 70, 120); doc.text("QUANTIDADE", 160, 120);
 
-            let y = 130;
-            doc.setFont("helvetica", "normal");
+            let y = 130; doc.setFont("helvetica", "normal");
             r.listaSaidas.slice(0, 22).forEach((item) => {
-                doc.text(String(item.data), 20, y);
-                doc.text(String(item.modelo).substring(0, 45), 70, y);
-                doc.text(`${item.qtd} un.`, 160, y);
-                doc.setDrawColor(226, 232, 240);
-                doc.line(15, y + 2, 195, y + 2);
-                y += 8;
+                doc.text(String(item.data), 20, y); doc.text(String(item.modelo).substring(0, 45), 70, y); doc.text(`${item.qtd} un.`, 160, y);
+                doc.setDrawColor(226, 232, 240); doc.line(15, y + 2, 195, y + 2); y += 8;
             });
-
-            // Campo de Assinatura para Feedback
-            doc.line(20, 265, 90, 265);
-            doc.text("Assinatura do Administrador", 25, 271);
-
-            doc.line(120, 265, 190, 265);
-            doc.text(`Assinatura (${r.pessoa})`, 130, 271);
-
+            doc.line(20, 265, 90, 265); doc.text("Assinatura do Administrador", 25, 271);
+            doc.line(120, 265, 190, 265); doc.text(`Assinatura (${r.pessoa})`, 130, 271);
             doc.save(`Feedback_${r.pessoa}_${r.periodo}_${estado.setor}.pdf`);
         }
 
-        async function lancar(tipo) {
-            let pfx = tipo === 'Entrada' ? 'e' : 's';
-            let p = document.getElementById(`${pfx}-pessoa`).value; let m = document.getElementById(`${pfx}-modelo`).value; let q = document.getElementById(`${pfx}-qtd`).value;
-            if(!p || !m) return alert('⚠️ Preencha todos os campos!');
-            
-            let btn = document.querySelector(`#tab-${tipo.toLowerCase()} .btn-primary`);
-            btn.innerText = 'Gravando...';
-            
-            try {
-                await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ setor: estado.setor, acao: tipo, pessoa: p, modelo: m, quantidade: q }) });
-                playSomSucesso(); 
-                btn.innerText = 'Sucesso!'; toast(`✅ ${tipo} registrada!`);
-                setTimeout(() => { btn.innerText = tipo==='Entrada'?'Lançar no Estoque':'Confirmar Retirada'; carregarDados(); document.querySelectorAll('.tab-btn')[0].click(); }, 1200);
-            } catch(e) { btn.innerText = 'Erro!'; alert('Falha ao salvar.'); }
-        }
-
         function gerarPDF(data, pessoa, modelo, qtd) {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({ format: 'a5' });
-            
-            doc.setFillColor(30, 30, 30);
-            doc.rect(0, 0, 210, 30, 'F');
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(16); doc.setFont("helvetica", "bold");
-            doc.text("COMPROVANTE DE RETIRADA", 15, 20);
-            
-            doc.setTextColor(0, 0, 0); doc.setFontSize(12);
-            doc.text(`Setor: LOGÍSTICA - ${estado.setor.toUpperCase()}`, 15, 50);
-            doc.setFont("helvetica", "normal");
-            doc.text(`Data/Hora da Baixa: ${data}`, 15, 60);
-            
-            doc.setFillColor(245, 245, 245);
-            doc.rect(15, 75, 118, 40, 'F');
-            doc.setFont("helvetica", "bold");
-            doc.text(`Membro da Equipe:`, 20, 85); doc.setFont("helvetica", "normal"); doc.text(pessoa, 65, 85);
-            doc.setFont("helvetica", "bold");
-            doc.text(`Modelo:`, 20, 95); doc.setFont("helvetica", "normal"); doc.text(modelo, 40, 95);
-            doc.setFont("helvetica", "bold");
-            doc.text(`Quantidade:`, 20, 105); doc.setFont("helvetica", "normal"); doc.text(`${qtd} unidades`, 50, 105);
-            
-            doc.text("________________________________________", 25, 150);
-            doc.setFontSize(10);
-            doc.text("Assinatura do Solicitante", 45, 155);
-            
+            const { jsPDF } = window.jspdf; const doc = new jsPDF({ format: 'a5' });
+            doc.setFillColor(30, 30, 30); doc.rect(0, 0, 210, 30, 'F'); doc.setTextColor(255, 255, 255);
+            doc.setFontSize(16); doc.setFont("helvetica", "bold"); doc.text("COMPROVANTE DE RETIRADA", 15, 20);
+            doc.setTextColor(0, 0, 0); doc.setFontSize(12); doc.text(`Setor: LOGÍSTICA - ${estado.setor.toUpperCase()}`, 15, 50);
+            doc.setFont("helvetica", "normal"); doc.text(`Data/Hora da Baixa: ${data}`, 15, 60);
+            doc.setFillColor(245, 245, 245); doc.rect(15, 75, 118, 40, 'F');
+            doc.setFont("helvetica", "bold"); doc.text(`Membro da Equipe:`, 20, 85); doc.setFont("helvetica", "normal"); doc.text(pessoa, 65, 85);
+            doc.setFont("helvetica", "bold"); doc.text(`Modelo:`, 20, 95); doc.setFont("helvetica", "normal"); doc.text(modelo, 40, 95);
+            doc.setFont("helvetica", "bold"); doc.text(`Quantidade:`, 20, 105); doc.setFont("helvetica", "normal"); doc.text(`${qtd} unidades`, 50, 105);
+            doc.text("________________________________________", 25, 150); doc.setFontSize(10); doc.text("Assinatura do Solicitante", 45, 155);
             doc.save(`Vale_Ret_${pessoa}_${data.split(' ')[0].replace(/\//g,'-')}.pdf`);
         }
 
         function renderizarGraficos() {
             let canvas = document.getElementById('graficoEquipe');
-            if(!canvas) return;
-            let ctx = canvas.getContext('2d');
+            if(!canvas) return; let ctx = canvas.getContext('2d');
             let isLight = document.body.classList.contains('light-mode');
-            let textColor = isLight ? '#0f172a' : '#cbd5e1';
-            let gridColor = isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.05)';
-
-            let labels = Object.keys(estado.analiseSaidas);
-            let data = Object.values(estado.analiseSaidas);
+            let textColor = isLight ? '#0f172a' : '#cbd5e1'; let gridColor = isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.05)';
+            let labels = Object.keys(estado.analiseSaidas); let data = Object.values(estado.analiseSaidas);
 
             if(estado.graficos.saidas) estado.graficos.saidas.destroy();
-
             estado.graficos.saidas = new Chart(ctx, {
                 type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Total de Peças Retiradas',
-                        data: data,
-                        backgroundColor: (estado.setor === 'Caixas' ? '#F38020' : '#0ea5e9'),
-                        borderRadius: 8
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { labels: { color: textColor } } },
-                    scales: {
-                        y: { ticks: { color: textColor }, grid: { color: gridColor } },
-                        x: { ticks: { color: textColor }, grid: { display: false } }
-                    }
-                }
+                data: { labels: labels, datasets: [{ label: 'Total de Peças Retiradas', data: data, backgroundColor: (estado.setor === 'Caixas' ? '#F38020' : '#0ea5e9'), borderRadius: 8 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: textColor } } }, scales: { y: { ticks: { color: textColor }, grid: { color: gridColor } }, x: { ticks: { color: textColor }, grid: { display: false } } } }
             });
         }
 
-        function abrirAba(id, btn) {
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('tab-' + id).classList.add('active');
-            btn.classList.add('active');
-        }
+        function abrirAba(id, btn) { document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active')); document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.getElementById('tab-' + id).classList.add('active'); btn.classList.add('active'); }
         function toggleMenu() { document.getElementById('sidebar').classList.toggle('open'); }
         function toast(msg) { let t = document.getElementById('toast'); t.innerText = msg; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 3000); }
     </script>
