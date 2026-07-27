@@ -327,9 +327,9 @@ df_historico = st.session_state.df_historico
 separadores = ["Marcello", "Fabiano", "Sérgio"]
 lista_modelos = sorted(df_estoque["Modelo"].tolist())
  
-     st.sidebar.markdown(logo_svg, unsafe_allow_html=True)
-     st.sidebar.markdown("---")
-     st.sidebar.markdown(f"<div style='text-align:center; color:#888;'>LOGADO COMO</div><div style='text-align:center; font-weight:bold; font-size:18px; color:#F38020; margin-bottom:20px;'>{st.session_state.perfil.upper()}</div>", unsafe_allow_html=True)
+st.sidebar.markdown(logo_svg, unsafe_allow_html=True)
+st.sidebar.markdown("---")
+st.sidebar.markdown(f"<div style='text-align:center; color:#888;'>LOGADO COMO</div><div style='text-align:center; font-weight:bold; font-size:18px; color:#F38020; margin-bottom:20px;'>{st.session_state.perfil.upper()}</div>", unsafe_allow_html=True)
      
      if st.sidebar.button("🔄 Sincronizar Base", use_container_width=True):
          st.cache_data.clear()
