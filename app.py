@@ -39,7 +39,6 @@ if "dados_carregados" not in st.session_state or st.session_state.dados_carregad
 # ==========================================
 # TEMATIZAÇÃO DINÂMICA (O EFEITO UAU)
 # ==========================================
-# Descobre em qual setor o usuário está no momento
 setor_ativo = st.session_state.login_setor if not st.session_state.logado else st.session_state.setor
 
 if setor_ativo == "Torres":
@@ -71,8 +70,9 @@ st.markdown(f"""
     --grad-logo: {grad_logo};
 }}
 
-/* Esconde o menu padrão */
-#MainMenu, header, footer {{visibility:hidden;}}
+/* Esconde o menu padrão mas MANTÉM a setinha da Sidebar funcionando */
+#MainMenu, footer {{visibility:hidden;}}
+header {{background-color: transparent !important;}} /* Deixa o topo transparente */
 
 /* Fundo Geral Premium */
 .stApp {{
@@ -511,7 +511,9 @@ else:
                 
         with abas[3]:
             st.markdown("<div class='panel'><h3 class='window-title'>📊 Janela de Indicadores</h3><p class='window-sub'>Acompanhe volume, itens críticos e movimentos por período.</p></div>", unsafe_allow_html=True)
-            
+            m1, m2 = st.columns(2)
+            m1.metric("📦 Total de Peças", int(df_estoque["Quantidade"].sum()))
+            m2.metric("⚠️ Críticos (Zerados)", len(zerados))
             d1, d2 = st.columns(2)
             inicio = d1.date_input("De:", datetime.now().replace(day=1))
             fim = d2.date_input("Até:", datetime.now())
