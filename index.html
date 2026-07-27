@@ -6,9 +6,6 @@
     <title>Portal Logística</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        /* =========================================
-           VARIÁVEIS DE TEMA E CORES
-           ========================================= */
         :root {
             --prim: #F38020; --sec: #dc2626;
             --glow1: rgba(243,128,32,0.3); --glow2: rgba(220,38,38,0.15);
@@ -29,9 +26,6 @@
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
 
-        /* =========================================
-           LOGIN WIZARD
-           ========================================= */
         #login-screen {
             min-height: 100vh; display: flex; align-items: center; justify-content: center;
             position: relative; z-index: 10;
@@ -56,9 +50,6 @@
         .step { display: none; }
         .step.active { display: block; animation: fadeSlideUp 0.4s forwards; }
 
-        /* =========================================
-           BOTÕES E INPUTS GERAIS
-           ========================================= */
         button, input, select { font-family: inherit; outline: none; }
         .btn {
             background: linear-gradient(145deg, #262b3c, #10131d); color: white;
@@ -76,12 +67,8 @@
         }
         input:focus, select:focus { border-color: var(--prim); box-shadow: 0 0 0 2px var(--glow1); }
 
-        /* =========================================
-           LAYOUT PRINCIPAL (SIDEBAR + CONTEÚDO)
-           ========================================= */
         #app-layout { display: none; height: 100vh; overflow: hidden; }
         
-        /* SIDEBAR (VIDRO) */
         .sidebar {
             width: 280px; background: rgba(10, 12, 18, 0.2); backdrop-filter: blur(25px);
             border-right: 1px solid rgba(255,255,255,0.06); height: 100%; padding: 20px;
@@ -96,18 +83,13 @@
         }
         .profile-pill b { color: var(--prim); display: block; font-size: 18px;}
         
-        /* CONTEÚDO PRINCIPAL */
         .main-content {
             margin-left: 280px; padding: 30px; height: 100vh; overflow-y: auto; width: calc(100% - 280px);
         }
 
-        /* HEADER MOBILE */
         .mobile-header { display: none; padding: 15px; background: rgba(10,12,18,0.8); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.08); align-items: center; justify-content: space-between;}
         .menu-toggle { background: transparent; border: none; color: white; font-size: 24px; cursor: pointer; }
 
-        /* =========================================
-           PAINEL, HEROS E KPIS
-           ========================================= */
         .hero { background: var(--panel-bg); border: 1px solid rgba(255,255,255,0.14); border-radius: 28px; padding: 26px; margin-bottom: 22px; animation: fadeSlideUp 0.6s; }
         .badge { background: var(--glow2); border: 1px solid var(--glow1); color: #fff; padding: 6px 12px; border-radius: 999px; font-size: 11px; font-weight: 900; display: inline-block; margin-bottom: 10px;}
         .hero h1 { margin: 0 0 5px; font-size: 32px; font-weight: 900; }
@@ -120,9 +102,6 @@
 
         .danger-glow { border-left: 5px solid #ef4444; background: linear-gradient(90deg, rgba(127,29,29,0.8), rgba(31,41,55,0.75)); padding: 15px; border-radius: 18px; margin-bottom: 20px; color: #fecaca; font-size: 14px;}
 
-        /* =========================================
-           ABAS E JANELAS (TABS)
-           ========================================= */
         .tabs-list {
             display: flex; gap: 6px; background: linear-gradient(180deg, rgba(20,22,32,0.75), rgba(8,9,14,0.85));
             padding: 10px; border-radius: 22px; border: 1px solid rgba(255,255,255,0.08);
@@ -141,9 +120,6 @@
         .panel h3 { margin: 0 0 5px; font-size: 20px; }
         .panel p.sub { color: #9ca3af; font-size: 13px; margin: 0 0 20px; }
 
-        /* =========================================
-           CATÁLOGO E MODAL (POP-UP)
-           ========================================= */
         .grid-catalogo { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
         
         .modal-overlay {
@@ -165,11 +141,8 @@
         .card-detalhe b { display: block; font-size: 30px; color: var(--prim); font-weight: 900; margin: 5px 0;}
         .card-detalhe small { font-size: 12px; color: #d1d5db; }
 
-        /* =========================================
-           HISTÓRICO
-           ========================================= */
         .history-card {
-            display: grid; grid-template-columns: 1fr 1fr 1fr 2fr 0.5fr; gap: 10px; align-items: center;
+            display: grid; grid-template-columns: 1.2fr 1fr 1fr 2fr 0.5fr; gap: 10px; align-items: center;
             background: linear-gradient(145deg,rgba(24,29,43,.92),rgba(8,10,16,.96));
             border: 1px solid rgba(255,255,255,.12); border-radius: 18px; padding: 12px 14px; margin-bottom: 10px;
             font-size: 13px;
@@ -181,10 +154,8 @@
 
         @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* TOAST NOTIFICATION */
         #toast { position: fixed; bottom: 20px; right: 20px; background: #10b981; color: white; padding: 15px 25px; border-radius: 16px; font-weight: 700; z-index: 2000; display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.4); animation: fadeSlideUp 0.3s;}
 
-        /* RESPONSIVO MOBILE */
         @media (max-width: 768px) {
             .sidebar { transform: translateX(-100%); }
             .sidebar.open { transform: translateX(0); }
@@ -199,9 +170,9 @@
 
     <script>
         // ==========================================
-        // https://script.google.com/macros/s/AKfycbxyWRv8Zd_jdSCmU5Co6pICdKLhHjkktTb97UN3-b1kJInU6HgccxhtvAU91XPRTuxm1w/exec
+        // COLE O SEU **NOVO** LINK DA API AQUI ABAIXO
         // ==========================================
-        const API_URL = "https://script.google.com/macros/s/AKfycbxyWRv8Zd_jdSCmU5Co6pICdKLhHjkktTb97UN3-b1kJInU6HgccxhtvAU91XPRTuxm1w/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbwRLsipTraGo72XeJTTG-JG_Wt6qzJRJ_iSQ2V2babralKh3aC_n8eNG0oh3b1dOw099g/exec";
 
         let estado = { setor: '', perfil: '', dados: null };
         const EQUIPES = { 'Caixas': ['Marcello', 'Fabiano', 'Sérgio'], 'Torres': ['Fran', 'Henrique', 'Leonardo', 'Patrick'] };
@@ -210,9 +181,6 @@
 
     <div id="toast">✅ Operação realizada!</div>
 
-    <!-- =========================================
-         WIZARD DE LOGIN
-         ========================================= -->
     <div id="login-screen">
         <div class="login-card">
             <div class="login-icon" id="logo-icon">⬢</div>
@@ -242,18 +210,12 @@
         </div>
     </div>
 
-    <!-- =========================================
-         SISTEMA PRINCIPAL
-         ========================================= -->
     <div id="app-layout">
-        
-        <!-- HEADER MOBILE -->
         <div class="mobile-header">
             <div style="font-weight: 900; font-size: 18px;">⬢ <span id="mob-setor">SISTEMA</span></div>
             <button class="menu-toggle" onclick="toggleMenu()">☰</button>
         </div>
 
-        <!-- SIDEBAR -->
         <div class="sidebar" id="sidebar">
             <div class="logo">⬢ SETOR <br><span id="side-setor">NOME</span></div>
             <div class="profile-pill"><span>PERFIL ATIVO</span><br><b id="side-perfil">PERFIL</b></div>
@@ -262,12 +224,11 @@
             <button class="btn btn-primary" onclick="location.reload()">🚪 Sair (Logout)</button>
         </div>
 
-        <!-- MAIN CONTENT -->
         <div class="main-content">
             <div class="hero">
                 <div class="badge" id="badge-top">SETOR</div>
                 <h1>Painel Operacional</h1>
-                <p>Controle unificado de estoque com validação de saldo e histórico em tempo real.</p>
+                <p>Controle unificado de estoque com validação de saldo em tempo real.</p>
                 <div id="alerta-zerados"></div>
                 
                 <div class="kpis">
@@ -277,7 +238,6 @@
                 </div>
             </div>
 
-            <!-- TABS -->
             <div class="tabs-list" id="nav-tabs">
                 <button class="tab-btn active" onclick="abrirAba('catalogo', this)">🗂️ Catálogo</button>
                 <button class="tab-btn" onclick="abrirAba('saida', this)">📤 Saídas</button>
@@ -285,7 +245,6 @@
                 <button class="tab-btn" onclick="abrirAba('historico', this)">🕒 Histórico</button>
             </div>
 
-            <!-- ABA CATÁLOGO -->
             <div id="tab-catalogo" class="tab-content active panel">
                 <h3>🗂️ Catálogo de Estoque</h3>
                 <p class="sub">Selecione um modelo para ver os detalhes de cores e tamanhos.</p>
@@ -293,7 +252,6 @@
                 <div class="grid-catalogo" id="grid-cat"></div>
             </div>
 
-            <!-- ABA SAÍDA -->
             <div id="tab-saida" class="tab-content panel">
                 <h3>📤 Janela de Saídas</h3>
                 <p class="sub">Registre retiradas com validação automática de saldo.</p>
@@ -303,7 +261,6 @@
                 <button class="btn btn-primary" onclick="lancar('Saída')">Confirmar Retirada</button>
             </div>
 
-            <!-- ABA ENTRADA -->
             <div id="tab-entrada" class="tab-content panel">
                 <h3>📥 Janela de Entradas</h3>
                 <p class="sub">Lance produção e reposição no estoque conectado.</p>
@@ -313,7 +270,6 @@
                 <button class="btn btn-primary" onclick="lancar('Entrada')">Lançar no Estoque</button>
             </div>
 
-            <!-- ABA HISTÓRICO -->
             <div id="tab-historico" class="tab-content panel">
                 <h3>🕒 Janela de Histórico</h3>
                 <p class="sub">Últimos lançamentos sincronizados com a planilha.</p>
@@ -325,7 +281,6 @@
         </div>
     </div>
 
-    <!-- MODAL DETALHE DO MODELO -->
     <div class="modal-overlay" id="modal-detalhe">
         <div class="modal">
             <h2 id="modal-titulo" style="text-align:center; margin:0 0 5px;">Modelo</h2>
@@ -335,7 +290,6 @@
         </div>
     </div>
 
-    <!-- SCRIPT DE FUNCIONAMENTO -->
     <script>
         function escolherSetor(s) {
             estado.setor = s;
@@ -343,7 +297,6 @@
             document.getElementById('step2').classList.add('active');
             document.getElementById('lbl-setor').innerText = s.toUpperCase();
 
-            // Troca de Tema Dinâmico
             const r = document.querySelector(':root');
             if(s === 'Torres') {
                 r.style.setProperty('--prim', '#0ea5e9'); r.style.setProperty('--sec', '#3b82f6');
@@ -375,10 +328,7 @@
             document.getElementById('side-perfil').innerText = estado.perfil.toUpperCase();
             document.getElementById('badge-top').innerText = 'ACESSO ' + estado.perfil.toUpperCase();
             
-            // Controle de visualização de abas
-            if(p === 'equipe') {
-                document.querySelectorAll('.tab-btn').forEach((b,i) => { if(i>0) b.style.display='none'; });
-            }
+            if(p === 'equipe') { document.querySelectorAll('.tab-btn').forEach((b,i) => { if(i>0) b.style.display='none'; }); }
             carregarDados();
         }
 
@@ -386,36 +336,48 @@
             toast('⏳ Sincronizando com o Google Sheets...');
             try {
                 let r = await fetch(`${API_URL}?setor=${estado.setor}`);
-                estado.dados = await r.json();
+                let json = await r.json();
+                
+                if(json.erro) {
+                    alert("⚠️ Erro no Google Apps Script:\n" + json.erro);
+                    return;
+                }
+                
+                estado.dados = json;
                 renderizarInterface();
                 toast('✅ Base de dados atualizada!');
-            } catch(e) { alert('Erro de conexão!'); }
+            } catch(e) { alert('Erro de conexão! Verifique se a URL do Apps Script está correta.'); }
         }
 
         function renderizarInterface() {
             let est = estado.dados.estoque;
             let hist = estado.dados.historico;
             
-            // Popula Selects de Equipe
             let htmlPessoas = '<option value="">Selecione o Separador...</option>';
             EQUIPES[estado.setor].forEach(p => htmlPessoas += `<option value="${p}">${p}</option>`);
             document.getElementById('s-pessoa').innerHTML = htmlPessoas;
             document.getElementById('e-pessoa').innerHTML = htmlPessoas;
 
-            // Processa Estoque
+            // Busca Inteligente de Colunas (ESTOQUE)
+            let cabecalhoEst = est[0].map(h => h.toString().trim());
+            let idxMod = cabecalhoEst.indexOf("Modelo"); if(idxMod === -1) idxMod = 0;
+            let idxQtd = cabecalhoEst.indexOf("Quantidade"); if(idxQtd === -1) idxQtd = 1;
+
             let htmlModelos = '<option value="">Selecione o Modelo...</option>';
             let totPecas = 0, zerados = [];
-            estado.catalogoLimpo = []; // Array estruturado
+            estado.catalogoLimpo = []; 
 
             for(let i=1; i<est.length; i++) {
-                let nome = est[i][0]; let qtd = Number(est[i][1])||0;
+                let nome = est[i][idxMod]; 
+                let qtd = Number(est[i][idxQtd]) || 0;
+                
                 if(!nome) continue;
                 totPecas += qtd;
                 if(qtd === 0) zerados.push(nome);
                 
                 htmlModelos += `<option value="${nome}">${nome} (Estoque: ${qtd})</option>`;
                 
-                let partes = nome.split(' - ');
+                let partes = String(nome).split(' - ');
                 let linha = partes[0];
                 let cor = partes.length > 1 ? partes[1] : 'Padrão';
                 
@@ -436,22 +398,35 @@
 
             renderizarCatalogo('');
             
-            // Processa Histórico
+            // Busca Inteligente de Colunas (HISTÓRICO)
             let htmlHist = '';
-            for(let i = hist.length - 1; i > 0; i--) { // Inverso para mais recentes primeiro
-                if(!hist[i][0]) continue;
-                let data = hist[i][1].split(' ')[0];
-                let acao = hist[i][2]; let pess = hist[i][3]; let mod = hist[i][4]; let qt = hist[i][5];
-                let classeAcao = acao === 'Entrada' ? 'acao-entrada' : 'acao-saida';
-                let icone = acao === 'Entrada' ? '📥' : '📤';
-                
-                htmlHist += `<div class='history-card'>
-                    <div>${data}</div>
-                    <div class='badge-acao ${classeAcao}'>${icone} ${acao}</div>
-                    <div>${pess}</div>
-                    <div>${mod}</div>
-                    <div style="font-weight:900; color:var(--prim); text-align:center">${qt}</div>
-                </div>`;
+            if(hist && hist.length > 0) {
+                let cabecalhoHist = hist[0].map(h => h.toString().trim());
+                let hData = cabecalhoHist.indexOf("Data"); if(hData === -1) hData = 1;
+                let hAcao = cabecalhoHist.indexOf("Ação"); if(hAcao === -1) hAcao = 2;
+                let hPess = cabecalhoHist.indexOf("Separador"); if(hPess === -1) hPess = 3;
+                let hMod = cabecalhoHist.indexOf("Modelo"); if(hMod === -1) hMod = 4;
+                let hQtd = cabecalhoHist.indexOf("Quantidade"); if(hQtd === -1) hQtd = 5;
+
+                for(let i = hist.length - 1; i > 0; i--) { 
+                    if(!hist[i][hMod]) continue; 
+                    let data = String(hist[i][hData]).split(' ')[0];
+                    let acao = hist[i][hAcao]; 
+                    let pess = hist[i][hPess]; 
+                    let mod = hist[i][hMod]; 
+                    let qt = hist[i][hQtd];
+                    
+                    let classeAcao = acao === 'Entrada' ? 'acao-entrada' : 'acao-saida';
+                    let icone = acao === 'Entrada' ? '📥' : '📤';
+                    
+                    htmlHist += `<div class='history-card'>
+                        <div>${data}</div>
+                        <div class='badge-acao ${classeAcao}'>${icone} ${acao}</div>
+                        <div>${pess}</div>
+                        <div>${mod}</div>
+                        <div style="font-weight:900; color:var(--prim); text-align:center">${qt}</div>
+                    </div>`;
+                }
             }
             document.getElementById('lista-historico').innerHTML = htmlHist || '<p>Nenhum histórico encontrado.</p>';
         }
