@@ -50,6 +50,29 @@ st.markdown("""
         margin-bottom: 15px;
         color: #fca5a5;
     }
+    
+    /* Novos Banners Premium para as Janelas */
+    .banner-saida {
+        background: linear-gradient(90deg, #2b1111 0%, #1A1A1A 100%);
+        padding: 20px;
+        border-radius: 8px;
+        border-left: 5px solid #ef4444;
+        margin-bottom: 20px;
+        border-top: 1px solid #333;
+        border-right: 1px solid #333;
+        border-bottom: 1px solid #333;
+    }
+    
+    .banner-entrada {
+        background: linear-gradient(90deg, #0f2b18 0%, #1A1A1A 100%);
+        padding: 20px;
+        border-radius: 8px;
+        border-left: 5px solid #10b981;
+        margin-bottom: 20px;
+        border-top: 1px solid #333;
+        border-right: 1px solid #333;
+        border-bottom: 1px solid #333;
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -243,8 +266,8 @@ else:
         exibir_estoque_premium(df_estoque, busca)
 
     else:
-        # AGORA SÃO ABAS SEPARADAS PARA CADA AÇÃO
-        abas_nomes = ["🗂️ Catálogo", "📤 Nova Saída", "📥 Nova Entrada", "📊 Dashboard", "🕒 Histórico", "👑 Fechamento"] if st.session_state.perfil == "coord" else ["🗂️ Catálogo", "📤 Nova Saída", "📥 Nova Entrada", "📊 Dashboard", "🕒 Histórico"]
+        # ABAS COM NOMES ATUALIZADOS
+        abas_nomes = ["🗂️ Catálogo", "📤 Pego do Estoque", "📥 Feito de Estoque", "📊 Dashboard", "🕒 Histórico", "👑 Fechamento"] if st.session_state.perfil == "coord" else ["🗂️ Catálogo", "📤 Pego do Estoque", "📥 Feito de Estoque", "📊 Dashboard", "🕒 Histórico"]
         abas = st.tabs(abas_nomes)
 
         with abas[0]: # ABA 1: SÓ CATÁLOGO
@@ -253,15 +276,21 @@ else:
             st.divider()
             exibir_estoque_premium(df_estoque, busca)
 
-        with abas[1]: # ABA 2: SÓ SAÍDAS
-            st.header("📤 Registrar Saída")
-            st.write("Registre as peças retiradas para expedição.")
+        with abas[1]: # ABA 2: PEGO DO ESTOQUE
+            # Banner Customizado Premium
+            st.markdown("""
+                <div class="banner-saida">
+                    <h3 style="margin:0; color:#ffffff;">📤 Material que foi pego do estoque</h3>
+                    <p style="margin:5px 0 0 0; font-size:14px; color:#aaaaaa;">Registre aqui as peças que estão sendo retiradas da prateleira para uso ou expedição.</p>
+                </div>
+            """, unsafe_allow_html=True)
+            
             with st.form("form_saida", clear_on_submit=True):
                 col1, col2, col3 = st.columns([2, 3, 1])
                 with col1: sep = st.selectbox("1. Colaborador", [""] + separadores)
                 with col2: modelo = st.selectbox("2. Modelo", [""] + lista_modelos)
                 with col3: qtd = st.number_input("3. Qtd", min_value=1, value=1)
-                submit_saida = st.form_submit_button("Confirmar Saída", type="primary", use_container_width=True)
+                submit_saida = st.form_submit_button("Confirmar Retirada", type="primary", use_container_width=True)
 
             if submit_saida:
                 if not sep or not modelo: st.error("⚠️ Preencha os campos.")
@@ -278,18 +307,24 @@ else:
                             df_historico = pd.concat([novo, df_historico], ignore_index=True)
                             salvar_historico(df_historico)
                             st.cache_data.clear()
-                        st.success(f"✅ Saída registrada com sucesso!")
+                        st.success(f"✅ Material pego do estoque registrado com sucesso!")
                         st.rerun()
 
-        with abas[2]: # ABA 3: SÓ ENTRADAS
-            st.header("📥 Receber Material")
-            st.write("Adicione peças recém produzidas ao estoque.")
+        with abas[2]: # ABA 3: FEITO DE ESTOQUE
+            # Banner Customizado Premium
+            st.markdown("""
+                <div class="banner-entrada">
+                    <h3 style="margin:0; color:#ffffff;">📥 Material que foi feito de estoque</h3>
+                    <p style="margin:5px 0 0 0; font-size:14px; color:#aaaaaa;">Adicione ao sistema as peças novas que foram produzidas e colocadas na prateleira.</p>
+                </div>
+            """, unsafe_allow_html=True)
+            
             with st.form("form_entrada", clear_on_submit=True):
                 col1_in, col2_in, col3_in = st.columns([2, 3, 1])
                 with col1_in: quem_fez = st.selectbox("1. Quem produziu?", [""] + separadores)
                 with col2_in: modelo_rep = st.selectbox("2. Modelo", [""] + lista_modelos)
                 with col3_in: qtd_rep = st.number_input("3. Qtd", min_value=1, value=1)
-                submit_entrada = st.form_submit_button("Lançar Entrada", use_container_width=True)
+                submit_entrada = st.form_submit_button("Lançar no Estoque", use_container_width=True)
                 
                 if submit_entrada:
                     if not modelo_rep or not quem_fez: st.error("⚠️ Preencha os campos.")
@@ -302,7 +337,7 @@ else:
                             df_historico = pd.concat([novo, df_historico], ignore_index=True)
                             salvar_historico(df_historico)
                             st.cache_data.clear()
-                        st.success("✅ Entrada Lançada com sucesso!")
+                        st.success("✅ Material feito de estoque lançado com sucesso!")
                         st.rerun()
 
         with abas[3]: # ABA 4: DASHBOARD
