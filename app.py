@@ -5,7 +5,7 @@ from datetime import datetime
 from streamlit_gsheets import GSheetsConnection
  
  # --- CONFIGURAÇÃO DA PÁGINA ---
- st.set_page_config(page_title="Caixas - Portal", page_icon="📦", layout="centered")
+st.set_page_config(page_title="Caixas - Portal", page_icon="📦", layout="centered")
  
  # --- DESIGN ULTRA PREMIUM (CSS HACK) ---
  st.markdown("""
