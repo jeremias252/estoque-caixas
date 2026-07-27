@@ -170,7 +170,7 @@
 
     <script>
         // ==========================================
-        // COLE O SEU **NOVO** LINK DA API AQUI ABAIXO
+        // COLE O SEU LINK DO GOOGLE APPS SCRIPT AQUI
         // ==========================================
         const API_URL = "https://script.google.com/macros/s/AKfycbwRLsipTraGo72XeJTTG-JG_Wt6qzJRJ_iSQ2V2babralKh3aC_n8eNG0oh3b1dOw099g/exec";
 
@@ -358,7 +358,6 @@
             document.getElementById('s-pessoa').innerHTML = htmlPessoas;
             document.getElementById('e-pessoa').innerHTML = htmlPessoas;
 
-            // Busca Inteligente de Colunas (ESTOQUE)
             let cabecalhoEst = est[0].map(h => h.toString().trim());
             let idxMod = cabecalhoEst.indexOf("Modelo"); if(idxMod === -1) idxMod = 0;
             let idxQtd = cabecalhoEst.indexOf("Quantidade"); if(idxQtd === -1) idxQtd = 1;
@@ -398,7 +397,6 @@
 
             renderizarCatalogo('');
             
-            // Busca Inteligente de Colunas (HISTÓRICO)
             let htmlHist = '';
             if(hist && hist.length > 0) {
                 let cabecalhoHist = hist[0].map(h => h.toString().trim());
@@ -462,29 +460,41 @@
         }
         function fecharModal() { document.getElementById('modal-detalhe').style.display = 'none'; }
 
+        /* FUNÇÃO CORRIGIDA DE RETIRADA / ENTRADA */
         async function lancar(tipo) {
-            let pfx = tipo === 'Entrada' ? 'e' : 's';
+            let isSaida = tipo === 'Saída';
+            let pfx = isSaida ? 's' : 'e';
+            let tabId = isSaida ? 'saida' : 'entrada';
+
             let p = document.getElementById(`${pfx}-pessoa`).value;
             let m = document.getElementById(`${pfx}-modelo`).value;
             let q = document.getElementById(`${pfx}-qtd`).value;
 
             if(!p || !m) return alert('⚠️ Preencha Separador e Modelo!');
             
-            document.querySelector(`#tab-${tipo.toLowerCase()} .btn-primary`).innerText = 'Gravando...';
+            let btnEl = document.querySelector(`#tab-${tabId} .btn-primary`);
+            if(btnEl) btnEl.innerText = 'Gravando...';
             
-            await fetch(API_URL, {
-                method: 'POST',
-                body: JSON.stringify({ setor: estado.setor, acao: tipo, pessoa: p, modelo: m, quantidade: q })
-            });
-            
-            document.querySelector(`#tab-${tipo.toLowerCase()} .btn-primary`).innerText = 'Sucesso!';
-            toast(`✅ ${tipo} de ${q}x registrada!`);
-            
-            setTimeout(() => {
-                document.querySelector(`#tab-${tipo.toLowerCase()} .btn-primary`).innerText = tipo==='Entrada' ? 'Lançar no Estoque' : 'Confirmar Retirada';
-                carregarDados();
-                abrirAba('catalogo', document.querySelectorAll('.tab-btn')[0]);
-            }, 1000);
+            try {
+                await fetch(API_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({ setor: estado.setor, acao: tipo, pessoa: p, modelo: m, quantidade: q })
+                });
+                
+                if(btnEl) btnEl.innerText = 'Sucesso!';
+                toast(`✅ ${tipo} de ${q}x registrada!`);
+                
+                setTimeout(() => {
+                    if(btnEl) btnEl.innerText = isSaida ? 'Confirmar Retirada' : 'Lançar no Estoque';
+                    carregarDados();
+                    abrirAba('catalogo', document.querySelectorAll('.tab-btn')[0]);
+                }, 1200);
+            } catch(e) {
+                alert('❌ Erro ao salvar lançamento. Tente novamente.');
+                if(btnEl) btnEl.innerText = isSaida ? 'Confirmar Retirada' : 'Lançar no Estoque';
+            }
         }
 
         function abrirAba(id, btn) {
