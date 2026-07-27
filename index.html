@@ -6,340 +6,525 @@
     <title>Portal Logística</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
+        /* =========================================
+           VARIÁVEIS DE TEMA E CORES
+           ========================================= */
         :root {
-            --prim: #F38020;
-            --glow: rgba(243,128,32,0.35);
-            --bg: #050608;
-            --card-bg: rgba(15, 17, 24, 0.7);
+            --prim: #F38020; --sec: #dc2626;
+            --glow1: rgba(243,128,32,0.3); --glow2: rgba(220,38,38,0.15);
+            --grad-btn: linear-gradient(145deg, #ffb15f, #F38020, #dc2626);
+            --bg-dark: #050608; --panel-bg: linear-gradient(145deg, rgba(31,36,55,.92), rgba(7,9,16,.96));
         }
+
         body, html {
             margin: 0; padding: 0; font-family: 'Poppins', sans-serif;
-            background-color: var(--bg); color: white; min-height: 100vh;
+            background-color: var(--bg-dark); color: #f8fafc; overflow-x: hidden;
+            background: radial-gradient(circle at 12% 8%, var(--glow1), transparent 30rem),
+                        radial-gradient(circle at 86% 12%, var(--glow2), transparent 28rem),
+                        linear-gradient(135deg, #050608, #111827 50%, #050608);
+            background-attachment: fixed; min-height: 100vh;
         }
-        .bg-glow {
-            position: fixed; width: 60vw; height: 60vw;
-            background: radial-gradient(circle, var(--glow) 0%, transparent 60%);
-            top: 50%; left: 50%; transform: translate(-50%, -50%);
-            z-index: -1; filter: blur(80px); transition: background 0.8s ease;
-        }
-        
-        /* LOGIN WIZARD */
-        .login-wrap {
-            height: 100vh; display: flex; align-items: center; justify-content: center;
+
+        * { box-sizing: border-box; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+
+        /* =========================================
+           LOGIN WIZARD
+           ========================================= */
+        #login-screen {
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            position: relative; z-index: 10;
         }
         .login-card {
-            background: var(--card-bg); border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 32px; padding: 40px 30px; width: 85vw; max-width: 400px;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1);
-            backdrop-filter: blur(25px); text-align: center;
-            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            width: 90%; max-width: 440px; background: rgba(15, 17, 24, 0.65);
+            border: 1px solid rgba(255,255,255,0.08); border-radius: 28px; padding: 30px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.5); backdrop-filter: blur(28px);
+            text-align: center;
         }
-        @keyframes slideUp {
-            from { transform: translateY(30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        .icon {
-            width: 65px; height: 65px; margin: 0 auto 15px;
-            background: linear-gradient(145deg, #ffb15f, var(--prim));
+        .login-icon {
+            width: 60px; height: 60px; margin: 0 auto 12px; background: var(--grad-btn);
             border-radius: 20px; display: flex; align-items: center; justify-content: center;
-            font-size: 30px; box-shadow: 0 14px 30px var(--glow); transition: all 0.6s ease;
+            font-size: 28px; box-shadow: 0 12px 28px var(--glow1); transition: all 0.5s;
         }
-        h1 { font-size: 24px; margin: 0 0 5px; font-weight: 900; }
-        p { color: #9ca3af; font-size: 13px; margin: 0 0 25px; }
-        
-        .btn {
-            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
-            color: white; padding: 15px; border-radius: 16px; width: 100%;
-            font-family: inherit; font-weight: 700; font-size: 14.5px; cursor: pointer;
-            margin-bottom: 12px; transition: all 0.2s ease;
-        }
-        .btn:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
-        .btn-primary {
-            background: linear-gradient(145deg, #ffb15f, var(--prim)); border: none;
-            box-shadow: 0 8px 20px var(--glow);
+        .login-card h2 { margin: 0 0 5px; font-weight: 900; font-size: 24px; }
+        .login-card p { color: #9ca3af; font-size: 13px; margin: 0 0 20px; }
+        .step-title {
+            color: #cbd5e1; font-size: 11px; font-weight: 700; letter-spacing: 1px;
+            margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;
         }
         .step { display: none; }
-        .step.active { display: block; animation: fadeIn 0.3s ease forwards; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .step.active { display: block; animation: fadeSlideUp 0.4s forwards; }
+
+        /* =========================================
+           BOTÕES E INPUTS GERAIS
+           ========================================= */
+        button, input, select { font-family: inherit; outline: none; }
+        .btn {
+            background: linear-gradient(145deg, #262b3c, #10131d); color: white;
+            border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; padding: 15px;
+            width: 100%; font-weight: 700; font-size: 14.5px; cursor: pointer; margin-bottom: 10px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3); transition: all 0.2s;
+        }
+        .btn:hover { transform: translateY(-2px); border-color: var(--glow1); }
+        .btn-primary { background: var(--grad-btn); border: none; box-shadow: 0 8px 20px var(--glow1); }
+        .btn-text { background: transparent; border: none; box-shadow: none; color: #9ca3af; font-size: 13px; padding: 5px;}
         
         input, select {
-            width: 100%; padding: 15px; border-radius: 14px; background: rgba(0,0,0,0.4);
-            border: 1px solid rgba(255,255,255,0.1); color: white; font-family: inherit; font-size: 15px;
-            margin-bottom: 20px; box-sizing: border-box; outline: none; transition: all 0.3s ease;
+            width: 100%; padding: 15px; border-radius: 14px; background: rgba(5,6,8,0.7);
+            border: 1px solid rgba(255,255,255,0.14); color: white; margin-bottom: 15px; transition: 0.3s;
         }
-        input:focus, select:focus { border-color: var(--prim); box-shadow: 0 0 0 2px var(--glow); }
-        .voltar { background: transparent; border: none; color: #6b7280; font-size: 13px; margin-top: 5px; }
+        input:focus, select:focus { border-color: var(--prim); box-shadow: 0 0 0 2px var(--glow1); }
 
-        /* DASHBOARD PRINCIPAL */
-        #dashboard { display: none; padding: 20px; max-width: 1100px; margin: 0 auto; }
-        .header-dash {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 20px 0; border-bottom: 1px solid rgba(255,255,255,0.08);
-        }
-        .badge {
-            background: var(--glow); border: 1px solid var(--prim); color: #fff;
-            padding: 6px 14px; border-radius: 999px; font-size: 11px; font-weight: 800; letter-spacing: 1px;
-        }
+        /* =========================================
+           LAYOUT PRINCIPAL (SIDEBAR + CONTEÚDO)
+           ========================================= */
+        #app-layout { display: none; height: 100vh; overflow: hidden; }
         
-        /* KPIS */
-        .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 25px 0; }
-        .kpi-card {
-            background: var(--card-bg); border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 20px; padding: 20px; backdrop-filter: blur(20px);
+        /* SIDEBAR (VIDRO) */
+        .sidebar {
+            width: 280px; background: rgba(10, 12, 18, 0.2); backdrop-filter: blur(25px);
+            border-right: 1px solid rgba(255,255,255,0.06); height: 100%; padding: 20px;
+            display: flex; flex-direction: column; position: fixed; left: 0; top: 0; z-index: 100;
+            transition: transform 0.3s ease;
         }
-        .kpi-card span { font-size: 11px; color: #9ca3af; text-transform: uppercase; font-weight: 800; }
-        .kpi-card b { display: block; font-size: 28px; margin-top: 5px; color: var(--prim); }
+        .sidebar .logo { font-size: 24px; font-weight: 900; text-align: center; margin-bottom: 20px; }
+        .sidebar .logo span { background: var(--grad-btn); -webkit-background-clip: text; color: transparent; }
+        .profile-pill {
+            background: rgba(5,7,12,0.54); border: 1px solid rgba(255,255,255,0.13);
+            border-radius: 18px; padding: 12px; text-align: center; color: #cbd5e1; margin-bottom: 20px;
+        }
+        .profile-pill b { color: var(--prim); display: block; font-size: 18px;}
+        
+        /* CONTEÚDO PRINCIPAL */
+        .main-content {
+            margin-left: 280px; padding: 30px; height: 100vh; overflow-y: auto; width: calc(100% - 280px);
+        }
 
-        /* TABS NAV */
-        .tabs-nav {
-            display: flex; gap: 8px; background: rgba(10,12,18,0.8); padding: 8px;
-            border-radius: 18px; border: 1px solid rgba(255,255,255,0.08); overflow-x: auto; margin-bottom: 25px;
+        /* HEADER MOBILE */
+        .mobile-header { display: none; padding: 15px; background: rgba(10,12,18,0.8); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.08); align-items: center; justify-content: space-between;}
+        .menu-toggle { background: transparent; border: none; color: white; font-size: 24px; cursor: pointer; }
+
+        /* =========================================
+           PAINEL, HEROS E KPIS
+           ========================================= */
+        .hero { background: var(--panel-bg); border: 1px solid rgba(255,255,255,0.14); border-radius: 28px; padding: 26px; margin-bottom: 22px; animation: fadeSlideUp 0.6s; }
+        .badge { background: var(--glow2); border: 1px solid var(--glow1); color: #fff; padding: 6px 12px; border-radius: 999px; font-size: 11px; font-weight: 900; display: inline-block; margin-bottom: 10px;}
+        .hero h1 { margin: 0 0 5px; font-size: 32px; font-weight: 900; }
+        .hero p { margin: 0; color: #9ca3af; font-size: 14px; }
+        
+        .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-top: 20px; }
+        .kpi { background: rgba(5,7,12,0.48); border: 1px solid rgba(255,255,255,0.12); border-radius: 20px; padding: 15px; }
+        .kpi span { font-size: 11px; color: #9ca3af; font-weight: 800; text-transform: uppercase; }
+        .kpi b { display: block; font-size: 24px; margin-top: 5px; }
+
+        .danger-glow { border-left: 5px solid #ef4444; background: linear-gradient(90deg, rgba(127,29,29,0.8), rgba(31,41,55,0.75)); padding: 15px; border-radius: 18px; margin-bottom: 20px; color: #fecaca; font-size: 14px;}
+
+        /* =========================================
+           ABAS E JANELAS (TABS)
+           ========================================= */
+        .tabs-list {
+            display: flex; gap: 6px; background: linear-gradient(180deg, rgba(20,22,32,0.75), rgba(8,9,14,0.85));
+            padding: 10px; border-radius: 22px; border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: inset 0 4px 14px rgba(0,0,0,0.55); backdrop-filter: blur(22px); margin-bottom: 25px;
+            overflow-x: auto; white-space: nowrap;
         }
         .tab-btn {
-            background: transparent; border: none; color: #9ca3af; padding: 10px 20px;
-            border-radius: 12px; font-family: inherit; font-weight: 700; cursor: pointer; white-space: nowrap;
+            background: transparent; border: none; color: #9ca3af; font-weight: 700; padding: 12px 22px;
+            border-radius: 16px; cursor: pointer; transition: 0.3s;
         }
-        .tab-btn.active { background: linear-gradient(145deg, #ffb15f, var(--prim)); color: white; box-shadow: 0 4px 15px var(--glow); }
+        .tab-btn.active { background: var(--grad-btn); color: white; box-shadow: 0 6px 20px var(--glow1); font-weight: 900;}
+        .tab-content { display: none; animation: fadeSlideUp 0.4s; }
+        .tab-content.active { display: block; }
+        
+        .panel { background: var(--panel-bg); border: 1px solid rgba(255,255,255,0.14); border-radius: 28px; padding: 26px; }
+        .panel h3 { margin: 0 0 5px; font-size: 20px; }
+        .panel p.sub { color: #9ca3af; font-size: 13px; margin: 0 0 20px; }
 
-        /* GRID ESTOQUE */
-        .grid-estoque { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; }
-        .item-card {
-            background: var(--card-bg); border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 18px; padding: 20px; text-align: center; backdrop-filter: blur(20px);
+        /* =========================================
+           CATÁLOGO E MODAL (POP-UP)
+           ========================================= */
+        .grid-catalogo { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+        
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 1000;
+            display: none; align-items: center; justify-content: center;
         }
-        .item-card h4 { margin: 0 0 10px; font-size: 15px; }
-        .item-card .qtd { font-size: 32px; font-weight: 900; color: var(--prim); }
+        .modal {
+            background: var(--panel-bg); border: 1px solid rgba(255,255,255,0.14);
+            border-radius: 28px; padding: 30px; width: 90%; max-width: 500px;
+            max-height: 80vh; overflow-y: auto; box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+            animation: fadeSlideUp 0.3s;
+        }
+        .card-detalhe {
+            background: linear-gradient(145deg,#202638,#0b0d14); border: 1px solid rgba(255,255,255,.12);
+            border-radius: 18px; padding: 16px; text-align: center; margin-bottom: 12px;
+        }
+        .card-detalhe span { font-size: 12px; color: #a7adb8; text-transform: uppercase; font-weight: 900;}
+        .card-detalhe b { display: block; font-size: 30px; color: var(--prim); font-weight: 900; margin: 5px 0;}
+        .card-detalhe small { font-size: 12px; color: #d1d5db; }
 
-        /* TOAST FLOATING NOTIFICATION */
-        .toast {
-            position: fixed; bottom: 20px; right: 20px; background: #10b981; color: white;
-            padding: 14px 22px; border-radius: 14px; font-weight: 700; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            display: none; animation: slideIn 0.3s forwards; z-index: 999;
+        /* =========================================
+           HISTÓRICO
+           ========================================= */
+        .history-card {
+            display: grid; grid-template-columns: 1fr 1fr 1fr 2fr 0.5fr; gap: 10px; align-items: center;
+            background: linear-gradient(145deg,rgba(24,29,43,.92),rgba(8,10,16,.96));
+            border: 1px solid rgba(255,255,255,.12); border-radius: 18px; padding: 12px 14px; margin-bottom: 10px;
+            font-size: 13px;
         }
-        @keyframes slideIn { from { transform: translateY(100px); } to { transform: translateY(0); } }
+        .hist-head { color: #9ca3af; font-size: 11px; font-weight: 900; text-transform: uppercase; border: none; background: transparent; padding: 0 14px;}
+        .badge-acao { font-weight: 900; border-radius: 99px; padding: 5px 10px; text-align: center; font-size: 11px; }
+        .acao-entrada { background: rgba(16,185,129,.15); color: #86efac; border: 1px solid rgba(16,185,129,.35); }
+        .acao-saida { background: rgba(239,68,68,.15); color: #fecaca; border: 1px solid rgba(239,68,68,.35); }
+
+        @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* TOAST NOTIFICATION */
+        #toast { position: fixed; bottom: 20px; right: 20px; background: #10b981; color: white; padding: 15px 25px; border-radius: 16px; font-weight: 700; z-index: 2000; display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.4); animation: fadeSlideUp 0.3s;}
+
+        /* RESPONSIVO MOBILE */
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0; width: 100%; padding: 15px; }
+            .mobile-header { display: flex; }
+            .history-card { grid-template-columns: 1fr; gap: 5px; text-align: center; padding: 15px;}
+            .hist-head { display: none; }
+        }
     </style>
 </head>
 <body>
+
     <script>
-        // LINK DO GOOGLE APPS SCRIPT INTEGRADO
+        // ==========================================
+        // https://script.google.com/macros/s/AKfycbxyWRv8Zd_jdSCmU5Co6pICdKLhHjkktTb97UN3-b1kJInU6HgccxhtvAU91XPRTuxm1w/exec
+        // ==========================================
         const API_URL = "https://script.google.com/macros/s/AKfycbxyWRv8Zd_jdSCmU5Co6pICdKLhHjkktTb97UN3-b1kJInU6HgccxhtvAU91XPRTuxm1w/exec";
 
-        let estado = { setor: 'Caixas', perfil: '', dados: null };
-
-        const EQUIPES = {
-            'Caixas': ['Marcello', 'Fabiano', 'Sérgio'],
-            'Torres': ['Fran', 'Henrique', 'Leonardo', 'Patrick']
-        };
+        let estado = { setor: '', perfil: '', dados: null };
+        const EQUIPES = { 'Caixas': ['Marcello', 'Fabiano', 'Sérgio'], 'Torres': ['Fran', 'Henrique', 'Leonardo', 'Patrick'] };
         const SENHAS = { 'Caixas': 'marcello123', 'Torres': 'fran123', 'coord': 'coord123' };
     </script>
 
-    <div class="bg-glow"></div>
-    <div id="toast" class="toast"></div>
+    <div id="toast">✅ Operação realizada!</div>
 
-    <!-- TELA DE LOGIN -->
-    <div class="login-wrap" id="login-screen">
+    <!-- =========================================
+         WIZARD DE LOGIN
+         ========================================= -->
+    <div id="login-screen">
         <div class="login-card">
-            <div class="icon" id="logo-icon">⬢</div>
-            <h1>Portal Logística</h1>
+            <div class="login-icon" id="logo-icon">⬢</div>
+            <h2>Portal Logística</h2>
             <p>Sistema Integrado de Gestão</p>
 
             <div id="step1" class="step active">
-                <div style="font-size:11px; color:#cbd5e1; margin-bottom:15px; font-weight:700;">PASSO 1: SELECIONE O SETOR</div>
+                <div class="step-title">PASSO 1: SELECIONE O SETOR</div>
                 <button class="btn" onclick="escolherSetor('Caixas')">📦 CAIXAS</button>
                 <button class="btn" onclick="escolherSetor('Torres')">🗼 TORRES</button>
             </div>
 
             <div id="step2" class="step">
-                <div style="font-size:11px; color:#cbd5e1; margin-bottom:15px; font-weight:700;">SETOR <span id="lbl-setor"></span> • PERFIL</div>
+                <div class="step-title">SETOR <span id="lbl-setor"></span> • PERFIL</div>
                 <button class="btn" onclick="logar('equipe')">👀 Equipe (Visualização)</button>
                 <button class="btn" onclick="irParaSenha('controle')">⚙️ Controle Operacional</button>
                 <button class="btn" onclick="irParaSenha('coord')">👑 Coordenação Master</button>
-                <button class="btn voltar" onclick="voltar(1)">⬅️ Voltar</button>
+                <button class="btn btn-text" onclick="voltar(1)">⬅️ Voltar aos Setores</button>
             </div>
 
             <div id="step3" class="step">
-                <div style="font-size:11px; color:#cbd5e1; margin-bottom:15px; font-weight:700;">DIGITE A SENHA DE ACESSO</div>
-                <input type="password" placeholder="••••••••" id="senha-input">
-                <button class="btn btn-primary" onclick="validarSenha()">ENTRAR NO PAINEL</button>
-                <button class="btn voltar" onclick="voltar(2)">⬅️ Voltar</button>
+                <div class="step-title">DIGITE SUA SENHA</div>
+                <input type="password" id="senha-input" placeholder="••••••••">
+                <button class="btn btn-primary" onclick="validarSenha()">ENTRAR NO SISTEMA</button>
+                <button class="btn btn-text" onclick="voltar(2)">⬅️ Voltar</button>
             </div>
         </div>
     </div>
 
-    <!-- DASHBOARD PRINCIPAL -->
-    <div id="dashboard">
-        <div class="header-dash">
-            <div>
-                <span class="badge" id="badge-setor">SETOR CAIXAS</span>
-                <h2 style="margin: 5px 0 0; font-size: 22px;">Painel Operacional</h2>
+    <!-- =========================================
+         SISTEMA PRINCIPAL
+         ========================================= -->
+    <div id="app-layout">
+        
+        <!-- HEADER MOBILE -->
+        <div class="mobile-header">
+            <div style="font-weight: 900; font-size: 18px;">⬢ <span id="mob-setor">SISTEMA</span></div>
+            <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+        </div>
+
+        <!-- SIDEBAR -->
+        <div class="sidebar" id="sidebar">
+            <div class="logo">⬢ SETOR <br><span id="side-setor">NOME</span></div>
+            <div class="profile-pill"><span>PERFIL ATIVO</span><br><b id="side-perfil">PERFIL</b></div>
+            <div style="flex:1"></div>
+            <button class="btn" onclick="carregarDados()">🔄 Sincronizar Base</button>
+            <button class="btn btn-primary" onclick="location.reload()">🚪 Sair (Logout)</button>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div class="main-content">
+            <div class="hero">
+                <div class="badge" id="badge-top">SETOR</div>
+                <h1>Painel Operacional</h1>
+                <p>Controle unificado de estoque com validação de saldo e histórico em tempo real.</p>
+                <div id="alerta-zerados"></div>
+                
+                <div class="kpis">
+                    <div class="kpi"><span>Peças em Estoque</span><b id="kpi-pecas">0</b></div>
+                    <div class="kpi"><span>Modelos Cadastrados</span><b id="kpi-modelos">0</b></div>
+                    <div class="kpi"><span>Itens Zerados</span><b id="kpi-zerados" style="color: #ef4444;">0</b></div>
+                </div>
             </div>
-            <button class="btn" style="width: auto; padding: 8px 16px; margin:0;" onclick="logout()">🚪 Sair</button>
-        </div>
 
-        <div class="kpis">
-            <div class="kpi-card"><span>Peças em Estoque</span><b id="kpi-total">0</b></div>
-            <div class="kpi-card"><span>Modelos Cadastrados</span><b id="kpi-modelos">0</b></div>
-            <div class="kpi-card"><span>Itens Zerados</span><b id="kpi-zerados" style="color:#ef4444">0</b></div>
-        </div>
-
-        <div class="tabs-nav">
-            <button class="tab-btn active" onclick="mudarAba('catalogo', this)">🗂️ Catálogo</button>
-            <button class="tab-btn" onclick="mudarAba('saida', this)">📤 Saídas</button>
-            <button class="tab-btn" onclick="mudarAba('entrada', this)">📥 Entradas</button>
-        </div>
-
-        <!-- CONTEÚDO TAB CATALOGO -->
-        <div id="tab-catalogo">
-            <input type="text" placeholder="🔍 Buscar modelo..." oninput="filtrarEstoque(this.value)">
-            <div class="grid-estoque" id="grid-estoque"></div>
-        </div>
-
-        <!-- CONTEÚDO TAB SAÍDA -->
-        <div id="tab-saida" style="display:none;">
-            <div class="kpi-card">
-                <h3>📤 Registrar Saída</h3>
-                <select id="saida-pessoa"></select>
-                <select id="saida-modelo"></select>
-                <input type="number" id="saida-qtd" value="1" min="1" placeholder="Quantidade">
-                <button class="btn btn-primary" onclick="salvarMovimento('Saída')">Confirmar Saída</button>
+            <!-- TABS -->
+            <div class="tabs-list" id="nav-tabs">
+                <button class="tab-btn active" onclick="abrirAba('catalogo', this)">🗂️ Catálogo</button>
+                <button class="tab-btn" onclick="abrirAba('saida', this)">📤 Saídas</button>
+                <button class="tab-btn" onclick="abrirAba('entrada', this)">📥 Entradas</button>
+                <button class="tab-btn" onclick="abrirAba('historico', this)">🕒 Histórico</button>
             </div>
-        </div>
 
-        <!-- CONTEÚDO TAB ENTRADA -->
-        <div id="tab-entrada" style="display:none;">
-            <div class="kpi-card">
-                <h3>📥 Registrar Entrada</h3>
-                <select id="entrada-pessoa"></select>
-                <select id="entrada-modelo"></select>
-                <input type="number" id="entrada-qtd" value="1" min="1" placeholder="Quantidade">
-                <button class="btn btn-primary" onclick="salvarMovimento('Entrada')">Confirmar Entrada</button>
+            <!-- ABA CATÁLOGO -->
+            <div id="tab-catalogo" class="tab-content active panel">
+                <h3>🗂️ Catálogo de Estoque</h3>
+                <p class="sub">Selecione um modelo para ver os detalhes de cores e tamanhos.</p>
+                <input type="text" id="busca-cat" placeholder="🔍 Pesquisar modelo..." oninput="renderizarCatalogo(this.value)">
+                <div class="grid-catalogo" id="grid-cat"></div>
+            </div>
+
+            <!-- ABA SAÍDA -->
+            <div id="tab-saida" class="tab-content panel">
+                <h3>📤 Janela de Saídas</h3>
+                <p class="sub">Registre retiradas com validação automática de saldo.</p>
+                <select id="s-pessoa"></select>
+                <select id="s-modelo"></select>
+                <input type="number" id="s-qtd" value="1" min="1">
+                <button class="btn btn-primary" onclick="lancar('Saída')">Confirmar Retirada</button>
+            </div>
+
+            <!-- ABA ENTRADA -->
+            <div id="tab-entrada" class="tab-content panel">
+                <h3>📥 Janela de Entradas</h3>
+                <p class="sub">Lance produção e reposição no estoque conectado.</p>
+                <select id="e-pessoa"></select>
+                <select id="e-modelo"></select>
+                <input type="number" id="e-qtd" value="1" min="1">
+                <button class="btn btn-primary" onclick="lancar('Entrada')">Lançar no Estoque</button>
+            </div>
+
+            <!-- ABA HISTÓRICO -->
+            <div id="tab-historico" class="tab-content panel">
+                <h3>🕒 Janela de Histórico</h3>
+                <p class="sub">Últimos lançamentos sincronizados com a planilha.</p>
+                <div class="history-card hist-head">
+                    <div>Data</div><div>Ação</div><div>Separador</div><div>Modelo</div><div>Qtd</div>
+                </div>
+                <div id="lista-historico"></div>
             </div>
         </div>
     </div>
 
+    <!-- MODAL DETALHE DO MODELO -->
+    <div class="modal-overlay" id="modal-detalhe">
+        <div class="modal">
+            <h2 id="modal-titulo" style="text-align:center; margin:0 0 5px;">Modelo</h2>
+            <p id="modal-total" style="text-align:center; color:var(--prim); font-weight:900; margin:0 0 20px;">Total: 0 un.</p>
+            <div id="modal-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;"></div>
+            <button class="btn" style="margin-top:20px;" onclick="fecharModal()">Fechar</button>
+        </div>
+    </div>
+
+    <!-- SCRIPT DE FUNCIONAMENTO -->
     <script>
-        function escolherSetor(setor) {
-            estado.setor = setor;
+        function escolherSetor(s) {
+            estado.setor = s;
             document.getElementById('step1').classList.remove('active');
             document.getElementById('step2').classList.add('active');
-            document.getElementById('lbl-setor').innerText = setor.toUpperCase();
+            document.getElementById('lbl-setor').innerText = s.toUpperCase();
 
+            // Troca de Tema Dinâmico
             const r = document.querySelector(':root');
-            if(setor === 'Torres') {
-                r.style.setProperty('--prim', '#0ea5e9');
-                r.style.setProperty('--glow', 'rgba(14,165,233,0.35)');
+            if(s === 'Torres') {
+                r.style.setProperty('--prim', '#0ea5e9'); r.style.setProperty('--sec', '#3b82f6');
+                r.style.setProperty('--glow1', 'rgba(14,165,233,0.3)'); r.style.setProperty('--glow2', 'rgba(59,130,246,0.15)');
+                r.style.setProperty('--grad-btn', 'linear-gradient(145deg, #38bdf8, #0ea5e9, #2563eb)');
             } else {
-                r.style.setProperty('--prim', '#F38020');
-                r.style.setProperty('--glow', 'rgba(243,128,32,0.35)');
+                r.style.setProperty('--prim', '#F38020'); r.style.setProperty('--sec', '#dc2626');
+                r.style.setProperty('--glow1', 'rgba(243,128,32,0.3)'); r.style.setProperty('--glow2', 'rgba(220,38,38,0.15)');
+                r.style.setProperty('--grad-btn', 'linear-gradient(145deg, #ffb15f, #F38020, #dc2626)');
             }
         }
 
-        function irParaSenha(perfil) {
-            estado.perfil = perfil;
-            document.getElementById('step2').classList.remove('active');
-            document.getElementById('step3').classList.add('active');
-        }
-
-        function voltar(p) {
-            document.querySelectorAll('.step').forEach(e => e.classList.remove('active'));
-            document.getElementById('step' + p).classList.add('active');
-        }
-
+        function irParaSenha(p) { estado.perfil = p; document.getElementById('step2').classList.remove('active'); document.getElementById('step3').classList.add('active'); }
+        function voltar(p) { document.querySelectorAll('.step').forEach(e => e.classList.remove('active')); document.getElementById('step'+p).classList.add('active'); }
+        
         function validarSenha() {
-            let pwd = document.getElementById('senha-input').value;
-            let correta = estado.perfil === 'coord' ? SENHAS.coord : SENHAS[estado.setor];
-            if(pwd === correta) { logar(estado.perfil); } else { alert('❌ Senha incorreta!'); }
+            let s = document.getElementById('senha-input').value;
+            if(s === (estado.perfil === 'coord' ? SENHAS.coord : SENHAS[estado.setor])) logar(estado.perfil);
+            else alert('❌ Senha Incorreta');
         }
 
-        async function logar(perfil) {
-            estado.perfil = perfil;
+        function logar(p) {
+            estado.perfil = p;
             document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('dashboard').style.display = 'block';
-            document.getElementById('badge-setor').innerText = 'SETOR ' + estado.setor.toUpperCase();
-            await carregarDados();
+            document.getElementById('app-layout').style.display = 'block';
+            
+            document.getElementById('side-setor').innerText = estado.setor.toUpperCase();
+            document.getElementById('mob-setor').innerText = estado.setor.toUpperCase();
+            document.getElementById('side-perfil').innerText = estado.perfil.toUpperCase();
+            document.getElementById('badge-top').innerText = 'ACESSO ' + estado.perfil.toUpperCase();
+            
+            // Controle de visualização de abas
+            if(p === 'equipe') {
+                document.querySelectorAll('.tab-btn').forEach((b,i) => { if(i>0) b.style.display='none'; });
+            }
+            carregarDados();
         }
 
         async function carregarDados() {
-            mostrarToast("⏳ Carregando planilha de " + estado.setor + "...");
+            toast('⏳ Sincronizando com o Google Sheets...');
             try {
-                let res = await fetch(`${API_URL}?setor=${estado.setor}`);
-                let json = await res.json();
-                estado.dados = json;
-                renderizarDashboard();
-                mostrarToast("✅ Sincronizado com sucesso!");
-            } catch(e) {
-                alert("⚠️ Erro ao carregar dados. Verifique a URL do Apps Script.");
-            }
+                let r = await fetch(`${API_URL}?setor=${estado.setor}`);
+                estado.dados = await r.json();
+                renderizarInterface();
+                toast('✅ Base de dados atualizada!');
+            } catch(e) { alert('Erro de conexão!'); }
         }
 
-        function renderizarDashboard() {
-            let estoque = estado.dados.estoque;
-            let total = 0, zerados = 0, modelos = estoque.length - 1;
+        function renderizarInterface() {
+            let est = estado.dados.estoque;
+            let hist = estado.dados.historico;
             
-            let grid = document.getElementById('grid-estoque');
-            let selSaidaModelo = document.getElementById('saida-modelo');
-            let selEntradaModelo = document.getElementById('entrada-modelo');
-            
-            grid.innerHTML = '';
-            selSaidaModelo.innerHTML = '';
-            selEntradaModelo.innerHTML = '';
+            // Popula Selects de Equipe
+            let htmlPessoas = '<option value="">Selecione o Separador...</option>';
+            EQUIPES[estado.setor].forEach(p => htmlPessoas += `<option value="${p}">${p}</option>`);
+            document.getElementById('s-pessoa').innerHTML = htmlPessoas;
+            document.getElementById('e-pessoa').innerHTML = htmlPessoas;
 
-            for(let i = 1; i < estoque.length; i++) {
-                let mod = estoque[i][0];
-                let qtd = Number(estoque[i][1]) || 0;
-                total += qtd;
-                if(qtd === 0) zerados++;
+            // Processa Estoque
+            let htmlModelos = '<option value="">Selecione o Modelo...</option>';
+            let totPecas = 0, zerados = [];
+            estado.catalogoLimpo = []; // Array estruturado
 
-                grid.innerHTML += `<div class="item-card"><h4>${mod}</h4><div class="qtd">${qtd}</div></div>`;
-                selSaidaModelo.innerHTML += `<option value="${mod}">${mod} (Saldo: ${qtd})</option>`;
-                selEntradaModelo.innerHTML += `<option value="${mod}">${mod}</option>`;
+            for(let i=1; i<est.length; i++) {
+                let nome = est[i][0]; let qtd = Number(est[i][1])||0;
+                if(!nome) continue;
+                totPecas += qtd;
+                if(qtd === 0) zerados.push(nome);
+                
+                htmlModelos += `<option value="${nome}">${nome} (Estoque: ${qtd})</option>`;
+                
+                let partes = nome.split(' - ');
+                let linha = partes[0];
+                let cor = partes.length > 1 ? partes[1] : 'Padrão';
+                
+                let item = estado.catalogoLimpo.find(x => x.linha === linha);
+                if(!item) { item = { linha: linha, total: 0, detalhes: [] }; estado.catalogoLimpo.push(item); }
+                item.total += qtd;
+                item.detalhes.push({ nomeC: nome, cor: cor, qtd: qtd });
             }
 
-            document.getElementById('kpi-total').innerText = total;
-            document.getElementById('kpi-modelos').innerText = modelos;
-            document.getElementById('kpi-zerados').innerText = zerados;
+            document.getElementById('s-modelo').innerHTML = htmlModelos;
+            document.getElementById('e-modelo').innerHTML = htmlModelos;
+            document.getElementById('kpi-pecas').innerText = totPecas;
+            document.getElementById('kpi-modelos').innerText = (est.length - 1);
+            document.getElementById('kpi-zerados').innerText = zerados.length;
+            
+            let divAlerta = document.getElementById('alerta-zerados');
+            divAlerta.innerHTML = zerados.length > 0 ? `<div class="danger-glow">🚨 <b>ALERTA:</b> Há ${zerados.length} modelos totalmente zerados.</div>` : '';
 
-            // Pessoas
-            let selPessoaS = document.getElementById('saida-pessoa');
-            let selPessoaE = document.getElementById('entrada-pessoa');
-            selPessoaS.innerHTML = ''; selPessoaE.innerHTML = '';
-            EQUIPES[estado.setor].forEach(p => {
-                selPessoaS.innerHTML += `<option value="${p}">${p}</option>`;
-                selPessoaE.innerHTML += `<option value="${p}">${p}</option>`;
+            renderizarCatalogo('');
+            
+            // Processa Histórico
+            let htmlHist = '';
+            for(let i = hist.length - 1; i > 0; i--) { // Inverso para mais recentes primeiro
+                if(!hist[i][0]) continue;
+                let data = hist[i][1].split(' ')[0];
+                let acao = hist[i][2]; let pess = hist[i][3]; let mod = hist[i][4]; let qt = hist[i][5];
+                let classeAcao = acao === 'Entrada' ? 'acao-entrada' : 'acao-saida';
+                let icone = acao === 'Entrada' ? '📥' : '📤';
+                
+                htmlHist += `<div class='history-card'>
+                    <div>${data}</div>
+                    <div class='badge-acao ${classeAcao}'>${icone} ${acao}</div>
+                    <div>${pess}</div>
+                    <div>${mod}</div>
+                    <div style="font-weight:900; color:var(--prim); text-align:center">${qt}</div>
+                </div>`;
+            }
+            document.getElementById('lista-historico').innerHTML = htmlHist || '<p>Nenhum histórico encontrado.</p>';
+        }
+
+        function renderizarCatalogo(busca) {
+            let html = '';
+            let b = busca.toLowerCase();
+            estado.catalogoLimpo.forEach((item, index) => {
+                if(item.linha.toLowerCase().includes(b)) {
+                    let icone = item.total === 0 ? '🔴' : (item.total <= 5 ? '🟡' : '📦');
+                    html += `<button class="btn" style="min-height:70px" onclick="abrirModal(${index})">${icone} ${item.linha} <br><span style="font-size:12px; font-weight:400">Total: ${item.total} un.</span></button>`;
+                }
             });
+            document.getElementById('grid-cat').innerHTML = html || '<p style="color:#9ca3af">Nenhum modelo encontrado.</p>';
         }
 
-        async function salvarMovimento(tipo) {
-            let isSaida = tipo === 'Saída';
-            let pessoa = document.getElementById(isSaida ? 'saida-pessoa' : 'entrada-pessoa').value;
-            let modelo = document.getElementById(isSaida ? 'saida-modelo' : 'entrada-modelo').value;
-            let qtd = document.getElementById(isSaida ? 'saida-qtd' : 'entrada-qtd').value;
+        function abrirModal(idx) {
+            let item = estado.catalogoLimpo[idx];
+            document.getElementById('modal-titulo').innerText = item.linha;
+            document.getElementById('modal-total').innerText = `Estoque Total: ${item.total} un.`;
+            
+            let html = '';
+            item.detalhes.forEach(d => {
+                let status = d.qtd === 0 ? '🔴 Zerado' : (d.qtd <= 5 ? '🟡 Baixo' : '🟢 OK');
+                html += `<div class="card-detalhe">
+                    <span>${d.cor}</span>
+                    <b>${d.qtd}</b>
+                    <small>${status}</small>
+                </div>`;
+            });
+            document.getElementById('modal-grid').innerHTML = html;
+            document.getElementById('modal-detalhe').style.display = 'flex';
+        }
+        function fecharModal() { document.getElementById('modal-detalhe').style.display = 'none'; }
 
-            mostrarToast(`💾 Gravando ${tipo}...`);
+        async function lancar(tipo) {
+            let pfx = tipo === 'Entrada' ? 'e' : 's';
+            let p = document.getElementById(`${pfx}-pessoa`).value;
+            let m = document.getElementById(`${pfx}-modelo`).value;
+            let q = document.getElementById(`${pfx}-qtd`).value;
+
+            if(!p || !m) return alert('⚠️ Preencha Separador e Modelo!');
+            
+            document.querySelector(`#tab-${tipo.toLowerCase()} .btn-primary`).innerText = 'Gravando...';
+            
             await fetch(API_URL, {
                 method: 'POST',
-                body: JSON.stringify({ setor: estado.setor, acao: tipo, pessoa, modelo, quantidade: qtd })
+                body: JSON.stringify({ setor: estado.setor, acao: tipo, pessoa: p, modelo: m, quantidade: q })
             });
-
-            await carregarDados();
-            mudarAba('catalogo', document.querySelectorAll('.tab-btn')[0]);
+            
+            document.querySelector(`#tab-${tipo.toLowerCase()} .btn-primary`).innerText = 'Sucesso!';
+            toast(`✅ ${tipo} de ${q}x registrada!`);
+            
+            setTimeout(() => {
+                document.querySelector(`#tab-${tipo.toLowerCase()} .btn-primary`).innerText = tipo==='Entrada' ? 'Lançar no Estoque' : 'Confirmar Retirada';
+                carregarDados();
+                abrirAba('catalogo', document.querySelectorAll('.tab-btn')[0]);
+            }, 1000);
         }
 
-        function mudarAba(nome, btn) {
+        function abrirAba(id, btn) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-' + id).classList.add('active');
             btn.classList.add('active');
-            document.getElementById('tab-catalogo').style.display = nome === 'catalogo' ? 'block' : 'none';
-            document.getElementById('tab-saida').style.display = nome === 'saida' ? 'block' : 'none';
-            document.getElementById('tab-entrada').style.display = nome === 'entrada' ? 'block' : 'none';
         }
 
-        function mostrarToast(msg) {
+        function toggleMenu() { document.getElementById('sidebar').classList.toggle('open'); }
+        function toast(msg) {
             let t = document.getElementById('toast');
             t.innerText = msg; t.style.display = 'block';
             setTimeout(() => t.style.display = 'none', 3000);
         }
-
-        function logout() { location.reload(); }
     </script>
 </body>
 </html>
