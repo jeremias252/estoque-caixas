@@ -306,7 +306,7 @@ def salvar_historico(df):
     conn.update(spreadsheet=URL_PLANILHA, worksheet="Historico", data=df)
  
 @st.dialog("Detalhes do Modelo")
- def abrir_janela_modelo(linha, df_linha, total):
+def abrir_janela_modelo(linha, df_linha, total):
      st.markdown(f"<h3 style='text-align:center; margin-bottom: 0;'>{linha}</h3>", unsafe_allow_html=True)
      st.markdown(f"<p style='text-align:center; color:#F38020; font-weight:bold; font-size:18px;'>Estoque Total: {total} un.</p>", unsafe_allow_html=True)
      st.divider()
