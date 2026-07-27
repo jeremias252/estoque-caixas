@@ -202,9 +202,6 @@
         .panel h3 { margin: 0 0 5px; font-size: 20px; color: var(--text-main); }
         .panel p.sub { color: var(--text-sub); font-size: 13px; margin: 0 0 20px; }
 
-        /* =========================================
-           CARDS DO CATÁLOGO POR MODELO
-           ========================================= */
         .grid-catalogo { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 16px; }
         
         .item-card {
@@ -235,9 +232,6 @@
         .status-ok { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.4); }
         .status-off { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.5); }
 
-        /* =========================================
-           POP-UP MODAL DAS CORES
-           ========================================= */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); z-index: 1000;
@@ -285,12 +279,10 @@
 <body>
 
     <script>
-        // ==========================================
-        // COLE O SEU LINK DO GOOGLE APPS SCRIPT AQUI
-        // ==========================================
+        // LINK OFICIAL INTEGRADO
         const API_URL = "https://script.google.com/macros/s/AKfycbwRLsipTraGo72XeJTTG-JG_Wt6qzJRJ_iSQ2V2babralKh3aC_n8eNG0oh3b1dOw099g/exec";
 
-        let estado = { setor: '', perfil: '', dados: null, graficos: {} };
+        let estado = { setor: '', perfil: '', dados: null, graficos: {}, relatorioAtual: null };
         const EQUIPES = { 'Caixas': ['Marcello', 'Fabiano', 'Sérgio'], 'Torres': ['Fran', 'Henrique', 'Leonardo', 'Patrick'] };
         const SENHAS = { 'Caixas': 'marcello123', 'Torres': 'fran123', 'admin': 'coord123' };
 
@@ -330,7 +322,6 @@
                 <button class="btn" onclick="escolherSetor('Torres')">🗼 TORRES</button>
             </div>
 
-            <!-- PASSO 2: ATUALIZADO (SEPARADORES / CONTROLE OPERACIONAL / ADMINISTRADOR) -->
             <div id="step2" class="step">
                 <div class="step-title">SETOR <span id="lbl-setor"></span> • PERFIL</div>
                 <button class="btn" onclick="logar('separadores')">📦 Separadores</button>
@@ -386,6 +377,7 @@
                 <button class="tab-btn" onclick="abrirAba('entrada', this)">📥 Entradas</button>
                 <button class="tab-btn" onclick="abrirAba('historico', this)">🕒 Histórico</button>
                 <button class="tab-btn" onclick="abrirAba('stats', this)">📊 Estatísticas</button>
+                <button class="tab-btn" id="btn-tab-relatorio" onclick="abrirAba('relatorio', this)">📋 Relatório Feedback</button>
             </div>
 
             <!-- ABA CATÁLOGO -->
@@ -428,6 +420,40 @@
                 <h3>📊 Análise de Retiradas</h3>
                 <p class="sub">Volume de saídas por membro da equipe.</p>
                 <div class="chart-container"><canvas id="graficoEquipe"></canvas></div>
+            </div>
+
+            <!-- ABA NOVA: RELATÓRIO DO ADMINISTRADOR PARA FEEDBACK -->
+            <div id="tab-relatorio" class="tab-content panel">
+                <h3>📋 Relatório de Desempenho por Separador</h3>
+                <p class="sub">Gere o relatório consolidado do dia ou da semana para alinhamento e feedback individual.</p>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                    <div>
+                        <label style="font-size: 12px; color: var(--text-sub); font-weight: 700; display: block; margin-bottom: 6px;">Separador:</label>
+                        <select id="rel-pessoa" onchange="gerarRelatorioFeedback()"></select>
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; color: var(--text-sub); font-weight: 700; display: block; margin-bottom: 6px;">Período do Relatório:</label>
+                        <select id="rel-periodo" onchange="gerarRelatorioFeedback()">
+                            <option value="hoje">📅 Hoje</option>
+                            <option value="semana" selected>📆 Últimos 7 Dias (Semanal)</option>
+                            <option value="mes">🗓️ Últimos 30 Dias</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="kpis" style="margin-top:0; margin-bottom: 20px;">
+                    <div class="kpi"><span>Total de Peças Pegas</span><b id="rel-kpi-pecas" style="color:var(--prim)">0</b></div>
+                    <div class="kpi"><span>Bipagens / Lançamentos</span><b id="rel-kpi-ops">0</b></div>
+                </div>
+
+                <button class="btn btn-primary" style="margin-bottom: 25px;" onclick="exportarPDFRelatorioFeedback()">📄 Baixar Relatório PDF de Feedback</button>
+
+                <h4 style="margin: 0 0 12px; color: var(--text-main);">Itens Retirados no Período:</h4>
+                <div class="history-card hist-head" style="grid-template-columns: 1.2fr 2fr 1fr;">
+                    <div>Data / Hora</div><div>Modelo do Item</div><div>Quantidade Pega</div>
+                </div>
+                <div id="rel-lista-detalhada"></div>
             </div>
         </div>
     </div>
@@ -484,7 +510,15 @@
             document.getElementById('side-perfil').innerText = nomeExibicao;
             document.getElementById('badge-top').innerText = 'ACESSO ' + nomeExibicao;
             
-            if(p === 'separadores') { document.querySelectorAll('.tab-btn').forEach((b,i) => { if(i>0) b.style.display='none'; }); }
+            let btnRel = document.getElementById('btn-tab-relatorio');
+            if(p === 'separadores') { 
+                document.querySelectorAll('.tab-btn').forEach((b,i) => { if(i>0) b.style.display='none'; }); 
+            } else if(p === 'controle') {
+                document.querySelectorAll('.tab-btn').forEach(b => b.style.display='inline-block');
+                if(btnRel) btnRel.style.display = 'none'; // Esconde aba de relatório do controle
+            } else if(p === 'admin') {
+                document.querySelectorAll('.tab-btn').forEach(b => b.style.display='inline-block');
+            }
             carregarDados();
         }
 
@@ -507,6 +541,7 @@
             EQUIPES[estado.setor].forEach(p => htmlPessoas += `<option value="${p}">${p}</option>`);
             document.getElementById('s-pessoa').innerHTML = htmlPessoas;
             document.getElementById('e-pessoa').innerHTML = htmlPessoas;
+            document.getElementById('rel-pessoa').innerHTML = htmlPessoas;
 
             let cabecalhoEst = est[0].map(h => h.toString().trim());
             let idxMod = cabecalhoEst.indexOf("Modelo"); if(idxMod === -1) idxMod = 0;
@@ -585,11 +620,11 @@
             }
             document.getElementById('lista-historico').innerHTML = htmlHist || '<p>Nenhum histórico registrado.</p>';
             renderizarGraficos();
+            if(estado.perfil === 'admin') gerarRelatorioFeedback();
         }
 
         function renderizarCatalogo(busca) {
             let html = ''; let b = busca.toLowerCase();
-            
             let modelosFiltrados = estado.catalogoAgrupado.filter(x => x.linha.toLowerCase().includes(b));
 
             if(modelosFiltrados.length === 0) {
@@ -602,7 +637,6 @@
                 let statusClass = isDisponivel ? 'disponivel' : 'esgotado';
                 let badgeText = isDisponivel ? '✅ Em Estoque' : '🔴 Zerado / Esgotado';
                 let badgeClass = isDisponivel ? 'status-ok' : 'status-off';
-
                 let idxOriginal = estado.catalogoAgrupado.indexOf(item);
 
                 html += `
@@ -637,8 +671,141 @@
             document.getElementById('modal-detalhe').style.display = 'flex';
         }
 
-        function fecharModal() {
-            document.getElementById('modal-detalhe').style.display = 'none';
+        function fecharModal() { document.getElementById('modal-detalhe').style.display = 'none'; }
+
+        /* =========================================
+           SISTEMA DE RELATÓRIO E FEEDBACK (ADMIN)
+           ========================================= */
+        function parseData(strData) {
+            if(!strData) return new Date(0);
+            let p = strData.split(' ')[0];
+            if(p.includes('/')) {
+                let [d,m,y] = p.split('/'); return new Date(y, m-1, d);
+            } else if(p.includes('-')) {
+                let [y,m,d] = p.split('-'); return new Date(y, m-1, d);
+            }
+            return new Date(strData);
+        }
+
+        function gerarRelatorioFeedback() {
+            let pessoa = document.getElementById('rel-pessoa').value;
+            let periodo = document.getElementById('rel-periodo').value;
+            let hist = estado.dados ? estado.dados.historico : [];
+            
+            if(!pessoa) {
+                document.getElementById('rel-kpi-pecas').innerText = '0';
+                document.getElementById('rel-kpi-ops').innerText = '0';
+                document.getElementById('rel-lista-detalhada').innerHTML = '<p style="color:var(--text-sub)">Selecione um separador acima para carregar o relatório.</p>';
+                estado.relatorioAtual = null;
+                return;
+            }
+
+            let hoje = new Date(); hoje.setHours(0,0,0,0);
+            let limiteDias = periodo === 'hoje' ? 0 : (periodo === 'semana' ? 7 : 30);
+            
+            let totalPecas = 0; let totalOps = 0; let listaSaidas = [];
+
+            if(hist && hist.length > 0) {
+                let cH = hist[0].map(h => h.toString().trim());
+                let hData = cH.indexOf("Data"); if(hData === -1) hData = 1;
+                let hAcao = cH.indexOf("Ação"); if(hAcao === -1) hAcao = 2;
+                let hPess = cH.indexOf("Separador"); if(hPess === -1) hPess = 3;
+                let hMod = cH.indexOf("Modelo"); if(hMod === -1) hMod = 4;
+                let hQtd = cH.indexOf("Quantidade"); if(hQtd === -1) hQtd = 5;
+
+                for(let i = 1; i < hist.length; i++) {
+                    let a = hist[i][hAcao]; let p = hist[i][hPess];
+                    if(a === 'Saída' && p === pessoa) {
+                        let dt = parseData(hist[i][hData]); dt.setHours(0,0,0,0);
+                        let diffDias = Math.floor((hoje - dt) / (1000 * 60 * 60 * 24));
+
+                        if(diffDias <= limiteDias) {
+                            let q = Number(hist[i][hQtd]) || 0;
+                            totalPecas += q; totalOps++;
+                            listaSaidas.push({ data: hist[i][hData], modelo: hist[i][hMod], qtd: q });
+                        }
+                    }
+                }
+            }
+
+            document.getElementById('rel-kpi-pecas').innerText = totalPecas;
+            document.getElementById('rel-kpi-ops').innerText = totalOps;
+
+            estado.relatorioAtual = { pessoa, periodo, totalPecas, totalOps, listaSaidas };
+
+            let htmlList = '';
+            listaSaidas.reverse().forEach(item => {
+                htmlList += `
+                <div class="history-card" style="grid-template-columns: 1.2fr 2fr 1fr;">
+                    <div>${item.data}</div>
+                    <div style="font-weight:700;">${item.modelo}</div>
+                    <div style="font-weight:900; color:var(--prim);">${item.qtd} un.</div>
+                </div>`;
+            });
+
+            document.getElementById('rel-lista-detalhada').innerHTML = htmlList || '<p style="color:var(--text-sub)">Nenhum lançamento de saída encontrado para este período.</p>';
+        }
+
+        function exportarPDFRelatorioFeedback() {
+            if(!estado.relatorioAtual || !estado.relatorioAtual.pessoa) {
+                return alert('⚠️ Selecione um separador para gerar o relatório em PDF!');
+            }
+
+            let r = estado.relatorioAtual;
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ format: 'a4' });
+
+            // Cabeçalho Oficial
+            doc.setFillColor(30, 41, 59);
+            doc.rect(0, 0, 210, 35, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(18); doc.setFont("helvetica", "bold");
+            doc.text("RELATÓRIO DE DESEMPENHO E FEEDBACK", 15, 22);
+
+            // Informações
+            doc.setTextColor(15, 23, 42); doc.setFontSize(11);
+            doc.text(`Setor: ${estado.setor.toUpperCase()}`, 15, 48);
+            doc.text(`Separador Avaliado: ${r.pessoa}`, 15, 56);
+            doc.text(`Período de Análise: ${r.periodo === 'hoje' ? 'Hoje' : (r.periodo === 'semana' ? 'Últimos 7 dias' : 'Últimos 30 dias')}`, 15, 64);
+            doc.text(`Data de Emissão: ${new Date().toLocaleDateString('pt-BR')}`, 130, 48);
+
+            // Box de Resumo KPI
+            doc.setFillColor(241, 245, 249);
+            doc.roundedRect(15, 72, 180, 25, 3, 3, 'F');
+            doc.setFont("helvetica", "bold"); doc.setFontSize(12);
+            doc.text(`TOTAL DE PEÇAS RETIRADAS: ${r.totalPecas} unidades`, 22, 88);
+            doc.text(`REGISTROS DE SAÍDA: ${r.totalOps}`, 120, 88);
+
+            // Tabela de Lançamentos
+            doc.setFontSize(11); doc.setFont("helvetica", "bold");
+            doc.text("Histórico de Detalhado de Saídas:", 15, 110);
+            
+            doc.setFillColor(226, 232, 240);
+            doc.rect(15, 115, 180, 8, 'F');
+            doc.setFontSize(9);
+            doc.text("DATA / HORA", 20, 120);
+            doc.text("MODELO / PEÇA", 70, 120);
+            doc.text("QUANTIDADE", 160, 120);
+
+            let y = 130;
+            doc.setFont("helvetica", "normal");
+            r.listaSaidas.slice(0, 22).forEach((item) => {
+                doc.text(String(item.data), 20, y);
+                doc.text(String(item.modelo).substring(0, 45), 70, y);
+                doc.text(`${item.qtd} un.`, 160, y);
+                doc.setDrawColor(226, 232, 240);
+                doc.line(15, y + 2, 195, y + 2);
+                y += 8;
+            });
+
+            // Campo de Assinatura para Feedback
+            doc.line(20, 265, 90, 265);
+            doc.text("Assinatura do Administrador", 25, 271);
+
+            doc.line(120, 265, 190, 265);
+            doc.text(`Assinatura (${r.pessoa})`, 130, 271);
+
+            doc.save(`Feedback_${r.pessoa}_${r.periodo}_${estado.setor}.pdf`);
         }
 
         async function lancar(tipo) {
