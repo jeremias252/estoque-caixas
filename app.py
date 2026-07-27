@@ -293,7 +293,7 @@ def carregar_dados():
          st.stop()
  
      try:
-@@ -143,54 +216,54 @@ def carregar_dados():
+def carregar_dados():
          df_historico = df_historico.dropna(subset=["ID"])
      except:
          df_historico = pd.DataFrame(columns=["ID", "Data", "Ação", "Separador", "Modelo", "Quantidade"])
@@ -352,7 +352,7 @@ def carregar_dados():
          cols = st.columns(2)
          for j in range(2):
              if i + j < len(df_totais):
-@@ -267,129 +340,135 @@ else:
+else:
              st.session_state.df_estoque = e
              st.session_state.df_historico = h
              st.session_state.dados_carregados = True
@@ -496,5 +496,4 @@ def carregar_dados():
                      csv_convertido = df_historico.drop(columns=["ID"], errors="ignore").to_csv(index=False, sep=";").encode("utf-8-sig")
                      st.download_button(label="📥 Baixar Excel (CSV)", data=csv_convertido, file_name=f"Caixas_{datetime.now().strftime('%d-%m')}.csv", mime="text/csv", type="primary", use_container_width=True)
  
-EOF
 )
