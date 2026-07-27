@@ -21,13 +21,13 @@
             --glow1: rgba(243,128,32,0.3); --glow2: rgba(220,38,38,0.15);
             --grad-btn: linear-gradient(145deg, #ffb15f, #F38020, #dc2626);
             --bg-dark: #050608; 
-            --panel-bg: linear-gradient(145deg, rgba(31,36,55,.90), rgba(7,9,16,.95));
+            --panel-bg: linear-gradient(145deg, rgba(20, 24, 36, 0.82), rgba(8, 10, 16, 0.90));
             --text-main: #f8fafc;
             --text-sub: #9ca3af;
             --border-color: rgba(255,255,255,0.1);
             --input-bg: rgba(5,6,8,0.7);
             --card-item-bg: rgba(15, 23, 42, 0.7);
-            --bg-overlay: rgba(5, 6, 8, 0.85);
+            --bg-overlay: linear-gradient(135deg, rgba(5, 6, 8, 0.92), rgba(15, 23, 42, 0.88));
         }
 
         body.light-mode {
@@ -35,7 +35,7 @@
             --text-main: #0f172a; --text-sub: #475569;
             --border-color: #cbd5e1; --input-bg: #ffffff;
             --card-item-bg: rgba(248, 250, 252, 0.9);
-            --bg-overlay: rgba(241, 245, 249, 0.88);
+            --bg-overlay: rgba(241, 245, 249, 0.92);
             color: #0f172a !important;
         }
 
@@ -46,10 +46,11 @@
             background-attachment: fixed; min-height: 100vh; transition: background 0.8s ease;
         }
 
-        /* CAMADA DE TRANSPARÊNCIA SOBRE A FOTO DE FUNDO */
+        /* CAMADA ELEGANTE DE DESFOQUE SOBRE O FUNDO DO SETOR */
         .bg-overlay {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: var(--bg-overlay); z-index: -1;
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
             pointer-events: none; transition: background 0.5s ease;
         }
 
@@ -59,36 +60,77 @@
 
         body.light-mode h1, body.light-mode h2, body.light-mode h3, body.light-mode h4, body.light-mode b { color: #0f172a !important; }
         body.light-mode p, body.light-mode .sub, body.light-mode span:not(.badge-status) { color: #475569 !important; }
-        body.light-mode .hero, body.light-mode .panel, body.light-mode .kpi, body.light-mode .login-card, body.light-mode .modal { background: var(--panel-bg) !important; box-shadow: 0 10px 25px rgba(0,0,0,0.05) !important; border-color: #cbd5e1 !important; }
+        body.light-mode .hero, body.light-mode .panel, body.light-mode .kpi, body.light-mode .modal { background: var(--panel-bg) !important; box-shadow: 0 10px 25px rgba(0,0,0,0.05) !important; border-color: #cbd5e1 !important; }
         body.light-mode .history-card, body.light-mode .card-detalhe { background: #f8fafc !important; border-color: #cbd5e1 !important; color: #0f172a !important; box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important; }
         body.light-mode .tabs-list { background: #ffffff !important; border-color: #cbd5e1 !important; box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important; }
         body.light-mode input, body.light-mode select { color: #0f172a !important; background-color: #ffffff !important; border-color: #94a3b8 !important; }
         body.light-mode select option { background-color: #ffffff !important; color: #0f172a !important; }
         body.light-mode .btn:not(.btn-primary) { background: #e2e8f0 !important; color: #0f172a !important; border-color: #cbd5e1 !important; box-shadow: none !important; }
-        body.light-mode .btn-text, body.light-mode .hist-head { color: #475569 !important; }
         body.light-mode .mobile-header, body.light-mode .sidebar { background: rgba(255,255,255,0.92) !important; border-color: #cbd5e1 !important; color: #0f172a !important; }
         body.light-mode .sidebar .logo span { background: var(--grad-btn) !important; -webkit-background-clip: text !important; color: transparent !important; }
         body.light-mode .profile-pill { background: #f8fafc !important; border-color: #cbd5e1 !important; color: #334155 !important; }
-        body.light-mode .menu-toggle { color: #0f172a !important; }
-        body.light-mode .danger-glow { background: #fef2f2 !important; border-left: 5px solid #ef4444 !important; color: #991b1b !important; }
 
+        /* =========================================
+           VÍDEO DE FUNDO DO LOGIN
+           ========================================= */
+        #login-bg-container {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; overflow: hidden;
+            background: #000;
+        }
+        #login-video {
+            width: 100%; height: 100%; object-fit: cover; opacity: 0.8;
+        }
+        .login-video-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(5,6,8,0.3), rgba(5,6,8,0.95)); 
+            backdrop-filter: blur(2px);
+        }
+
+        /* =========================================
+           TELA DE LOGIN PREMIUM
+           ========================================= */
         #login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; z-index: 10; padding: 20px;}
-        .login-card { width: 100%; max-width: 440px; background: rgba(15, 17, 24, 0.75); border: 1px solid var(--border-color); border-radius: 28px; padding: 40px 30px; box-shadow: 0 25px 60px rgba(0,0,0,0.5); backdrop-filter: blur(28px); text-align: center; }
+        .login-card { 
+            width: 100%; max-width: 420px; 
+            background: rgba(15, 18, 25, 0.45); 
+            border: 1px solid rgba(255,255,255,0.08); 
+            border-radius: 32px; padding: 40px 30px; 
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8); 
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            text-align: center; 
+        }
         
-        /* CONTAINER DO LOGO DA EMPRESA */
         .login-logo-container {
-            width: 100%; height: 90px; margin: 0 auto 20px;
+            width: 100%; height: 75px; margin: 0 auto 20px;
             display: flex; align-items: center; justify-content: center;
-            overflow: hidden; padding: 5px;
         }
         .login-logo-container img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
-        .login-card h2 { margin: 0 0 5px; font-weight: 900; font-size: 20px; color: var(--text-main); }
-        .login-card p { color: var(--text-sub); font-size: 13px; margin: 0 0 25px; }
-        .step-title { color: var(--text-sub); font-size: 11px; font-weight: 700; letter-spacing: 1px; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
+        .login-card h2 { margin: 0 0 5px; font-weight: 900; font-size: 24px; color: #fff; letter-spacing: -0.5px;}
+        .login-card p { color: #9ca3af; font-size: 13px; margin: 0 0 30px; }
+        .step-title { color: #cbd5e1; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; text-transform: uppercase;}
+        
         .step { display: none; }
         .step.active { display: block; animation: fadeSlideUp 0.4s forwards; }
 
+        /* BOTÕES DE LOGIN INSPIRADOS NA FOTO */
+        .btn-login {
+            background: rgba(24, 28, 37, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 22px; color: white; padding: 16px;
+            width: 100%; font-weight: 700; font-size: 15px; cursor: pointer; margin-bottom: 12px;
+            display: flex; align-items: center; justify-content: center; gap: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: inherit;
+        }
+        .btn-login:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.4);
+        }
+
+        /* OUTROS ELEMENTOS DO SISTEMA */
         button, input, select { font-family: inherit; outline: none; }
         .btn { background: linear-gradient(145deg, #262b3c, #10131d); color: white; border: 1px solid var(--border-color); border-radius: 18px; padding: 15px; width: 100%; font-weight: 700; font-size: 14.5px; cursor: pointer; margin-bottom: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); transition: all 0.2s; }
         .btn:hover:not(:disabled) { transform: translateY(-2px); border-color: var(--glow1); }
@@ -101,12 +143,12 @@
         input:focus, select:focus { border-color: var(--prim); box-shadow: 0 0 0 2px var(--glow1); }
 
         #app-layout { display: none; height: 100vh; overflow: hidden; }
-        .sidebar { width: 280px; background: rgba(10, 12, 18, 0.6); backdrop-filter: blur(25px); border-right: 1px solid var(--border-color); height: 100%; padding: 20px; display: flex; flex-direction: column; position: fixed; left: 0; top: 0; z-index: 100; transition: transform 0.3s ease; }
+        .sidebar { width: 280px; background: rgba(10, 12, 18, 0.75); backdrop-filter: blur(25px); border-right: 1px solid var(--border-color); height: 100%; padding: 20px; display: flex; flex-direction: column; position: fixed; left: 0; top: 0; z-index: 100; transition: transform 0.3s ease; }
         
         .sidebar .logo-side-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; margin-bottom: 25px; }
-        .sidebar .logo-side-wrap img { width: 100%; max-height: 70px; object-fit: contain; margin-bottom: 10px;}
-        .sidebar .logo { font-size: 14px; font-weight: 900; text-align: center; color: var(--text-sub); letter-spacing: 2px;}
-        .sidebar .logo span { background: var(--grad-btn); -webkit-background-clip: text; color: transparent; font-size: 20px; letter-spacing: 0;}
+        .sidebar .logo-side-wrap img { width: 100%; max-height: 60px; object-fit: contain; margin-bottom: 10px;}
+        .sidebar .logo { font-size: 13px; font-weight: 900; text-align: center; color: var(--text-sub); letter-spacing: 2px;}
+        .sidebar .logo span { background: var(--grad-btn); -webkit-background-clip: text; color: transparent; font-size: 19px; letter-spacing: 0;}
         
         .profile-pill { background: rgba(5,7,12,0.54); border: 1px solid var(--border-color); border-radius: 18px; padding: 12px; text-align: center; color: var(--text-sub); margin-bottom: 20px; }
         .profile-pill b { color: var(--prim); display: block; font-size: 18px;}
@@ -139,17 +181,14 @@
         .panel h3 { margin: 0 0 5px; font-size: 20px; color: var(--text-main); }
         .panel p.sub { color: var(--text-sub); font-size: 13px; margin: 0 0 20px; }
 
-        /* CARDS DO CATÁLOGO COM FOTO DO PRODUTO */
+        /* CARDS LIMPOS DO CATÁLOGO */
         .grid-catalogo { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 16px; }
-        .item-card { background: var(--card-item-bg); border: 2px solid var(--border-color); border-radius: 22px; padding: 16px; text-align: center; transition: all 0.3s ease; position: relative; overflow: hidden; cursor: pointer; backdrop-filter: blur(15px); }
+        .item-card { background: var(--card-item-bg); border: 2px solid var(--border-color); border-radius: 22px; padding: 22px; text-align: center; transition: all 0.3s ease; position: relative; overflow: hidden; cursor: pointer; backdrop-filter: blur(15px); }
         .item-card:hover { transform: translateY(-4px); border-color: var(--prim); }
         .item-card.disponivel { border-color: rgba(16, 185, 129, 0.4); box-shadow: 0 8px 20px rgba(16, 185, 129, 0.08); }
-        .item-card.disponivel .qtd-num { color: var(--prim); font-size: 30px; font-weight: 900; margin: 4px 0; }
+        .item-card.disponivel .qtd-num { color: var(--prim); font-size: 34px; font-weight: 900; margin: 6px 0; }
         .item-card.esgotado { border-color: rgba(239, 68, 68, 0.6); background: rgba(239, 68, 68, 0.08) !important; box-shadow: 0 8px 20px rgba(239, 68, 68, 0.12); }
-        .item-card.esgotado .qtd-num { color: #ef4444; font-size: 30px; font-weight: 900; margin: 4px 0; }
-        
-        .item-img-wrap { width: 100%; height: 130px; border-radius: 14px; overflow: hidden; margin-bottom: 12px; background: rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: center; }
-        .item-img-wrap img { width: 100%; height: 100%; object-fit: contain; }
+        .item-card.esgotado .qtd-num { color: #ef4444; font-size: 34px; font-weight: 900; margin: 6px 0; }
 
         .badge-status { font-size: 10px; font-weight: 900; letter-spacing: 0.5px; padding: 4px 10px; border-radius: 999px; text-transform: uppercase; display: inline-block; }
         .status-ok { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.4); }
@@ -186,13 +225,22 @@
 </head>
 <body>
 
+    <!-- CAMADA DE EFEITO (Desfoque da Imagem de Fundo) -->
     <div class="bg-overlay"></div>
+
+    <!-- VÍDEO DE FUNDO DO LOGIN -->
+    <div id="login-bg-container">
+        <video autoplay muted loop playsinline id="login-video">
+            <source src="https://comprar.caixatomada.com/wp-content/uploads/2026/04/video-home-04-26-02.mp4" type="video/mp4">
+        </video>
+        <div class="login-video-overlay"></div>
+    </div>
 
     <script>
         // ==========================================
         // 1. LINK DA SUA API DO GOOGLE APPS SCRIPT
         // ==========================================
-        const API_URL = "https://script.google.com/macros/s/AKfycbwRLsipTraGo72XeJTTG-JG_Wt6qzJRJ_iSQ2V2babralKh3aC_n8eNG0oh3b1dOw099g/exec";
+        const API_URL = "COLE_O_SEU_URL_DO_GOOGLE_AQUI";
 
         // ==========================================
         // 2. LINK DO LOGO DA SUA EMPRESA
@@ -200,20 +248,12 @@
         const URL_LOGO_EMPRESA = "https://comprar.caixatomada.com/wp-content/uploads/2026/06/Logo-CaixaTomada-w.png"; 
 
         // ==========================================
-        // 3. FOTOS DE FUNDO REAIS DOS SETORES E PRODUTOS
+        // 3. FOTOS DE FUNDO REAIS DOS SETORES
         // ==========================================
         const BGS_SETORES = {
             'Caixas': 'https://i0.wp.com/comprar.caixatomada.com/wp-content/uploads/2020/11/CX02Q-02-scaled.jpg?w=1920&ssl=1',
             'Torres': 'https://i0.wp.com/comprar.caixatomada.com/wp-content/uploads/2021/04/TR03W-scaled.jpg?w=1920&ssl=1'
         };
-
-        const FOTOS_PADRAO_PRODUTO = {
-            'Caixas': 'https://i0.wp.com/comprar.caixatomada.com/wp-content/uploads/2018/11/CX04FN-scaled.jpg?w=1920&ssl=1',
-            'Torres': 'https://i0.wp.com/comprar.caixatomada.com/wp-content/uploads/2025/06/140511620237872_1751027593293565.jpg?w=1600&ssl=1'
-        };
-
-        // Opcional: Se quiser colocar uma foto diferente para um modelo específico
-        const IMAGENS_MODELOS = {};
 
         let estado = { setor: '', perfil: '', dados: null, graficos: {}, relatorioAtual: null, mapaSaidasPorModelo: {} };
         let filaOffline = JSON.parse(localStorage.getItem('filaLogistica')) || [];
@@ -255,6 +295,7 @@
             localStorage.setItem('temaPortal', document.body.classList.contains('light-mode') ? 'claro' : 'escuro');
             if(estado.dados) renderizarGraficos(); 
         }
+        
         window.onload = () => { 
             if(localStorage.getItem('temaPortal') === 'claro') document.body.classList.add('light-mode'); 
             let elLogoLogin = document.getElementById('img-logo-login');
@@ -266,7 +307,7 @@
 
     <div id="toast">✅ Operação realizada!</div>
 
-    <!-- TELA LOGIN -->
+    <!-- TELA LOGIN PREMIUM -->
     <div id="login-screen">
         <div class="login-card">
             <div class="login-logo-container">
@@ -277,22 +318,22 @@
 
             <div id="step1" class="step active">
                 <div class="step-title">PASSO 1: SELECIONE O SETOR</div>
-                <button class="btn" onclick="escolherSetor('Caixas')">📦 CAIXAS</button>
-                <button class="btn" onclick="escolherSetor('Torres')">🗼 TORRES</button>
+                <button class="btn-login" onclick="escolherSetor('Caixas')">📦 CAIXAS</button>
+                <button class="btn-login" onclick="escolherSetor('Torres')">🗼 TORRES</button>
             </div>
 
             <div id="step2" class="step">
                 <div class="step-title">SETOR <span id="lbl-setor"></span> • PERFIL</div>
-                <button class="btn" onclick="logar('separadores')">📦 Separadores</button>
-                <button class="btn" onclick="irParaSenha('controle')">⚙️ Controle Operacional</button>
-                <button class="btn" onclick="irParaSenha('admin')">👑 Administrador</button>
+                <button class="btn-login" onclick="logar('separadores')">👀 Separadores</button>
+                <button class="btn-login" onclick="irParaSenha('controle')">⚙️ Controle Operacional</button>
+                <button class="btn-login" onclick="irParaSenha('admin')">👑 Administrador</button>
                 <button class="btn btn-text" onclick="voltar(1)">⬅️ Voltar</button>
             </div>
 
             <div id="step3" class="step">
                 <div class="step-title">DIGITE SUA SENHA</div>
-                <input type="password" id="senha-input" placeholder="••••••••">
-                <button class="btn btn-primary" onclick="validarSenha()">ENTRAR NO SISTEMA</button>
+                <input type="password" id="senha-input" placeholder="••••••••" style="text-align:center;">
+                <button class="btn-login" style="background:var(--grad-btn); border:none;" onclick="validarSenha()">ENTRAR NO SISTEMA</button>
                 <button class="btn btn-text" onclick="voltar(2)">⬅️ Voltar</button>
             </div>
         </div>
@@ -468,7 +509,7 @@
             document.getElementById('step2').classList.add('active');
             document.getElementById('lbl-setor').innerText = s.toUpperCase();
 
-            // APLICA FOTO DE FUNDO REAL DO SETOR
+            // APLICA FOTO DE FUNDO AMBIENTE DO SETOR
             document.body.style.backgroundImage = `url('${BGS_SETORES[s]}')`;
 
             const r = document.querySelector(':root');
@@ -495,6 +536,11 @@
 
         function logar(p) {
             estado.perfil = p;
+            
+            // SOME COM O VIDEO DE FUNDO DO LOGIN
+            let bgVideo = document.getElementById('login-bg-container');
+            if(bgVideo) bgVideo.style.display = 'none';
+
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('app-layout').style.display = 'block';
             
@@ -507,8 +553,6 @@
             document.getElementById('badge-top').innerText = 'ACESSO ' + nomeExibicao;
             
             let btnRel = document.getElementById('btn-tab-relatorio');
-            let btnNovo = document.getElementById('btn-tab-novo');
-            let btnInv = document.getElementById('btn-tab-inv');
 
             if(p === 'separadores') { 
                 document.querySelectorAll('.tab-btn').forEach((b,i) => { if(i>0) b.style.display='none'; }); 
@@ -687,20 +731,14 @@
                 let isQuente = saidasLinha > 0 && saidasLinha >= corteQuente;
                 let badgeHot = isQuente ? `<div class="badge-status status-hot">🔥 Alto Giro</div>` : '';
 
-                // APLICAÇÃO DA FOTO PADRÃO CORRETA POR SETOR
-                let fotoItem = IMAGENS_MODELOS[item.linha] || FOTOS_PADRAO_PRODUTO[estado.setor];
-
                 html += `
                 <div class="item-card ${statusClass}" onclick="abrirModal(${idxOriginal})">
-                    <div class="item-img-wrap">
-                        <img src="${fotoItem}" alt="${item.linha}">
-                    </div>
                     <div>
                         <span class="badge-status ${badgeClass}">${badgeText}</span>
                         ${badgeHot}
                     </div>
                     <div class="qtd-num">${item.total} <small style="font-size:12px; font-weight:400; color:var(--text-sub)">un.</small></div>
-                    <div style="font-weight:800; font-size:15px; margin-bottom:2px;">${item.linha}</div>
+                    <div style="font-weight:800; font-size:16px; margin-bottom:4px;">${item.linha}</div>
                     <small style="color:var(--text-sub); font-size:11px;">🔍 Clique para ver as cores</small>
                 </div>`;
             });
