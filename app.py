@@ -331,7 +331,7 @@ def abrir_janela_modelo(linha, df_linha, total):
                  """
                  cols[j].markdown(card_html, unsafe_allow_html=True)
  
- def exibir_estoque_premium(df_base, termo_busca=""):
+def exibir_estoque_premium(df_base, termo_busca=""):
      df_view = df_base.copy()
      if termo_busca:
          df_view = df_view[df_view["Modelo"].str.contains(termo_busca, case=False)]
@@ -339,8 +339,8 @@ def abrir_janela_modelo(linha, df_linha, total):
          st.warning("Nenhum modelo encontrado.")
          return
  
-     def extrair_linha(nome): return nome.rsplit(" - ", 1)[0] if " - " in nome else nome
-     def extrair_cor(nome): return nome.rsplit(" - ", 1)[1] if " - " in nome else "Padrão"
+def extrair_linha(nome): return nome.rsplit(" - ", 1)[0] if " - " in nome else nome
+def extrair_cor(nome): return nome.rsplit(" - ", 1)[1] if " - " in nome else "Padrão"
  
      df_view['Linha'] = df_view['Modelo'].apply(extrair_linha)
      df_view['Cor'] = df_view['Modelo'].apply(extrair_cor)
