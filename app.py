@@ -324,8 +324,8 @@ else:
  
 df_estoque = st.session_state.df_estoque
 df_historico = st.session_state.df_historico
-     separadores = ["Marcello", "Fabiano", "Sérgio"]
-     lista_modelos = sorted(df_estoque["Modelo"].tolist())
+separadores = ["Marcello", "Fabiano", "Sérgio"]
+lista_modelos = sorted(df_estoque["Modelo"].tolist())
  
      st.sidebar.markdown(logo_svg, unsafe_allow_html=True)
      st.sidebar.markdown("---")
