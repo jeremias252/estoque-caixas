@@ -331,13 +331,13 @@ st.sidebar.markdown(logo_svg, unsafe_allow_html=True)
 st.sidebar.markdown("---")
 st.sidebar.markdown(f"<div style='text-align:center; color:#888;'>LOGADO COMO</div><div style='text-align:center; font-weight:bold; font-size:18px; color:#F38020; margin-bottom:20px;'>{st.session_state.perfil.upper()}</div>", unsafe_allow_html=True)
      
-     if st.sidebar.button("🔄 Sincronizar Base", use_container_width=True):
+if st.sidebar.button("🔄 Sincronizar Base", use_container_width=True):
          st.cache_data.clear()
          st.session_state.dados_carregados = False
          st.rerun()
          
      st.sidebar.markdown("<br><br>", unsafe_allow_html=True)
-     if st.sidebar.button("🚪 Sair (Logout)", type="primary", use_container_width=True):
+ if st.sidebar.button("🚪 Sair (Logout)", type="primary", use_container_width=True):
          st.session_state.logado = False
          st.session_state.perfil = ""
          st.session_state.dados_carregados = False
@@ -353,10 +353,10 @@ st.sidebar.markdown(f"<div style='text-align:center; color:#888;'>LOGADO COMO</d
 +        """, unsafe_allow_html=True)
  
      zerados = df_estoque[df_estoque["Quantidade"] == 0]["Modelo"].tolist()
-     if zerados:
+ if zerados:
          st.markdown(f"<div style='background-color:#3f0e0e; border-left:5px solid #ef4444; padding:15px; border-radius:8px; margin-bottom:20px; color:#fca5a5;'>🚨 <b>ALERTA:</b> Há {len(zerados)} modelos com estoque totalmente zerado.</div>", unsafe_allow_html=True)
  
-     if st.session_state.perfil == "equipe":
+ if st.session_state.perfil == "equipe":
 -        st.info("👋 Modo Visualização. Solicite retiradas ao responsável.")
 +        st.markdown("<div class='glass-window' style='padding: 22px; margin-bottom: 18px;'>👋 <b>Modo Visualização.</b> Solicite retiradas ao responsável.</div>", unsafe_allow_html=True)
          busca = st.text_input("🔍 Buscar modelo específico...", key="busca_equipe")
