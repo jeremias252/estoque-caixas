@@ -342,9 +342,9 @@ def exibir_estoque_premium(df_base, termo_busca=""):
 def extrair_linha(nome): return nome.rsplit(" - ", 1)[0] if " - " in nome else nome
 def extrair_cor(nome): return nome.rsplit(" - ", 1)[1] if " - " in nome else "Padrão"
  
-     df_view['Linha'] = df_view['Modelo'].apply(extrair_linha)
-     df_view['Cor'] = df_view['Modelo'].apply(extrair_cor)
-     df_totais = df_view.groupby('Linha')['Quantidade'].sum().reset_index().sort_values(by='Quantidade', ascending=False)
+df_view['Linha'] = df_view['Modelo'].apply(extrair_linha)
+df_view['Cor'] = df_view['Modelo'].apply(extrair_cor)
+df_totais = df_view.groupby('Linha')['Quantidade'].sum().reset_index().sort_values(by='Quantidade', ascending=False)
      
      st.markdown("<p style='color:#888; font-size:14px; text-align:center;'>Selecione um modelo para ver os detalhes:</p>", unsafe_allow_html=True)
      
