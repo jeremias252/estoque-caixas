@@ -18,7 +18,7 @@ st.markdown("""
                 linear-gradient(135deg,#050608,#111827 50%,#050608);
     color: #f8fafc;
 }
-.block-container {max-width:1180px; padding-top:2rem; padding-bottom:3rem;}
+.block-container {max-width:1180px; padding-top:1rem; padding-bottom:2rem;}
 [data-testid="stSidebar"] {background:linear-gradient(180deg,#0b0d14,#171b28); border-right:1px solid rgba(255,255,255,.08);}
 
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap');
@@ -49,45 +49,44 @@ st.markdown("""
 .stTabs [data-baseweb="tab-highlight"] {display: none !important;}
 
 /* =========================================
-   NOVA TELA DE LOGIN (ESTILO WIZARD/APPLE)
+   NOVA TELA DE LOGIN (POSICIONAMENTO CORRIGIDO)
    ========================================= */
 .login-wrap {
-    min-height:85vh; display:flex; align-items:center; justify-content:center;
-    position: relative; z-index: 1;
+    min-height: 50vh; display: flex; align-items: center; justify-content: center;
+    position: relative; z-index: 1; margin-top: 15px;
 }
-/* Brilho laranja de fundo */
 .login-wrap::before {
-    content: ""; position: absolute; width: 450px; height: 450px;
-    background: radial-gradient(circle, rgba(243,128,32,0.15) 0%, transparent 60%);
+    content: ""; position: absolute; width: 380px; height: 380px;
+    background: radial-gradient(circle, rgba(243,128,32,0.18) 0%, transparent 65%);
     top: 50%; left: 50%; transform: translate(-50%, -50%);
-    z-index: -1; filter: blur(40px);
+    z-index: -1; filter: blur(35px);
 }
 .login-card {
     width: 100%; max-width: 440px; margin: 0 auto;
-    background: rgba(15, 17, 24, 0.5);
+    background: rgba(15, 17, 24, 0.65);
     border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 32px; padding: 45px 35px;
-    box-shadow: 0 35px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+    border-radius: 28px; padding: 30px 28px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
     backdrop-filter: blur(28px);
 }
 .login-icon {
-    width: 70px; height: 70px; margin: 0 auto 15px;
+    width: 60px; height: 60px; margin: 0 auto 12px;
     display: flex; align-items: center; justify-content: center;
-    font-size: 32px; border-radius: 22px;
+    font-size: 28px; border-radius: 20px;
     background: linear-gradient(150deg,#ffb15f,#F38020 55%,#dc2626);
-    box-shadow: 0 14px 34px rgba(243,128,32,.4), inset 0 2px 0 rgba(255,255,255,.3);
+    box-shadow: 0 12px 28px rgba(243,128,32,.35), inset 0 2px 0 rgba(255,255,255,.3);
 }
 .login-title {
     text-align: center; font-family: 'Poppins', sans-serif; font-weight: 900;
-    font-size: 28px; margin: 0 0 5px; color: #fff; letter-spacing: -0.5px;
+    font-size: 26px; margin: 0 0 4px; color: #fff; letter-spacing: -0.5px;
 }
 .login-sub {
-    text-align: center; color: #9ca3af; font-size: 14px; margin: 0 0 30px; font-weight: 400;
+    text-align: center; color: #9ca3af; font-size: 13.5px; margin: 0 0 22px; font-weight: 400;
 }
 .login-step-title {
     text-align: center; font-family: 'Poppins', sans-serif; color: #cbd5e1;
-    font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
-    margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px;
+    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;
 }
 
 /* =========================================
@@ -116,9 +115,9 @@ st.markdown("""
 .logo span {background:linear-gradient(90deg,#ffbd77,#F38020,#ef4444); -webkit-background-clip:text; color:transparent}
 .title {font-size:clamp(38px,5vw,64px); font-weight:900; line-height:.92; margin:8px 0; letter-spacing:-.05em}
 
-/* Botões do Sistema (Grandes e clicáveis) */
+/* Botões do Sistema */
 .stButton>button, .stDownloadButton>button, [data-testid="stFormSubmitButton"] button {
-    border-radius:18px !important; font-family:'Poppins',sans-serif !important; font-weight:700 !important; min-height:55px;
+    border-radius:18px !important; font-family:'Poppins',sans-serif !important; font-weight:700 !important; min-height:50px;
     background:linear-gradient(145deg,#262b3c,#10131d) !important; color:white !important;
     border:1px solid rgba(255,255,255,.08) !important; box-shadow:0 8px 20px rgba(0,0,0,.3) !important;
     font-size: 15px !important; transition: all 0.2s ease !important;
@@ -132,7 +131,7 @@ st.markdown("""
 }
 input, textarea, [data-baseweb="select"] > div {
     background:rgba(5,6,8,.7) !important; border-radius:14px !important; border-color:rgba(255,255,255,.14) !important;
-    min-height: 50px; font-size: 16px !important;
+    min-height: 48px; font-size: 15px !important;
 }
 .card {
     background:linear-gradient(145deg,#202638,#0b0d14); border:1px solid rgba(255,255,255,.12);
@@ -145,7 +144,7 @@ input, textarea, [data-baseweb="select"] > div {
 """, unsafe_allow_html=True)
 
 # ==========================================
-# CONFIGURAÇÕES E DICIONÁRIOS (CAIXAS E TORRES)
+# CONFIGURAÇÕES E DICIONÁRIOS
 # ==========================================
 PLANILHAS = {
     "Caixas": "https://docs.google.com/spreadsheets/d/10z1gPJNmHoHO5kj6B4SoXknUNz6MwrQz1NjwkkBatQU/edit?usp=drivesdk",
@@ -164,7 +163,6 @@ SENHAS_CONTROLE = {
 
 conn = st.connection("gsheets", type=GSheetsConnection)
 
-# --- GERENCIAMENTO DE ESTADO ---
 for chave in ["logado", "perfil", "setor", "dados_carregados", "login_setor", "login_perfil"]:
     if chave not in st.session_state:
         st.session_state[chave] = ""
@@ -271,9 +269,8 @@ def registrar_movimento(acao, pessoa, modelo, quantidade, df_estoque, df_histori
     st.success("✅ Movimento registrado com sucesso!")
     st.rerun()
 
-
 # ==========================================
-# WIZARD DE LOGIN (TELA INICIAL MAGNÍFICA)
+# WIZARD DE LOGIN (POSIÇÃO CORRIGIDA)
 # ==========================================
 if not st.session_state.logado:
     _, centro, _ = st.columns([1, 1.2, 1])
@@ -321,7 +318,7 @@ if not st.session_state.logado:
                 st.session_state.login_setor = ""
                 st.rerun()
 
-        # PASSO 3: DIGITAR SENHA (CONTROLE E COORD)
+        # PASSO 3: DIGITAR SENHA
         else:
             st.markdown(f"<div class='login-step-title'>ACESSO RESTRITO • {st.session_state.login_perfil.upper()}</div>", unsafe_allow_html=True)
             
@@ -349,7 +346,7 @@ if not st.session_state.logado:
         st.markdown("</div></div>", unsafe_allow_html=True)
 
 # ==========================================
-# PAINEL OPERACIONAL (CARREGADO APÓS LOGIN)
+# PAINEL OPERACIONAL
 # ==========================================
 else:
     meu_setor = st.session_state.setor
