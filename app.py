@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime
 from streamlit_gsheets import GSheetsConnection
 
-st.set_page_config(page_title="Caixas - Portal", page_icon="📦", layout="wide")
+st.set_page_config(page_title="Portal Logística", page_icon="📦", layout="wide")
 
 st.markdown("""
 <style>
@@ -52,13 +52,11 @@ st.markdown("""
     overflow: hidden;
 }
 
-/* Hover em aba não selecionada */
 .stTabs button[data-baseweb="tab"]:hover {
     background: rgba(255,255,255,.06) !important;
     transform: translateY(-1px);
 }
 
-/* Aba SELECIONADA */
 .stTabs button[data-baseweb="tab"][aria-selected="true"] {
     background: linear-gradient(145deg, #ffb15f 0%, #F38020 45%, #dc2626 100%) !important;
     box-shadow:
@@ -74,7 +72,6 @@ st.markdown("""
     50% { box-shadow: 0 8px 28px rgba(243,128,32,.7), 0 2px 0 rgba(255,255,255,.3) inset, 0 -6px 14px rgba(127,29,29,.4) inset; }
 }
 
-/* Texto das abas normais */
 .stTabs button[data-baseweb="tab"] p {
     color: #9ca3af !important;
     font-family: 'Poppins', sans-serif !important;
@@ -85,7 +82,6 @@ st.markdown("""
     transition: letter-spacing .3s ease;
 }
 
-/* Texto da aba selecionada */
 .stTabs button[data-baseweb="tab"][aria-selected="true"] p {
     color: #ffffff !important;
     font-weight: 900 !important;
@@ -93,13 +89,11 @@ st.markdown("""
     text-shadow: 0 2px 8px rgba(0,0,0,.35);
 }
 
-/* Esconde a barra padrão do Streamlit */
 .stTabs [data-baseweb="tab-highlight"] {
     display: none !important;
     background-color: transparent !important;
 }
 
-/* Separador sutil entre abas */
 .stTabs button[data-baseweb="tab"]:not(:last-child)::after {
     content: "";
     position: absolute;
@@ -115,7 +109,7 @@ st.markdown("""
 }
 
 /* =========================================
-   RESTANTE DO DESIGN DOS PAINEIS E BOTÕES
+   RESTANTE DO DESIGN
    ========================================= */
 .hero, .panel, [data-testid="stForm"] {
     position:relative; overflow:hidden;
@@ -138,31 +132,6 @@ st.markdown("""
 .kpi b {display:block; font-size:24px; color:#fff}
 .kpi span {color:#9ca3af; font-size:12px; font-weight:800; text-transform:uppercase}
 .danger-glow {border-left:5px solid #ef4444; background:linear-gradient(90deg,rgba(127,29,29,.8),rgba(31,41,55,.75)); border-radius:18px; padding:16px; margin-bottom:18px; color:#fecaca}
-.login-wrap {min-height:82vh; display:flex; align-items:center}
-.profile-pill {background:rgba(5,7,12,.54); border:1px solid rgba(255,255,255,.13); border-radius:18px; padding:12px; text-align:center; margin:14px 0; color:#cbd5e1}
-.profile-pill b {color:#F38020}
-.window-title {margin:0; font-weight:900}
-.window-sub {color:#cbd5e1; margin:6px 0 0}
-.divider-glow {height:1px; background:linear-gradient(90deg,transparent,rgba(243,128,32,.8),transparent); margin:18px 0}
-.role-grid {display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:14px 0}
-.role-card {background:rgba(5,7,12,.48); border:1px solid rgba(255,255,255,.12); border-radius:18px; padding:12px; text-align:center}
-.role-card b {display:block; color:#fff}
-.role-card span {font-size:12px; color:#9ca3af}
-.history-card {display:grid; grid-template-columns:1.1fr .8fr 1fr 2fr .7fr; gap:10px; align-items:center; background:linear-gradient(145deg,rgba(24,29,43,.92),rgba(8,10,16,.96)); border:1px solid rgba(255,255,255,.12); border-radius:18px; padding:12px 14px; margin-bottom:10px; box-shadow:0 12px 30px rgba(0,0,0,.28)}
-.history-head {color:#9ca3af; font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:.08em}
-.history-action {font-weight:900; border-radius:999px; padding:6px 10px; text-align:center}
-.entrada {background:rgba(16,185,129,.15); color:#86efac; border:1px solid rgba(16,185,129,.35)}
-.saida {background:rgba(239,68,68,.15); color:#fecaca; border:1px solid rgba(239,68,68,.35)}
-.qty-badge {font-weight:900; color:#F38020; text-align:center}
-.logo {font-size:34px; font-weight:900; text-align:center; letter-spacing:-1px; margin-bottom:14px; text-shadow:0 10px 30px rgba(0,0,0,.45)}
-.logo span {background:linear-gradient(90deg,#ffbd77,#F38020,#ef4444); -webkit-background-clip:text; color:transparent}
-.eyebrow {color:#F38020; font-size:12px; font-weight:900; letter-spacing:.18em; text-transform:uppercase}
-.title {font-size:clamp(38px,5vw,64px); font-weight:900; line-height:.92; margin:8px 0; letter-spacing:-.05em}
-.sub {color:#cbd5e1; margin:8px 0 0; max-width:720px}
-
-/* =========================================
-   LOGIN PREMIUM (cartão único, mais limpo)
-   ========================================= */
 .login-wrap {min-height:88vh; display:flex; align-items:center; justify-content:center}
 .login-card {
     position:relative; overflow:hidden;
@@ -174,19 +143,6 @@ st.markdown("""
     box-shadow:0 30px 90px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.10);
     backdrop-filter:blur(20px);
 }
-.login-card::before {
-    content:"";
-    position:absolute; inset:-2px;
-    border-radius:30px;
-    padding:2px;
-    background:conic-gradient(from 0deg, rgba(243,128,32,.55), rgba(220,38,38,.4), transparent 35%, transparent 65%, rgba(243,128,32,.55));
-    -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite:xor;
-    mask-composite:exclude;
-    animation:rotateBorder 6s linear infinite;
-    opacity:.55;
-}
-@keyframes rotateBorder { to { transform:rotate(360deg); } }
 .login-icon {
     width:64px; height:64px; margin:0 auto 14px;
     display:flex; align-items:center; justify-content:center;
@@ -203,20 +159,18 @@ st.markdown("""
     text-align:center; font-family:'Poppins',sans-serif; font-weight:900;
     font-size:26px; margin:8px 0 4px; letter-spacing:-.02em; color:#fff;
 }
-.login-sub {
-    text-align:center; color:#9ca3af; font-size:13.5px; margin:0 0 22px; line-height:1.5;
-}
-.login-card [data-testid="stSelectbox"] label,
-.login-card [data-testid="stTextInput"] label {
-    color:#cbd5e1 !important; font-weight:700 !important; font-size:12.5px !important;
-    text-transform:uppercase; letter-spacing:.06em;
-}
-.login-footnote {
-    text-align:center; color:#6b7280; font-size:11.5px; margin-top:18px;
-    display:flex; align-items:center; justify-content:center; gap:6px;
-}
-
-/* Botões do Sistema */
+.profile-pill {background:rgba(5,7,12,.54); border:1px solid rgba(255,255,255,.13); border-radius:18px; padding:12px; text-align:center; margin:14px 0; color:#cbd5e1}
+.profile-pill b {color:#F38020}
+.window-title {margin:0; font-weight:900}
+.window-sub {color:#cbd5e1; margin:6px 0 0}
+.history-card {display:grid; grid-template-columns:1.1fr .8fr 1fr 2fr .7fr; gap:10px; align-items:center; background:linear-gradient(145deg,rgba(24,29,43,.92),rgba(8,10,16,.96)); border:1px solid rgba(255,255,255,.12); border-radius:18px; padding:12px 14px; margin-bottom:10px; box-shadow:0 12px 30px rgba(0,0,0,.28)}
+.history-head {color:#9ca3af; font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:.08em}
+.history-action {font-weight:900; border-radius:999px; padding:6px 10px; text-align:center}
+.entrada {background:rgba(16,185,129,.15); color:#86efac; border:1px solid rgba(16,185,129,.35)}
+.saida {background:rgba(239,68,68,.15); color:#fecaca; border:1px solid rgba(239,68,68,.35)}
+.qty-badge {font-weight:900; color:#F38020; text-align:center}
+.logo {font-size:34px; font-weight:900; text-align:center; letter-spacing:-1px; margin-bottom:14px; text-shadow:0 10px 30px rgba(0,0,0,.45)}
+.logo span {background:linear-gradient(90deg,#ffbd77,#F38020,#ef4444); -webkit-background-clip:text; color:transparent}
 .stButton>button, .stDownloadButton>button, [data-testid="stFormSubmitButton"] button {
     border-radius:15px !important; font-weight:900 !important; min-height:45px;
     background:linear-gradient(145deg,#262b3c,#10131d) !important; color:white !important;
@@ -243,36 +197,54 @@ input, textarea, [data-baseweb="select"] > div {
 </style>
 """, unsafe_allow_html=True)
 
-URL_PLANILHA = "https://docs.google.com/spreadsheets/d/10z1gPJNmHoHO5kj6B4SoXknUNz6MwrQz1NjwkkBatQU/edit?usp=drivesdk"
+# ==========================================
+# CONFIGURAÇÕES E DICIONÁRIOS (CAIXAS E TORRES)
+# ==========================================
+PLANILHAS = {
+    "Caixas": "https://docs.google.com/spreadsheets/d/10z1gPJNmHoHO5kj6B4SoXknUNz6MwrQz1NjwkkBatQU/edit?usp=drivesdk",
+    "Torres": "COLE_O_LINK_DAS_TORRES_AQUI"
+}
+
+EQUIPES = {
+    "Caixas": ["Marcello", "Fabiano", "Sérgio"],
+    "Torres": ["Fran", "Henrique", "Leonardo", "Patrick"]
+}
+
+SENHAS_CONTROLE = {
+    "Caixas": "marcello123",
+    "Torres": "fran123"
+}
+
 conn = st.connection("gsheets", type=GSheetsConnection)
 
-for chave, valor in {"logado": False, "perfil": "", "dados_carregados": False}.items():
+for chave, valor in {"logado": False, "perfil": "", "setor": "", "dados_carregados": False}.items():
     if chave not in st.session_state:
         st.session_state[chave] = valor
 
-def logo():
-    st.markdown("<div class='logo'>⬢ SETOR <span>CAIXAS</span></div>", unsafe_allow_html=True)
+def logo(setor_nome="SISTEMA"):
+    st.markdown(f"<div class='logo'>⬢ SETOR <span>{setor_nome.upper()}</span></div>", unsafe_allow_html=True)
 
-def carregar_dados():
+def carregar_dados(setor):
+    url_alvo = PLANILHAS[setor]
     try:
-        estoque = conn.read(spreadsheet=URL_PLANILHA, worksheet="Estoque", ttl=600).copy()
+        estoque = conn.read(spreadsheet=url_alvo, worksheet="Estoque", ttl=600).copy()
         estoque = estoque.dropna(subset=["Modelo"])
         estoque["Quantidade"] = pd.to_numeric(estoque["Quantidade"], errors="coerce").fillna(0).astype(int)
     except Exception:
         st.error("⚠️ Falha de comunicação com o Google Drive.")
         st.stop()
     try:
-        historico = conn.read(spreadsheet=URL_PLANILHA, worksheet="Historico", ttl=600).copy()
+        historico = conn.read(spreadsheet=url_alvo, worksheet="Historico", ttl=600).copy()
         historico = historico.dropna(subset=["ID"])
     except Exception:
         historico = pd.DataFrame(columns=["ID", "Data", "Ação", "Separador", "Modelo", "Quantidade"])
     return estoque, historico
 
-def salvar_estoque(df):
-    conn.update(spreadsheet=URL_PLANILHA, worksheet="Estoque", data=df)
+def salvar_estoque(df, setor):
+    conn.update(spreadsheet=PLANILHAS[setor], worksheet="Estoque", data=df)
 
-def salvar_historico(df):
-    conn.update(spreadsheet=URL_PLANILHA, worksheet="Historico", data=df)
+def salvar_historico(df, setor):
+    conn.update(spreadsheet=PLANILHAS[setor], worksheet="Historico", data=df)
 
 @st.dialog("Detalhes do Modelo")
 def abrir_janela_modelo(linha, df_linha, total):
@@ -333,7 +305,7 @@ def exibir_historico_bonito(df_historico):
         </div>
         """, unsafe_allow_html=True)
 
-def registrar_movimento(acao, pessoa, modelo, quantidade, df_estoque, df_historico):
+def registrar_movimento(acao, pessoa, modelo, quantidade, df_estoque, df_historico, setor):
     idx = df_estoque[df_estoque["Modelo"] == modelo].index[0]
     if acao == "Saída" and df_estoque.at[idx, "Quantidade"] < quantidade:
         st.error(f"⚠️ Saldo insuficiente! Temos {df_estoque.at[idx, 'Quantidade']} un.")
@@ -342,11 +314,15 @@ def registrar_movimento(acao, pessoa, modelo, quantidade, df_estoque, df_histori
     novo = pd.DataFrame([{"ID": str(uuid.uuid4()), "Data": datetime.now().strftime("%Y-%m-%d %H:%M"), "Ação": acao, "Separador": pessoa, "Modelo": modelo, "Quantidade": quantidade}])
     st.session_state.df_estoque = df_estoque
     st.session_state.df_historico = pd.concat([novo, df_historico], ignore_index=True)
-    salvar_estoque(df_estoque)
-    salvar_historico(st.session_state.df_historico)
+    salvar_estoque(df_estoque, setor)
+    salvar_historico(st.session_state.df_historico, setor)
     st.success("✅ Movimento registrado com sucesso!")
     st.rerun()
 
+
+# ==========================================
+# TELA DE LOGIN INTEGRADA
+# ==========================================
 if not st.session_state.logado:
     _, centro, _ = st.columns([1, 1.15, 1])
     st.markdown("<div class='login-wrap'>", unsafe_allow_html=True)
@@ -354,52 +330,70 @@ if not st.session_state.logado:
         st.markdown("<div class='login-card'>", unsafe_allow_html=True)
         st.markdown("""
         <div class='login-icon'>⬢</div>
-        <div class='login-eyebrow'>Acesso Seguro</div>
-        <div class='login-title'>Setor Caixas</div>
-        <p class='login-sub'>Selecione seu perfil para abrir o painel correspondente.</p>
+        <div class='login-eyebrow'>Acesso Seguro ERP</div>
+        <div class='login-title'>Portal Logística</div>
         """, unsafe_allow_html=True)
-        opcao = st.selectbox("Perfil", ["", "👀 Equipe (Visualização)", "⚙️ Controle (Marcello)", "👑 Coordenador"], label_visibility="visible")
-        if opcao == "👀 Equipe (Visualização)":
-            if st.button("Acessar Estoque Livre", type="primary", use_container_width=True):
-                st.session_state.logado = True
-                st.session_state.perfil = "equipe"
-                st.rerun()
-        elif opcao == "⚙️ Controle (Marcello)":
-            senha = st.text_input("Senha", type="password")
-            if st.button("Entrar no Painel", type="primary", use_container_width=True):
-                if senha == "marcello123":
+        
+        escolha_setor = st.selectbox("1. Escolha o Setor", ["", "📦 Caixas", "🗼 Torres"])
+        escolha_perfil = st.selectbox("2. Escolha o Perfil", ["", "👀 Equipe (Visualização)", "⚙️ Controle", "👑 Coordenador"])
+        
+        if escolha_setor and escolha_perfil:
+            setor_limpo = "Caixas" if "Caixas" in escolha_setor else "Torres"
+            
+            if escolha_perfil == "👀 Equipe (Visualização)":
+                if st.button(f"Acessar Estoque Livre - {setor_limpo}", type="primary", use_container_width=True):
                     st.session_state.logado = True
-                    st.session_state.perfil = "marcello"
+                    st.session_state.perfil = "equipe"
+                    st.session_state.setor = setor_limpo
                     st.rerun()
-                else:
-                    st.error("❌ Senha incorreta!")
-        elif opcao == "👑 Coordenador":
-            senha = st.text_input("Senha", type="password")
-            if st.button("Entrar no Painel", type="primary", use_container_width=True):
-                if senha == "coord123":
-                    st.session_state.logado = True
-                    st.session_state.perfil = "coord"
-                    st.rerun()
-                else:
-                    st.error("❌ Senha incorreta!")
+                    
+            elif escolha_perfil == "⚙️ Controle":
+                senha = st.text_input("Senha", type="password")
+                if st.button(f"Entrar no Painel - {setor_limpo}", type="primary", use_container_width=True):
+                    senha_correta = SENHAS_CONTROLE[setor_limpo]
+                    if senha == senha_correta:
+                        st.session_state.logado = True
+                        st.session_state.perfil = "controle"
+                        st.session_state.setor = setor_limpo
+                        st.rerun()
+                    else:
+                        st.error("❌ Senha incorreta!")
+                        
+            elif escolha_perfil == "👑 Coordenador":
+                senha = st.text_input("Senha Master", type="password")
+                if st.button("Entrar no Painel Gerencial", type="primary", use_container_width=True):
+                    if senha == "coord123":
+                        st.session_state.logado = True
+                        st.session_state.perfil = "coord"
+                        st.session_state.setor = setor_limpo
+                        st.rerun()
+                    else:
+                        st.error("❌ Senha incorreta!")
+                        
         st.markdown("<div class='login-footnote'>🔒 Conexão criptografada com o Google Sheets</div>", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
+
+# ==========================================
+# PAINEL OPERACIONAL (CARREGADO APÓS LOGIN)
+# ==========================================
 else:
+    meu_setor = st.session_state.setor
+    
     if not st.session_state.dados_carregados:
-        with st.spinner("⏳ Sincronizando com o banco de dados..."):
-            st.session_state.df_estoque, st.session_state.df_historico = carregar_dados()
+        with st.spinner(f"⏳ Sincronizando banco de dados de {meu_setor}..."):
+            st.session_state.df_estoque, st.session_state.df_historico = carregar_dados(meu_setor)
             st.session_state.dados_carregados = True
 
     df_estoque = st.session_state.df_estoque
     df_historico = st.session_state.df_historico
-    separadores = ["Marcello", "Fabiano", "Sérgio"]
+    separadores = EQUIPES[meu_setor]
     modelos = sorted(df_estoque["Modelo"].tolist())
 
     with st.sidebar:
-        logo()
+        logo(meu_setor)
         st.markdown("---")
-        st.markdown(f"<div class='profile-pill'><span>LOGADO COMO</span><br><b>{st.session_state.perfil.upper()}</b></div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='profile-pill'><span>PERFIL ATIVO</span><br><b>{st.session_state.perfil.upper()}</b></div>", unsafe_allow_html=True)
         if st.button("🔄 Sincronizar Base", use_container_width=True):
             st.session_state.dados_carregados = False
             st.rerun()
@@ -407,21 +401,23 @@ else:
         if st.button("🚪 Sair (Logout)", type="primary", use_container_width=True):
             st.session_state.logado = False
             st.session_state.perfil = ""
+            st.session_state.setor = ""
             st.session_state.dados_carregados = False
             st.rerun()
 
     zerados = df_estoque[df_estoque["Quantidade"] == 0]["Modelo"].tolist()
     total_pecas = int(df_estoque["Quantidade"].sum())
     total_modelos = len(df_estoque)
+    
     st.markdown(f"""
     <section class='hero'>
         <div class='hero-top'>
             <div>
-                <div class='badge'>⬢ OPERAÇÃO PREMIUM</div>
+                <div class='badge'>⬢ SETOR {meu_setor.upper()}</div>
                 <div class='title'>Painel Operacional</div>
-                <p class='sub'>Controle de estoque com janelas independentes, cartões premium, botões 3D e leitura rápida dos indicadores.</p>
+                <p class='sub'>Controle unificado de estoque com validação de saldo e histórico em tempo real.</p>
             </div>
-            <div class='badge'>PERFIL {st.session_state.perfil.upper()}</div>
+            <div class='badge'>ACESSO {st.session_state.perfil.upper()}</div>
         </div>
         <div class='kpis'>
             <div class='kpi'><span>Peças em estoque</span><b>{total_pecas}</b></div>
@@ -430,6 +426,7 @@ else:
         </div>
     </section>
     """, unsafe_allow_html=True)
+    
     if zerados:
         st.markdown(f"<div class='danger-glow'>🚨 <b>ALERTA:</b> Há {len(zerados)} modelos com estoque totalmente zerado.</div>", unsafe_allow_html=True)
 
@@ -446,6 +443,7 @@ else:
         with abas[0]:
             busca = st.text_input("🔍 Pesquisar no estoque...")
             exibir_estoque(df_estoque, busca)
+            
         with abas[1]:
             st.markdown("<div class='panel'><h3 class='window-title'>📤 Janela de Saídas</h3><p class='window-sub'>Registre retiradas com validação automática de saldo.</p></div>", unsafe_allow_html=True)
             with st.form("form_saida", clear_on_submit=True):
@@ -455,7 +453,8 @@ else:
                 qtd = c3.number_input("Qtd", min_value=1, value=1)
                 enviar = st.form_submit_button("Confirmar Retirada", type="primary", use_container_width=True)
             if enviar:
-                registrar_movimento("Saída", pessoa, modelo, qtd, df_estoque, df_historico) if pessoa and modelo else st.error("⚠️ Preencha os campos.")
+                registrar_movimento("Saída", pessoa, modelo, qtd, df_estoque, df_historico, meu_setor) if pessoa and modelo else st.error("⚠️ Preencha os campos.")
+                
         with abas[2]:
             st.markdown("<div class='panel'><h3 class='window-title'>📥 Janela de Entradas</h3><p class='window-sub'>Lance produção e reposição no estoque conectado.</p></div>", unsafe_allow_html=True)
             with st.form("form_entrada", clear_on_submit=True):
@@ -465,15 +464,17 @@ else:
                 qtd = c3.number_input("Qtd", min_value=1, value=1)
                 enviar = st.form_submit_button("Lançar no Estoque", type="primary", use_container_width=True)
             if enviar:
-                registrar_movimento("Entrada", pessoa, modelo, qtd, df_estoque, df_historico) if pessoa and modelo else st.error("⚠️ Preencha os campos.")
+                registrar_movimento("Entrada", pessoa, modelo, qtd, df_estoque, df_historico, meu_setor) if pessoa and modelo else st.error("⚠️ Preencha os campos.")
+                
         with abas[3]:
             st.markdown("<div class='panel'><h3 class='window-title'>📊 Janela de Indicadores</h3><p class='window-sub'>Acompanhe volume, itens críticos e movimentos por período.</p></div>", unsafe_allow_html=True)
             m1, m2 = st.columns(2)
-            m1.metric("📦 Peças no Estoque", int(df_estoque["Quantidade"].sum()))
-            m2.metric("⚠️ Modelos Críticos", len(zerados))
+            m1.metric("📦 Total de Peças", int(df_estoque["Quantidade"].sum()))
+            m2.metric("⚠️ Críticos (Zerados)", len(zerados))
             d1, d2 = st.columns(2)
             inicio = d1.date_input("De:", datetime.now().replace(day=1))
             fim = d2.date_input("Até:", datetime.now())
+            
             if not df_historico.empty:
                 hist = df_historico.copy()
                 hist["Data_Filtro"] = pd.to_datetime(hist["Data"]).dt.date
@@ -481,11 +482,13 @@ else:
                 g1, g2 = st.columns(2)
                 g1.bar_chart(hist[hist["Ação"] == "Entrada"].groupby("Separador")["Quantidade"].sum(), color="#10b981")
                 g2.bar_chart(hist[hist["Ação"] == "Saída"].groupby("Separador")["Quantidade"].sum(), color="#ef4444")
+                
         with abas[4]:
             st.markdown("<div class='panel'><h3 class='window-title'>🕒 Janela de Histórico</h3><p class='window-sub'>Últimos lançamentos sincronizados com a planilha.</p></div>", unsafe_allow_html=True)
             exibir_historico_bonito(df_historico)
+            
         if st.session_state.perfil == "coord":
             with abas[5]:
                 st.markdown("<div class='panel'><h3 class='window-title'>👑 Janela Executiva</h3><p class='window-sub'>Exporte os dados para análise e conferência.</p></div>", unsafe_allow_html=True)
                 csv = df_historico.drop(columns=["ID"], errors="ignore").to_csv(index=False, sep=";").encode("utf-8-sig")
-                st.download_button("📥 Baixar Excel (CSV)", csv, f"Caixas_{datetime.now().strftime('%d-%m')}.csv", "text/csv", type="primary", use_container_width=True)
+                st.download_button("📥 Baixar Excel (CSV)", csv, f"Relatorio_{meu_setor}_{datetime.now().strftime('%d-%m')}.csv", "text/csv", type="primary", use_container_width=True)
