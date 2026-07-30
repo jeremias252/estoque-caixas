@@ -478,33 +478,40 @@
 
             <!-- ABA RELATÓRIO DO ADMINISTRADOR -->
             <div id="tab-relatorio" class="tab-content panel">
-                <h3>📋 Relatório de Desempenho por Separador</h3>
-                <p class="sub">Selecione o separador e o dia exato para gerar o relatório individual.</p>
+                <h3>📋 Relatório de Desempenho Operacional</h3>
+                <p class="sub">Selecione os parâmetros abaixo para auditar Retiradas ou Lançamentos no estoque.</p>
                 
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px;">
                     <div>
-                        <label style="font-size: 12px; color: var(--text-sub); font-weight: 700; display: block; margin-bottom: 6px;">Separador:</label>
+                        <label style="font-size: 12px; color: var(--text-sub); font-weight: 700; display: block; margin-bottom: 6px;">Separador / Repositor:</label>
                         <select id="rel-pessoa" onchange="gerarRelatorioFeedback()"></select>
                     </div>
                     <div>
                         <label style="font-size: 12px; color: var(--text-sub); font-weight: 700; display: block; margin-bottom: 6px;">Data do Relatório:</label>
                         <input type="date" id="rel-data" onchange="gerarRelatorioFeedback()">
                     </div>
+                    <div>
+                        <label style="font-size: 12px; color: var(--text-sub); font-weight: 700; display: block; margin-bottom: 6px;">Tipo de Registro:</label>
+                        <select id="rel-acao" onchange="gerarRelatorioFeedback()">
+                            <option value="Saída" selected>📤 Retiradas (Saídas)</option>
+                            <option value="Entrada">📥 Lançamentos (Entradas)</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="kpis" style="margin-top:0; margin-bottom: 20px;">
-                    <div class="kpi"><span>Total de Peças Pegas</span><b id="rel-kpi-pecas" style="color:var(--prim)">0</b></div>
-                    <div class="kpi"><span>Bipagens / Lançamentos</span><b id="rel-kpi-ops">0</b></div>
+                    <div class="kpi"><span id="lbl-rel-pecas">Total de Peças Retiradas</span><b id="rel-kpi-pecas" style="color:var(--prim)">0</b></div>
+                    <div class="kpi"><span>Bipagens / Registros</span><b id="rel-kpi-ops">0</b></div>
                 </div>
 
                 <div style="display:flex; gap:10px; margin-bottom:25px; flex-wrap:wrap;">
-                    <button class="btn btn-primary" style="flex:1; margin:0;" onclick="exportarPDFRelatorioFeedback()">📄 Baixar PDF de Feedback</button>
+                    <button class="btn btn-primary" style="flex:1; margin:0;" onclick="exportarPDFRelatorioFeedback()">📄 Baixar PDF do Relatório</button>
                     <button class="btn btn-wsp" style="flex:1; margin:0;" onclick="enviarWhatsAppFeedback()">📲 Enviar via WhatsApp</button>
                 </div>
 
-                <h4 style="margin: 0 0 12px; color: var(--text-main);">Itens Retirados na Data:</h4>
+                <h4 id="lbl-rel-tabela" style="margin: 0 0 12px; color: var(--text-main);">Itens Retirados na Data:</h4>
                 <div class="history-card hist-head" style="grid-template-columns: 1.2fr 2fr 1fr;">
-                    <div>Data / Hora</div><div>Modelo do Item</div><div>Quantidade Pega</div>
+                    <div>Data / Hora</div><div>Modelo do Item</div><div>Quantidade</div>
                 </div>
                 <div id="rel-lista-detalhada"></div>
             </div>
@@ -835,11 +842,14 @@
         function enviarWhatsAppFeedback() {
             if(!estado.relatorioAtual || !estado.relatorioAtual.pessoa) return alert('⚠️ Selecione um separador primeiro!');
             let r = estado.relatorioAtual;
+            let acaoText = r.acao === 'Saída' ? 'Retiradas' : 'Lançadas';
+            
             let msg = `*RESUMO DE DESEMPENHO - LOGÍSTICA (${estado.setor.toUpperCase()})*\n\n` +
-                      `👤 *Separador:* ${r.pessoa}\n` +
+                      `👤 *Membro da Equipe:* ${r.pessoa}\n` +
                       `📅 *Data:* ${r.dataRelatorio}\n` +
-                      `📦 *Total de Peças Retiradas:* ${r.totalPecas} un.\n` +
-                      `📊 *Total de Baixas:* ${r.totalOps} lançamentos\n\n` +
+                      `🔄 *Tipo de Ação:* ${r.acao}s\n` +
+                      `📦 *Total de Peças ${acaoText}:* ${r.totalPecas} un.\n` +
+                      `📊 *Total de Registros:* ${r.totalOps} lançamentos\n\n` +
                       `_Relatório gerado pelo Portal Logística._`;
             window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
         }
@@ -1027,8 +1037,15 @@
         function gerarRelatorioFeedback() {
             let pessoa = document.getElementById('rel-pessoa').value;
             let dataSelecionada = document.getElementById('rel-data').value;
+            let acaoSelecionada = document.getElementById('rel-acao').value; // 'Saída' ou 'Entrada'
             let hist = estado.dados ? estado.dados.historico : [];
             
+            // Alterar textos dinamicamente dependendo da ação
+            let labelPecas = acaoSelecionada === 'Saída' ? 'Total de Peças Retiradas' : 'Total de Peças Lançadas';
+            let labelTabela = acaoSelecionada === 'Saída' ? 'Itens Retirados na Data:' : 'Itens Lançados na Data:';
+            document.getElementById('lbl-rel-pecas').innerText = labelPecas;
+            document.getElementById('lbl-rel-tabela').innerText = labelTabela;
+
             if(!pessoa || !dataSelecionada) {
                 document.getElementById('rel-kpi-pecas').innerText = '0'; document.getElementById('rel-kpi-ops').innerText = '0';
                 document.getElementById('rel-lista-detalhada').innerHTML = '<p style="color:var(--text-sub)">Selecione um separador e a data acima para carregar o relatório.</p>';
@@ -1050,7 +1067,8 @@
 
                 for(let i = 1; i < hist.length; i++) {
                     let a = hist[i][hAcao]; let p = hist[i][hPess];
-                    if(a === 'Saída' && p === pessoa) {
+                    
+                    if(a === acaoSelecionada && p === pessoa) {
                         let dt = parseData(hist[i][hData]); dt.setHours(0,0,0,0);
                         
                         if(dt.getTime() === dataFiltro.getTime()) {
@@ -1064,7 +1082,7 @@
             document.getElementById('rel-kpi-pecas').innerText = totalPecas; document.getElementById('rel-kpi-ops').innerText = totalOps;
             
             let dataFormatada = `${dia}/${mes}/${ano}`;
-            estado.relatorioAtual = { pessoa, dataRelatorio: dataFormatada, totalPecas, totalOps, listaSaidas };
+            estado.relatorioAtual = { pessoa, dataRelatorio: dataFormatada, acao: acaoSelecionada, totalPecas, totalOps, listaSaidas };
             
             let htmlList = '';
             listaSaidas.reverse().forEach(item => {
@@ -1073,25 +1091,27 @@
                     <div>${item.data}</div><div style="font-weight:700;">${item.modelo}</div><div style="font-weight:900; color:var(--prim);">${item.qtd} un.</div>
                 </div>`;
             });
-            document.getElementById('rel-lista-detalhada').innerHTML = htmlList || '<p style="color:var(--text-sub)">Nenhum lançamento de saída encontrado para este separador nesta data.</p>';
+            document.getElementById('rel-lista-detalhada').innerHTML = htmlList || `<p style="color:var(--text-sub)">Nenhum registro de ${acaoSelecionada.toLowerCase()} encontrado para este separador nesta data.</p>`;
         }
 
         function exportarPDFRelatorioFeedback() {
             if(!estado.relatorioAtual || !estado.relatorioAtual.pessoa) return alert('⚠️ Selecione um separador para gerar o relatório em PDF!');
             let r = estado.relatorioAtual; const { jsPDF } = window.jspdf; const doc = new jsPDF({ format: 'a4' });
 
+            let acaoText = r.acao === 'Saída' ? 'RETIRADAS' : 'LANÇADAS';
+
             doc.setFillColor(30, 41, 59); doc.rect(0, 0, 210, 35, 'F'); doc.setTextColor(255, 255, 255);
-            doc.setFontSize(18); doc.setFont("helvetica", "bold"); doc.text("RELATÓRIO DE DESEMPENHO E FEEDBACK", 15, 22);
+            doc.setFontSize(18); doc.setFont("helvetica", "bold"); doc.text("RELATÓRIO DE DESEMPENHO OPERACIONAL", 15, 22);
             doc.setTextColor(15, 23, 42); doc.setFontSize(11); doc.text(`Setor: ${estado.setor.toUpperCase()}`, 15, 48);
-            doc.text(`Separador Avaliado: ${r.pessoa}`, 15, 56);
-            doc.text(`Data de Análise: ${r.dataRelatorio}`, 15, 64);
+            doc.text(`Membro Avaliado: ${r.pessoa}`, 15, 56);
+            doc.text(`Data de Análise: ${r.dataRelatorio} (${r.acao}s)`, 15, 64);
             doc.text(`Data de Emissão: ${new Date().toLocaleDateString('pt-BR')}`, 130, 48);
 
             doc.setFillColor(241, 245, 249); doc.roundedRect(15, 72, 180, 25, 3, 3, 'F');
             doc.setFont("helvetica", "bold"); doc.setFontSize(12);
-            doc.text(`TOTAL DE PEÇAS RETIRADAS: ${r.totalPecas} unidades`, 22, 88); doc.text(`REGISTROS DE SAÍDA: ${r.totalOps}`, 120, 88);
+            doc.text(`TOTAL DE PEÇAS ${acaoText}: ${r.totalPecas} unidades`, 22, 88); doc.text(`TOTAL DE REGISTROS: ${r.totalOps}`, 120, 88);
 
-            doc.setFontSize(11); doc.setFont("helvetica", "bold"); doc.text("Histórico Detalhado de Saídas:", 15, 110);
+            doc.setFontSize(11); doc.setFont("helvetica", "bold"); doc.text(`Histórico Detalhado de ${r.acao}s:`, 15, 110);
             doc.setFillColor(226, 232, 240); doc.rect(15, 115, 180, 8, 'F'); doc.setFontSize(9);
             doc.text("DATA / HORA", 20, 120); doc.text("MODELO / PEÇA", 70, 120); doc.text("QUANTIDADE", 160, 120);
 
@@ -1102,7 +1122,7 @@
             });
             doc.line(20, 265, 90, 265); doc.text("Assinatura do Administrador", 25, 271);
             doc.line(120, 265, 190, 265); doc.text(`Assinatura (${r.pessoa})`, 130, 271);
-            doc.save(`Feedback_${r.pessoa}_${r.dataRelatorio.replace(/\//g,'-')}_${estado.setor}.pdf`);
+            doc.save(`Relatorio_${r.acao}_${r.pessoa}_${r.dataRelatorio.replace(/\//g,'-')}_${estado.setor}.pdf`);
         }
 
         function gerarPDF(data, pessoa, modelo, qtd) {
