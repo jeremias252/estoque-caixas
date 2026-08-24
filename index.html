@@ -109,6 +109,7 @@
 
         input, select { width: 100%; padding: 15px; border-radius: 14px; background: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-main); margin-bottom: 15px; transition: 0.3s; }
         input:focus, select:focus { border-color: var(--prim); box-shadow: 0 0 0 2px var(--glow1); }
+        select:disabled, input:disabled { opacity: 0.6; cursor: not-allowed; }
 
         #app-layout { display: none; height: 100vh; overflow: hidden; }
         
@@ -246,9 +247,9 @@
             'Torres': 'https://i0.wp.com/comprar.caixatomada.com/wp-content/uploads/2021/04/TR03W-scaled.jpg?w=1920&ssl=1'
         };
 
-        let estado = { setor: '', perfil: '', dados: null, graficos: {}, relatorioAtual: null, mapaSaidasPorModelo: {}, metaDiaria: Number(localStorage.getItem('metaDiaria')) || 0 };
+        let estado = { setor: '', perfil: '', nomeAtivo: '', dados: null, graficos: {}, relatorioAtual: null, mapaSaidasPorModelo: {}, metaDiaria: Number(localStorage.getItem('metaDiaria')) || 0 };
         let filaOffline = JSON.parse(localStorage.getItem('filaLogistica')) || [];
-        const EQUIPES = { 'Caixas': ['Marcello', 'Fabiano', 'Ana', 'Sérgio'], 'Torres': ['Fran', 'Henrique', 'Leonardo', 'Fanuel', 'Miguel', 'Douglas', 'Jeremias' ] };
+        const EQUIPES = { 'Caixas': ['Marcello', 'Fabiano', 'Sérgio'], 'Torres': ['Fran', 'Henrique', 'Leonardo', 'Patrick'] };
         const SENHAS = { 'Caixas': 'marcello123', 'Torres': 'fran123', 'admin': 'coord123' };
 
         function atualizarStatusRede() {
@@ -315,10 +316,17 @@
 
             <div id="step2" class="step">
                 <div class="step-title">SETOR <span id="lbl-setor"></span> • PERFIL</div>
-                <button class="btn-login" onclick="logar('separadores')">👀 Separadores</button>
+                <button class="btn-login" onclick="abrirSelecaoSeparador()">👀 Separadores</button>
                 <button class="btn-login" onclick="irParaSenha('controle')">⚙️ Controle Operacional</button>
                 <button class="btn-login" onclick="irParaSenha('admin')">👑 Administrador</button>
                 <button class="btn btn-text" onclick="voltar(1)">⬅️ Voltar</button>
+            </div>
+
+            <!-- NOVO PASSO EXCLUSIVO PARA SEPARADORES (SEM SENHA) -->
+            <div id="step-separador" class="step">
+                <div class="step-title">QUEM É VOCÊ?</div>
+                <div id="lista-nomes-separadores"></div>
+                <button class="btn btn-text" onclick="voltar(2)">⬅️ Voltar</button>
             </div>
 
             <div id="step3" class="step">
@@ -407,7 +415,7 @@
                 <div class="grid-catalogo" id="grid-cat"></div>
             </div>
 
-            <!-- ABA SAÍDA COM BOTÃO DE VOZ PARA ADMIN -->
+            <!-- ABA SAÍDA -->
             <div id="tab-saida" class="tab-content panel">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <h3>📤 Registrar Saída</h3>
@@ -419,13 +427,13 @@
                 <button class="btn btn-primary" id="btn-saida" onclick="lancar('Saída')">Confirmar Retirada</button>
             </div>
 
-            <!-- ABA ENTRADA (COM OPÇÃO DE DEVOLUÇÃO E BOTÃO DE VOZ PARA ADMIN) -->
+            <!-- ABA ENTRADA (COM OPÇÃO DE DEVOLUÇÃO PARA ADMIN) -->
             <div id="tab-entrada" class="tab-content panel">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <h3>📥 Registrar Entrada / Devolução</h3>
                     <button class="btn btn-admin-only" style="width:auto; padding:6px 12px; font-size:12px;" onclick="iniciarVoz('Entrada')">🎙️ Preencher por Voz</button>
                 </div>
-                <p class="sub">Selecione "Devolução / Cancelamento" na lista abaixo se o item estiver retornando.</p>
+                <p class="sub btn-admin-only">Selecione "Devolução / Cancelamento" na lista abaixo se o item estiver retornando.</p>
                 <select id="e-pessoa"></select>
                 <select id="e-modelo"></select>
                 <input type="number" id="e-qtd" value="1" min="1">
@@ -549,14 +557,44 @@
             }
         }
 
-        function irParaSenha(p) { estado.perfil = p; document.getElementById('step2').classList.remove('active'); document.getElementById('step3').classList.add('active'); }
-        function voltar(p) { document.querySelectorAll('.step').forEach(e => e.classList.remove('active')); document.getElementById('step'+p).classList.add('active'); }
+        // ================= FUNÇÕES DE LOGIN =================
+        function abrirSelecaoSeparador() {
+            let html = '';
+            EQUIPES[estado.setor].forEach(nome => {
+                html += `<button class="btn-login" onclick="logarComoSeparador('${nome}')">👤 ${nome}</button>`;
+            });
+            document.getElementById('lista-nomes-separadores').innerHTML = html;
+            document.querySelectorAll('.step').forEach(e => e.classList.remove('active'));
+            document.getElementById('step-separador').classList.add('active');
+        }
+
+        function logarComoSeparador(nome) {
+            estado.nomeAtivo = nome; // Guarda quem é o separador atual
+            logar('separadores');
+        }
+
+        function irParaSenha(p) { 
+            estado.perfil = p; 
+            document.querySelectorAll('.step').forEach(e => e.classList.remove('active')); 
+            document.getElementById('step3').classList.add('active'); 
+        }
+
+        function voltar(p) { 
+            document.querySelectorAll('.step').forEach(e => e.classList.remove('active')); 
+            document.getElementById('step'+p).classList.add('active'); 
+            // Se voltou da tela de separador, limpa o nome ativo
+            if(p === 2) estado.nomeAtivo = '';
+        }
         
         function validarSenha() {
             let s = document.getElementById('senha-input').value;
             let senhaCorreta = estado.perfil === 'admin' ? SENHAS.admin : SENHAS[estado.setor];
-            if(s === senhaCorreta) logar(estado.perfil);
-            else alert('❌ Senha Incorreta');
+            if(s === senhaCorreta) {
+                estado.nomeAtivo = ''; // Zera o nome ativo para Admin/Controle terem acesso a todos os nomes
+                logar(estado.perfil);
+            } else {
+                alert('❌ Senha Incorreta');
+            }
         }
 
         function logar(p) {
@@ -568,32 +606,42 @@
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('app-layout').style.display = 'block';
             
-            let rotulosPerfil = { 'separadores': 'SEPARADORES', 'controle': 'CONTROLE OPERACIONAL', 'admin': 'ADMINISTRADOR' };
+            let rotulosPerfil = { 'separadores': 'SEPARADOR', 'controle': 'CONTROLE OPERACIONAL', 'admin': 'ADMINISTRADOR' };
             let nomeExibicao = rotulosPerfil[p] || p.toUpperCase();
+
+            // Se for separador, o nome dele aparece em destaque no aplicativo
+            if(p === 'separadores' && estado.nomeAtivo) {
+                nomeExibicao = `${estado.nomeAtivo} (Separador)`;
+            }
 
             document.getElementById('side-setor').innerText = estado.setor.toUpperCase();
             document.getElementById('mob-setor').innerText = estado.setor.toUpperCase();
             document.getElementById('side-perfil').innerText = nomeExibicao;
-            document.getElementById('badge-top').innerText = 'ACESSO ' + nomeExibicao;
+            document.getElementById('badge-top').innerText = 'ACESSO ' + nomeExibicao.toUpperCase();
             
             let btnRel = document.getElementById('btn-tab-relatorio');
             let boxAdminMenu = document.getElementById('admin-box-menu');
             let btnsAdminOnly = document.querySelectorAll('.btn-admin-only');
 
-            // CONTROLE DE PERMISSÕES 
+            // CONTROLE DE PERMISSÕES NAS ABAS
             if(p === 'separadores') { 
-                // Separadores só veem o catálogo (índice 0)
-                document.querySelectorAll('.tab-btn').forEach((b,i) => { if(i>0) b.style.display='none'; }); 
+                // Separadores veem: Catálogo (0), Saídas (1), Entradas (2) e Histórico (5)
+                document.querySelectorAll('.tab-btn').forEach((b,i) => { 
+                    if([0, 1, 2, 5].includes(i)) b.style.display='inline-block'; 
+                    else b.style.display='none'; 
+                }); 
                 if(boxAdminMenu) boxAdminMenu.style.display = 'none';
                 btnsAdminOnly.forEach(b => b.style.display = 'none');
             } else if(p === 'controle') {
-                // Controle vê tudo menos Relatório
-                document.querySelectorAll('.tab-btn').forEach(b => b.style.display='inline-block');
-                if(btnRel) btnRel.style.display = 'none'; 
+                // Controle vê tudo menos Relatório (7)
+                document.querySelectorAll('.tab-btn').forEach((b,i) => { 
+                    if(i !== 7) b.style.display='inline-block'; 
+                    else b.style.display='none'; 
+                });
                 if(boxAdminMenu) boxAdminMenu.style.display = 'none';
                 btnsAdminOnly.forEach(b => b.style.display = 'none');
             } else if(p === 'admin') {
-                // Admin vê tudo
+                // Admin vê absolutamente tudo
                 document.querySelectorAll('.tab-btn').forEach(b => b.style.display='inline-block');
                 if(boxAdminMenu) boxAdminMenu.style.display = 'block';
                 btnsAdminOnly.forEach(b => b.style.display = 'inline-block');
@@ -671,17 +719,31 @@
             
             let htmlPessoas = '<option value="">Selecione a pessoa...</option>';
             EQUIPES[estado.setor].forEach(p => htmlPessoas += `<option value="${p}">${p}</option>`);
-            document.getElementById('s-pessoa').innerHTML = htmlPessoas;
-            document.getElementById('rel-pessoa').innerHTML = htmlPessoas;
             
+            let selectPessoaSaida = document.getElementById('s-pessoa');
+            let selectPessoaEntrada = document.getElementById('e-pessoa');
+            
+            selectPessoaSaida.innerHTML = htmlPessoas;
+            document.getElementById('rel-pessoa').innerHTML = htmlPessoas;
+            // Na entrada, adicionamos a opção de Devolução (Só Admin e Controle verão por causa da trava abaixo)
+            selectPessoaEntrada.innerHTML = htmlPessoas + '<option value="Devolução (Retorno)" style="font-weight:bold; color:var(--prim)">🔄 Devolução / Cancelamento</option>';
+
+            // TRAVA DE SEGURANÇA PARA SEPARADORES: Eles não podem escolher a pessoa, é o nome deles e ponto!
+            if(estado.perfil === 'separadores' && estado.nomeAtivo) {
+                selectPessoaSaida.value = estado.nomeAtivo;
+                selectPessoaSaida.disabled = true; // Bloqueia o campo
+                selectPessoaEntrada.value = estado.nomeAtivo;
+                selectPessoaEntrada.disabled = true; // Bloqueia o campo
+            } else {
+                selectPessoaSaida.disabled = false;
+                selectPessoaEntrada.disabled = false;
+            }
+
             // Garantir que a data do relatório sempre tenha uma data inicial (Hoje)
             let inputDataRel = document.getElementById('rel-data');
             if(inputDataRel && !inputDataRel.value) {
                 inputDataRel.value = new Date().toISOString().split('T')[0];
             }
-            
-            // Na entrada, adicionamos a opção de Devolução
-            document.getElementById('e-pessoa').innerHTML = htmlPessoas + '<option value="Devolução (Retorno)" style="font-weight:bold; color:var(--prim)">🔄 Devolução / Cancelamento</option>';
 
             estado.mapaSaidasPorModelo = {};
             let totalSaidasHoje = 0;
@@ -738,16 +800,13 @@
             document.getElementById('e-modelo').innerHTML = htmlModelos;
             document.getElementById('inv-modelo').innerHTML = htmlModelos;
             
-            // ANIMAR KPIS (ODÔMETRO)
             animarNumero('kpi-pecas', totPecas);
             animarNumero('kpi-modelos', estado.catalogoAgrupado.length);
             animarNumero('kpi-zerados', zerados.length);
 
             document.getElementById('alerta-zerados').innerHTML = zerados.length > 0 ? `<div class="danger-glow">🚨 <b>ALERTA:</b> Há ${zerados.length} variação(ões) com estoque zerado.</div>` : '';
 
-            // ATUALIZA BARRA DE META
             atualizarBarraMeta(totalSaidasHoje);
-
             renderizarCatalogo('');
             atualizarPreviewInventario();
             
@@ -1037,10 +1096,9 @@
         function gerarRelatorioFeedback() {
             let pessoa = document.getElementById('rel-pessoa').value;
             let dataSelecionada = document.getElementById('rel-data').value;
-            let acaoSelecionada = document.getElementById('rel-acao').value; // 'Saída' ou 'Entrada'
+            let acaoSelecionada = document.getElementById('rel-acao').value; 
             let hist = estado.dados ? estado.dados.historico : [];
             
-            // Alterar textos dinamicamente dependendo da ação
             let labelPecas = acaoSelecionada === 'Saída' ? 'Total de Peças Retiradas' : 'Total de Peças Lançadas';
             let labelTabela = acaoSelecionada === 'Saída' ? 'Itens Retirados na Data:' : 'Itens Lançados na Data:';
             document.getElementById('lbl-rel-pecas').innerText = labelPecas;
@@ -1052,7 +1110,6 @@
                 estado.relatorioAtual = null; return;
             }
 
-            // Converter a data selecionada do input (YYYY-MM-DD) para comparar com o histórico
             let [ano, mes, dia] = dataSelecionada.split('-');
             let dataFiltro = new Date(ano, mes - 1, dia);
             dataFiltro.setHours(0,0,0,0);
