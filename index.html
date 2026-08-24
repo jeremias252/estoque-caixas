@@ -249,7 +249,9 @@
 
         let estado = { setor: '', perfil: '', nomeAtivo: '', dados: null, graficos: {}, relatorioAtual: null, mapaSaidasPorModelo: {}, metaDiaria: Number(localStorage.getItem('metaDiaria')) || 0 };
         let filaOffline = JSON.parse(localStorage.getItem('filaLogistica')) || [];
-        const EQUIPES = { 'Caixas': ['Marcello', 'Fabiano', 'Sérgio'], 'Torres': ['Fran', 'Henrique', 'Leonardo', 'Patrick'] };
+        
+        // --- EQUIPES ATUALIZADAS AQUI ---
+        const EQUIPES = { 'Caixas': ['Marcello', 'Fabiano', 'Sérgio', 'Ana', 'Gustavo'], 'Torres': ['Fran', 'Henrique', 'Leonardo', 'Patrick', 'Fanuel', 'Miguel', 'Jeremias', 'Douglas'] };
         const SENHAS = { 'Caixas': 'marcello123', 'Torres': 'fran123', 'admin': 'coord123' };
 
         function atualizarStatusRede() {
