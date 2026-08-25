@@ -422,7 +422,6 @@
                 <div class="grid-catalogo" id="grid-cat"></div>
             </div>
 
-            <!-- NOVA ABA: REPOSIÇÃO COM LÓGICA DE FILA INTELIGENTE E ATALHOS -->
             <div id="tab-reposicao" class="tab-content panel">
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 10px;">
                     <h3>🚨 Fila de Reposição / Produção</h3>
@@ -430,7 +429,6 @@
                 </div>
                 <p class="sub">Modelos solicitados pela coordenação ou com estoque crítico.</p>
                 
-                <!-- BLOCO DO COORDENADOR PARA SOLICITAR -->
                 <div class="admin-box-menu coord-only" id="box-admin-reposicao" style="margin-bottom:25px; border-color:#10b981; background:rgba(16,185,129,0.08);">
                     <h4 style="color:#10b981;">➕ Solicitar Nova Ordem de Produção</h4>
                     <input type="text" list="lista-modelos" id="rep-modelo" placeholder="🔍 Buscar modelo para pedir reposição..." autocomplete="off">
@@ -438,7 +436,6 @@
                     <button class="btn btn-primary" id="btn-pedir-rep" style="background:#10b981; box-shadow:0 8px 20px rgba(16,185,129,0.3);" onclick="solicitarReposicao()">Solicitar à Equipe</button>
                 </div>
 
-                <!-- LISTA DE PEDIDOS ATIVOS -->
                 <div id="lista-reposicao-solicitada"></div>
 
                 <hr style="border:none; border-top:1px solid rgba(255,255,255,0.1); margin: 30px 0;">
@@ -554,7 +551,7 @@
         </div>
     </div>
 
-    <!-- POP-UP DETALHAMENTO DE CORES E LANÇAMENTO DIRETO -->
+    <!-- POP-UP DETALHAMENTO DE CORES -->
     <div class="modal-overlay" id="modal-detalhe">
         <div class="modal">
             <h2 id="modal-titulo" style="text-align:center; margin:0 0 5px;">Modelo</h2>
@@ -770,7 +767,6 @@
             let totalSaidasHoje = 0;
             let hojeStr = new Date().toLocaleDateString('pt-BR');
 
-            // LEITURA DO HISTÓRICO PARA GERAR DADOS E AS TRAVAS
             if(hist && hist.length > 0) {
                 let cH = hist[0].map(h => h.toString().trim());
                 let hData = cH.indexOf("Data"); if(hData === -1) hData = 1;
@@ -783,7 +779,6 @@
                     let a = hist[i][hAcao]; let p = String(hist[i][hPess]); let m = String(hist[i][hMod]); let q = Number(hist[i][hQtd]) || 0;
                     if(!m) continue;
 
-                    // HACKS DE COMUNICAÇÃO (Ordem e Trava)
                     if(p.startsWith('⏳ REPOSIÇÃO|')) {
                         estado.filaReposicao[m] = parseInt(p.split('|')[1]) || 0;
                     } else if (p.startsWith('⚙️ FAZENDO|')) {
@@ -793,7 +788,6 @@
                         delete estado.emProducao[m];
                     }
 
-                    // CONTAGEM NORMAL DE SAÍDAS
                     if(a === 'Saída' && !p.includes('REPOSIÇÃO') && !p.includes('FAZENDO')) {
                         let nomeLinha = m.split(' - ')[0].trim();
                         estado.mapaSaidasPorModelo[nomeLinha] = (estado.mapaSaidasPorModelo[nomeLinha] || 0) + q;
@@ -853,19 +847,16 @@
             if(estado.perfil === 'admin') gerarRelatorioFeedback();
         }
 
-        // ================= FUNÇÕES DE REPOSIÇÃO E PRODUÇÃO (TRAVA) =================
-        
         async function enviarPayloadSilencioso(payload, msgSucesso) {
             if (!navigator.onLine) {
                 filaOffline.push(payload); localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
                 toast(`📶 Salvo offline!`); atualizarStatusRede(); return;
             }
             
-            // Faz o envio mas não trava a tela (Otimista)
             fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) })
             .then(() => {
                 playSomSucesso(); toast(msgSucesso); 
-                setTimeout(() => carregarDados(false), 3000); // Sincroniza em 3s silenciosamente
+                setTimeout(() => carregarDados(false), 3000); 
             })
             .catch(e => {
                 filaOffline.push(payload); localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
@@ -875,8 +866,6 @@
 
         function assumirProducao(modelo) {
             let p = estado.nomeAtivo || estado.perfil.toUpperCase();
-            
-            // Interface Otimista: Já pinta na tela na hora que o cara assumiu
             estado.emProducao[modelo] = p;
             fecharModal();
             renderizarReposicao(); 
@@ -886,7 +875,6 @@
         }
 
         function concluirProducao(modelo) {
-            // Interface Otimista
             delete estado.emProducao[modelo];
             fecharModal();
             renderizarReposicao();
@@ -925,7 +913,6 @@
         function concluirReposicao(modelo) {
             if(!confirm(`Deseja forçar a conclusão da ordem de "${modelo}" e remover da lista?`)) return;
             
-            // Interface otimista
             delete estado.filaReposicao[modelo];
             renderizarReposicao();
             
@@ -934,7 +921,6 @@
         }
 
         function renderizarReposicao() {
-            // 1. Renderiza Ordem de Produção (Pedida pelo Admin)
             let htmlSol = '';
             let modelosSolicitados = Object.keys(estado.filaReposicao);
             
@@ -978,7 +964,6 @@
                 document.querySelectorAll('#lista-reposicao-solicitada .coord-only').forEach(b => b.style.display = 'none');
             }
 
-            // 2. Renderiza Críticos Automáticos
             let htmlCrit = '';
             let reposicaoFiltrada = estado.catalogoAgrupado.filter(x => x.total < 10);
             
@@ -1041,7 +1026,6 @@
                     let textoDaLinha = `${d} ${a} ${p} ${m} ${q}`.toLowerCase();
                     if(b !== '' && !textoDaLinha.includes(b)) continue; 
 
-                    // Traduz as mensagens de Sistema para o Histórico ficar bonito
                     if(p.startsWith('⏳ REPOSIÇÃO|')) { p = `🚨 Pedido Ordem (${p.split('|')[1]} un)`; q = '-'; } 
                     else if (p.startsWith('⚙️ FAZENDO|')) { p = `✋ Início Produção (${p.split('|')[1]})`; q = '-'; } 
                     else if (p === '✅ FIM REPOSIÇÃO') { p = `✅ Produção Concluída`; q = '-'; }
@@ -1089,7 +1073,7 @@
             let box = document.getElementById('box-meta-dashboard');
             if(!estado.metaDiaria || estado.metaDiaria <= 0) { box.style.display = 'none'; return; }
             box.style.display = 'block';
-            let pct = Math.min(Math.round((saidasHoje / estado.metaDiaria) * 100), 100);
+            let pct = Math.min(Math.round((saidasHoje / saidasHoje) * 100), 100);
             document.getElementById('meta-porcentagem').innerText = `${saidasHoje} / ${estado.metaDiaria} un. (${pct}%)`;
             document.getElementById('meta-bar-fill').style.width = pct + '%';
         }
@@ -1171,8 +1155,7 @@
             if(el) { let v = parseInt(el.value) || 1; v += delta; if(v < 1) v = 1; el.value = v; }
         }
 
-        // ================= OTIMIZAÇÃO: LANÇAMENTO DIRETO DO MODAL SEM TRAVAR TELA =================
-        async function lancarDoModal(btn, acao, modelo, inputId) {
+        function lancarDoModal(btn, acao, modelo, inputId) {
             let q = parseInt(document.getElementById(inputId).value) || 0;
             let p = estado.nomeAtivo;
 
@@ -1191,13 +1174,11 @@
 
             if(q < 1) return alert('⚠️ Quantidade inválida!');
 
-            // INTERFACE OTIMISTA: Atualiza a tela antes mesmo de mandar pro servidor
             fecharModal(); 
             toast(`⏳ Registrando ${acao} de ${q}x...`);
 
             let payload = { setor: estado.setor, acao: acao, pessoa: p, modelo: modelo, quantidade: q };
 
-            // Atualiza o estoque localmente na hora para o usuário ver
             let catItem = estado.catalogoAgrupado.find(c => c.linha === modelo.split(' - ')[0].trim());
             if(catItem) {
                 let det = catItem.detalhes.find(d => d.nomeC === modelo);
@@ -1211,25 +1192,18 @@
             renderizarReposicao();
 
             if (!navigator.onLine) {
-                filaOffline.push(payload);
-                localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
-                playSomSucesso(); toast(`📶 Salvo offline!`);
-                atualizarStatusRede();
-                return;
+                filaOffline.push(payload); localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
+                playSomSucesso(); toast(`📶 Salvo offline!`); atualizarStatusRede(); return;
             }
 
-            // Envia pro Google no fundo
             try {
                 fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) })
                 .then(() => {
-                    playSomSucesso(); 
-                    toast(`✅ ${q}x ${acao} registrada no servidor!`);
-                    setTimeout(() => carregarDados(false), 3000); // Sincroniza em 3s de forma invisível
+                    playSomSucesso(); toast(`✅ ${q}x ${acao} registrada no servidor!`);
+                    setTimeout(() => carregarDados(false), 2000); 
                 }).catch(e => {
-                    filaOffline.push(payload);
-                    localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
-                    toast(`📶 Queda de rede. Salvo offline!`);
-                    atualizarStatusRede();
+                    filaOffline.push(payload); localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
+                    toast(`📶 Queda de rede. Salvo offline!`); atualizarStatusRede();
                 });
             } catch(e) {}
         }
@@ -1242,7 +1216,6 @@
                 let statusText = d.qtd === 0 ? '🔴 Esgotado' : (d.qtd < 10 ? '🔴 Crítico' : (d.qtd <= 25 ? '🟡 Atenção' : '🟢 OK'));
                 let inpId = `mqtd-${idx}-${i}`;
                 
-                // MÁGICA DA TRAVA DE CONCORRÊNCIA
                 let produtor = estado.emProducao[d.nomeC];
                 let avisoProducao = ''; let btnAcaoProd = '';
 
@@ -1340,7 +1313,6 @@
             }
         }
 
-        // ================= OTIMIZAÇÃO: INVENTÁRIO COM SALVAMENTO OFFLINE SEGURO =================
         async function confirmarAjusteInventario() {
             let modelo = document.getElementById('inv-modelo').value;
             let qtdFisica = Number(document.getElementById('inv-qtd-fisica').value);
@@ -1359,39 +1331,29 @@
 
             let payload = { setor: estado.setor, acao: tipoAcao, pessoa: 'Ajuste Inventário', modelo: modelo, quantidade: qtdAjuste };
 
-            // Interface Otimista
             let catItem = estado.catalogoAgrupado.find(c => c.linha === modelo.split(' - ')[0].trim());
             if(catItem) {
                 let det = catItem.detalhes.find(d => d.nomeC === modelo);
                 if(det) det.qtd = qtdFisica; 
                 catItem.total = catItem.detalhes.reduce((acc, curr) => acc + curr.qtd, 0);
             }
-            
             document.getElementById('inv-qtd-fisica').value = '0';
             atualizarPreviewInventario();
 
             if (!navigator.onLine) {
-                filaOffline.push(payload);
-                localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
+                filaOffline.push(payload); localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
                 playSomSucesso(); toast(`📶 Ajuste salvo offline!`);
                 btn.innerText = '⚙️ Confirmar Ajuste de Inventário'; btn.disabled = false;
-                atualizarStatusRede();
-                return;
+                atualizarStatusRede(); return;
             }
 
             try {
-                fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) })
-                .then(() => {
-                    playSomSucesso();
-                    toast(`⚙️ Ajuste concluído!`);
-                    btn.innerText = '⚙️ Confirmar Ajuste de Inventário'; btn.disabled = false;
-                    setTimeout(() => carregarDados(false), 2000);
-                }).catch(e => {
-                    throw e;
-                });
+                await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
+                playSomSucesso(); toast(`⚙️ Ajuste concluído!`);
+                btn.innerText = '⚙️ Confirmar Ajuste de Inventário'; btn.disabled = false;
+                setTimeout(() => carregarDados(false), 2000);
             } catch(e) {
-                filaOffline.push(payload);
-                localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
+                filaOffline.push(payload); localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
                 toast(`📶 Queda de rede. Salvo offline!`);
                 btn.innerText = '⚙️ Confirmar Ajuste de Inventário'; btn.disabled = false;
                 atualizarStatusRede();
