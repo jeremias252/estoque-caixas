@@ -554,7 +554,7 @@
         </div>
     </div>
 
-    <!-- POP-UP DETALHAMENTO DE CORES -->
+    <!-- POP-UP DETALHAMENTO DE CORES E LANÇAMENTO DIRETO -->
     <div class="modal-overlay" id="modal-detalhe">
         <div class="modal">
             <h2 id="modal-titulo" style="text-align:center; margin:0 0 5px;">Modelo</h2>
@@ -681,7 +681,7 @@
                 return;
             }
 
-            if(forcarSync) toast('⏳ Sincronizando com o servidor...');
+            if(forcarSync) toast('⏳ Sincronizando...');
             try {
                 let r = await fetch(`${API_URL}?setor=${estado.setor}`);
                 let json = await r.json();
@@ -858,25 +858,39 @@
         async function enviarPayloadSilencioso(payload, msgSucesso) {
             if (!navigator.onLine) {
                 filaOffline.push(payload); localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
-                toast(`📶 Salvo offline!`); atualizarStatusRede(); fecharModal(); return;
+                toast(`📶 Salvo offline!`); atualizarStatusRede(); return;
             }
-            try {
-                toast('⏳ Processando...');
-                await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
-                playSomSucesso(); toast(msgSucesso); fecharModal(); carregarDados(true);
-            } catch(e) {
+            
+            // Faz o envio mas não trava a tela (Otimista)
+            fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) })
+            .then(() => {
+                playSomSucesso(); toast(msgSucesso); 
+                setTimeout(() => carregarDados(false), 3000); // Sincroniza em 3s silenciosamente
+            })
+            .catch(e => {
                 filaOffline.push(payload); localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
-                toast(`📶 Queda de rede. Salvo offline!`); atualizarStatusRede(); fecharModal();
-            }
+                toast(`📶 Queda de rede. Salvo offline!`); atualizarStatusRede();
+            });
         }
 
         function assumirProducao(modelo) {
             let p = estado.nomeAtivo || estado.perfil.toUpperCase();
+            
+            // Interface Otimista: Já pinta na tela na hora que o cara assumiu
+            estado.emProducao[modelo] = p;
+            fecharModal();
+            renderizarReposicao(); 
+            
             let payload = { setor: estado.setor, acao: 'Entrada', pessoa: '⚙️ FAZENDO|' + p, modelo: modelo, quantidade: 0 };
-            enviarPayloadSilencioso(payload, '✋ Você assumiu a produção deste item!');
+            enviarPayloadSilencioso(payload, '✋ Você assumiu a reposição deste item!');
         }
 
         function concluirProducao(modelo) {
+            // Interface Otimista
+            delete estado.emProducao[modelo];
+            fecharModal();
+            renderizarReposicao();
+            
             let payload = { setor: estado.setor, acao: 'Entrada', pessoa: '✅ FIM REPOSIÇÃO', modelo: modelo, quantidade: 0 };
             enviarPayloadSilencioso(payload, '✅ Reposição liberada/concluída!');
         }
@@ -910,6 +924,11 @@
 
         function concluirReposicao(modelo) {
             if(!confirm(`Deseja forçar a conclusão da ordem de "${modelo}" e remover da lista?`)) return;
+            
+            // Interface otimista
+            delete estado.filaReposicao[modelo];
+            renderizarReposicao();
+            
             let payload = { setor: estado.setor, acao: 'Entrada', pessoa: '✅ FIM REPOSIÇÃO', modelo: modelo, quantidade: 0 };
             enviarPayloadSilencioso(payload, '✅ Pedido finalizado!');
         }
@@ -1152,6 +1171,7 @@
             if(el) { let v = parseInt(el.value) || 1; v += delta; if(v < 1) v = 1; el.value = v; }
         }
 
+        // ================= OTIMIZAÇÃO: LANÇAMENTO DIRETO DO MODAL SEM TRAVAR TELA =================
         async function lancarDoModal(btn, acao, modelo, inputId) {
             let q = parseInt(document.getElementById(inputId).value) || 0;
             let p = estado.nomeAtivo;
@@ -1171,22 +1191,47 @@
 
             if(q < 1) return alert('⚠️ Quantidade inválida!');
 
-            let txtOri = btn.innerText; btn.innerText = '⏳...'; btn.disabled = true;
+            // INTERFACE OTIMISTA: Atualiza a tela antes mesmo de mandar pro servidor
+            fecharModal(); 
+            toast(`⏳ Registrando ${acao} de ${q}x...`);
+
             let payload = { setor: estado.setor, acao: acao, pessoa: p, modelo: modelo, quantidade: q };
 
+            // Atualiza o estoque localmente na hora para o usuário ver
+            let catItem = estado.catalogoAgrupado.find(c => c.linha === modelo.split(' - ')[0].trim());
+            if(catItem) {
+                let det = catItem.detalhes.find(d => d.nomeC === modelo);
+                if(det) {
+                    if(acao === 'Entrada') det.qtd += q; else det.qtd -= q;
+                    if(det.qtd < 0) det.qtd = 0;
+                }
+                catItem.total = catItem.detalhes.reduce((acc, curr) => acc + curr.qtd, 0);
+            }
+            renderizarCatalogo(''); 
+            renderizarReposicao();
+
             if (!navigator.onLine) {
-                filaOffline.push(payload); localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
-                playSomSucesso(); toast(`📶 Salvo offline!`); fecharModal(); atualizarStatusRede(); return;
+                filaOffline.push(payload);
+                localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
+                playSomSucesso(); toast(`📶 Salvo offline!`);
+                atualizarStatusRede();
+                return;
             }
 
+            // Envia pro Google no fundo
             try {
-                await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
-                playSomSucesso(); toast(`✅ ${q}x ${acao} registrada com sucesso!`);
-                fecharModal(); carregarDados(true);
-            } catch(e) { 
-                filaOffline.push(payload); localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
-                toast(`📶 Queda de rede. Salvo offline!`); fecharModal(); atualizarStatusRede();
-            }
+                fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) })
+                .then(() => {
+                    playSomSucesso(); 
+                    toast(`✅ ${q}x ${acao} registrada no servidor!`);
+                    setTimeout(() => carregarDados(false), 3000); // Sincroniza em 3s de forma invisível
+                }).catch(e => {
+                    filaOffline.push(payload);
+                    localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
+                    toast(`📶 Queda de rede. Salvo offline!`);
+                    atualizarStatusRede();
+                });
+            } catch(e) {}
         }
 
         function abrirModal(idx) {
@@ -1295,6 +1340,7 @@
             }
         }
 
+        // ================= OTIMIZAÇÃO: INVENTÁRIO COM SALVAMENTO OFFLINE SEGURO =================
         async function confirmarAjusteInventario() {
             let modelo = document.getElementById('inv-modelo').value;
             let qtdFisica = Number(document.getElementById('inv-qtd-fisica').value);
@@ -1313,29 +1359,43 @@
 
             let payload = { setor: estado.setor, acao: tipoAcao, pessoa: 'Ajuste Inventário', modelo: modelo, quantidade: qtdAjuste };
 
-            try {
-                await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
-                playSomSucesso();
-                toast(`⚙️ Ajuste de Inventário de ${qtdAjuste}x para "${modelo}" concluído!`);
-                setTimeout(() => { btn.innerText = '⚙️ Confirmar Ajuste de Inventário'; btn.disabled = false; carregarDados(true); abrirAba('catalogo', document.querySelectorAll('.tab-btn')[0]); }, 1200);
-            } catch(e) {
-                alert('Erro ao salvar ajuste.');
-                btn.innerText = '⚙️ Confirmar Ajuste de Inventário'; btn.disabled = false;
+            // Interface Otimista
+            let catItem = estado.catalogoAgrupado.find(c => c.linha === modelo.split(' - ')[0].trim());
+            if(catItem) {
+                let det = catItem.detalhes.find(d => d.nomeC === modelo);
+                if(det) det.qtd = qtdFisica; 
+                catItem.total = catItem.detalhes.reduce((acc, curr) => acc + curr.qtd, 0);
             }
-        }
+            
+            document.getElementById('inv-qtd-fisica').value = '0';
+            atualizarPreviewInventario();
 
-        function irParaLancamentoRapido(acao, modelo) {
-            let tabId = acao === 'Saída' ? 'saida' : 'entrada';
-            let pfx = acao === 'Saída' ? 's' : 'e';
-            
-            let btnTab = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(`'${tabId}'`));
-            if(btnTab) btnTab.click();
-            
-            setTimeout(() => {
-                document.getElementById(`${pfx}-modelo`).value = modelo;
-                document.getElementById(`${pfx}-qtd`).value = '1';
-                document.getElementById(`${pfx}-qtd`).focus();
-            }, 150);
+            if (!navigator.onLine) {
+                filaOffline.push(payload);
+                localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
+                playSomSucesso(); toast(`📶 Ajuste salvo offline!`);
+                btn.innerText = '⚙️ Confirmar Ajuste de Inventário'; btn.disabled = false;
+                atualizarStatusRede();
+                return;
+            }
+
+            try {
+                fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) })
+                .then(() => {
+                    playSomSucesso();
+                    toast(`⚙️ Ajuste concluído!`);
+                    btn.innerText = '⚙️ Confirmar Ajuste de Inventário'; btn.disabled = false;
+                    setTimeout(() => carregarDados(false), 2000);
+                }).catch(e => {
+                    throw e;
+                });
+            } catch(e) {
+                filaOffline.push(payload);
+                localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
+                toast(`📶 Queda de rede. Salvo offline!`);
+                btn.innerText = '⚙️ Confirmar Ajuste de Inventário'; btn.disabled = false;
+                atualizarStatusRede();
+            }
         }
 
         async function lancar(tipo) {
