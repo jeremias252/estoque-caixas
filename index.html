@@ -255,7 +255,7 @@
             'Torres': 'https://i0.wp.com/comprar.caixatomada.com/wp-content/uploads/2021/04/TR03W-scaled.jpg?w=1920&ssl=1'
         };
 
-        let estado = { setor: '', perfil: '', nomeAtivo: '', dados: null, graficos: {}, relatorioAtual: null, mapaSaidasPorModelo: {}, metaDiaria: Number(localStorage.getItem('metaDiaria')) || 0 };
+        let estado = { setor: '', perfil: '', nomeAtivo: '', dados: null, graficos: {}, relatorioAtual: null, mapaSaidasPorModelo: {}, filaReposicao: {}, metaDiaria: Number(localStorage.getItem('metaDiaria')) || 0 };
         let filaOffline = JSON.parse(localStorage.getItem('filaLogistica')) || [];
         
         const EQUIPES = { 'Caixas': ['Marcello', 'Fabiano', 'Sérgio', 'Ana', 'Gustavo'], 'Torres': ['Fran', 'Henrique', 'Leonardo', 'Patrick', 'Fanuel', 'Miguel', 'Jeremias', 'Douglas'] };
@@ -421,13 +421,24 @@
                 <div class="grid-catalogo" id="grid-cat"></div>
             </div>
 
+            <!-- NOVA ABA: REPOSIÇÃO COM LÓGICA DE FILA INTELIGENTE -->
             <div id="tab-reposicao" class="tab-content panel">
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 10px;">
                     <h3>🚨 Fila de Reposição / Produção</h3>
-                    <button class="btn btn-admin-only btn-wsp" style="font-size: 13px; font-weight: bold; padding: 10px 20px;" onclick="enviarWhatsAppReposicao()">📲 Cobrar Equipe (WhatsApp)</button>
+                    <button class="btn coord-only btn-wsp" style="font-size: 13px; font-weight: bold; padding: 10px 20px; width:auto;" onclick="enviarWhatsAppReposicao()">📲 Cobrar Equipe</button>
                 </div>
-                <p class="sub">Modelos e cores com estoque crítico (abaixo de 10) que precisam ser repostos imediatamente.</p>
-                <div id="lista-reposicao" class="grid-catalogo"></div>
+                <p class="sub">Modelos solicitados pela coordenação para produção urgente.</p>
+                
+                <!-- BLOCO DO COORDENADOR PARA SOLICITAR -->
+                <div class="admin-box-menu coord-only" id="box-admin-reposicao" style="margin-bottom:25px; border-color:#10b981; background:rgba(16,185,129,0.08);">
+                    <h4 style="color:#10b981;">➕ Solicitar Nova Reposição</h4>
+                    <input type="text" list="lista-modelos" id="rep-modelo" placeholder="🔍 Buscar modelo para pedir reposição..." autocomplete="off">
+                    <input type="number" id="rep-qtd" placeholder="Quantidade desejada (Ex: 50)" min="1">
+                    <button class="btn btn-primary" id="btn-pedir-rep" style="background:#10b981; box-shadow:0 8px 20px rgba(16,185,129,0.3);" onclick="solicitarReposicao()">Solicitar à Equipe</button>
+                </div>
+
+                <!-- LISTA DE PEDIDOS ATIVOS -->
+                <div id="lista-reposicao-solicitada"></div>
             </div>
 
             <div id="tab-saida" class="tab-content panel">
@@ -482,7 +493,7 @@
             <div id="tab-historico" class="tab-content panel">
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:15px;">
                     <h3 style="margin:0;">🕒 Histórico Recente</h3>
-                    <button class="btn btn-admin-only" style="width:auto; margin:0; padding:10px 15px; font-size:12px; background:#10b981; border:none; color:white; font-weight:bold; border-radius:12px;" onclick="baixarCSV()">📊 Exportar Excel (.csv)</button>
+                    <button class="btn coord-only" style="width:auto; margin:0; padding:10px 15px; font-size:12px; background:#10b981; border:none; color:white; font-weight:bold; border-radius:12px;" onclick="baixarCSV()">📊 Exportar Excel (.csv)</button>
                 </div>
                 <input type="text" id="busca-hist" placeholder="🔍 Filtrar por data, pessoa, ação ou modelo..." oninput="renderizarHistorico(this.value)">
                 <div class="history-card hist-head">
@@ -545,6 +556,104 @@
             <p id="modal-total" style="text-align:center; color:var(--prim); font-weight:900; margin:0 0 20px;">Total: 0 un.</p>
             <div id="modal-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;"></div>
             <button class="btn btn-primary" style="margin-top:20px;" onclick="fecharModal()">Fechar Janela</button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycbwRLsipTraGo72XeJTTG-JG_Wt6qzJRJ_iSQ2V2babralKh3aC_n8eNG0oh3b1dOw099g/exec";
+        const URL_LOGO_EMPRESA = "https://comprar.caixatomada.com/wp-content/uploads/2026/06/Logo-CaixaTomada-w.png"; 
+
+        const BGS_SETORES = {
+            'Caixas': 'https://i0.wp.com/comprar.caixatomada.com/wp-content/uploads/2020/11/CX02Q-02-scaled.jpg?w=1920&ssl=1',
+            'Torres': 'https://i0.wp.com/comprar.caixatomada.com/wp-content/uploads/2021/04/TR03W-scaled.jpg?w=1920&ssl=1'
+        };
+
+        let estado = { setor: '', perfil: '', nomeAtivo: '', dados: null, graficos: {}, relatorioAtual: null, mapaSaidasPorModelo: {}, filaReposicao: {}, metaDiaria: Number(localStorage.getItem('metaDiaria')) || 0 };
+        let filaOffline = JSON.parse(localStorage.getItem('filaLogistica')) || [];
+        
+        const EQUIPES = { 'Caixas': ['Marcello', 'Fabiano', 'Sérgio', 'Ana', 'Gustavo'], 'Torres': ['Fran', 'Henrique', 'Leonardo', 'Patrick', 'Fanuel', 'Miguel', 'Jeremias', 'Douglas'] };
+        const SENHAS = { 'Caixas': 'marcello123', 'Torres': 'fran123', 'admin': 'coord123' };
+
+        function atualizarStatusRede() {
+            let badge = document.getElementById('status-rede');
+            if(!badge) return;
+            if (navigator.onLine) {
+                if (filaOffline.length > 0) {
+                    badge.innerHTML = '🔄 Sincronizando...'; badge.style.color = 'var(--prim)';
+                    sincronizarFila();
+                } else {
+                    badge.innerHTML = '🟢 Online'; badge.style.color = '#10b981';
+                }
+            } else {
+                badge.innerHTML = `🔴 Offline (${filaOffline.length} pendentes)`; badge.style.color = '#ef4444';
+            }
+        }
+        window.addEventListener('online', atualizarStatusRede);
+        window.addEventListener('offline', atualizarStatusRede);
+
+        function playSomSucesso() {
+            try { if (navigator.vibrate) navigator.vibrate([100, 50, 100]); } catch(e){}
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator(); const gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.type = 'sine'; osc.frequency.value = 850;
+                gain.gain.setValueAtTime(0.5, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+                osc.start(); osc.stop(ctx.currentTime + 0.15);
+            } catch(e){}
+        }
+
+        function toggleTema() {
+            document.body.classList.toggle('light-mode');
+            localStorage.setItem('temaPortal', document.body.classList.contains('light-mode') ? 'claro' : 'escuro');
+            if(estado.dados) renderizarGraficos(); 
+        }
+        
+        window.onload = () => { 
+            if(localStorage.getItem('temaPortal') === 'claro') document.body.classList.add('light-mode'); 
+            let elLogoLogin = document.getElementById('img-logo-login');
+            if(elLogoLogin && URL_LOGO_EMPRESA) elLogoLogin.src = URL_LOGO_EMPRESA;
+            let elLogoSide = document.getElementById('img-logo-side');
+            if(elLogoSide && URL_LOGO_EMPRESA) elLogoSide.src = URL_LOGO_EMPRESA;
+        }
+    </script>
+
+    <!-- TELA LOGIN PREMIUM -->
+    <div id="login-screen">
+        <div class="login-card">
+            <div class="login-logo-container">
+                <img id="img-logo-login" src="" alt="Logo Empresa">
+            </div>
+            <h2>Portal Logística</h2>
+            <p>Sistema Integrado de Gestão</p>
+
+            <div id="step1" class="step active">
+                <div class="step-title">PASSO 1: SELECIONE O SETOR</div>
+                <button class="btn-login" onclick="escolherSetor('Caixas')">📦 CAIXAS</button>
+                <button class="btn-login" onclick="escolherSetor('Torres')">🗼 TORRES</button>
+            </div>
+
+            <div id="step2" class="step">
+                <div class="step-title">SETOR <span id="lbl-setor"></span> • PERFIL</div>
+                <button class="btn-login" onclick="abrirSelecaoSeparador()">👀 Separadores</button>
+                <button class="btn-login" onclick="irParaSenha('controle')">⚙️ Controle Operacional</button>
+                <button class="btn-login" onclick="irParaSenha('admin')">👑 Administrador</button>
+                <button class="btn btn-text" onclick="voltar(1)">⬅️ Voltar</button>
+            </div>
+
+            <div id="step-separador" class="step">
+                <div class="step-title">QUEM É VOCÊ?</div>
+                <div id="lista-nomes-separadores"></div>
+                <button class="btn btn-text" onclick="voltar(2)">⬅️ Voltar</button>
+            </div>
+
+            <div id="step3" class="step">
+                <div class="step-title">DIGITE SUA SENHA</div>
+                <input type="password" id="senha-input" placeholder="••••••••" style="text-align:center;">
+                <button class="btn-login" style="background:var(--grad-btn); border:none;" onclick="validarSenha()">ENTRAR NO SISTEMA</button>
+                <button class="btn btn-text" onclick="voltar(2)">⬅️ Voltar</button>
+            </div>
         </div>
     </div>
 
@@ -628,28 +737,27 @@
             document.getElementById('side-perfil').innerText = nomeExibicao;
             document.getElementById('badge-top').innerText = 'ACESSO ' + nomeExibicao.toUpperCase();
             
-            let btnRel = document.getElementById('btn-tab-relatorio');
-            let boxAdminMenu = document.getElementById('admin-box-menu');
             let btnsAdminOnly = document.querySelectorAll('.btn-admin-only');
+            let btnsCoordOnly = document.querySelectorAll('.coord-only'); // Controle + Admin
 
             if(p === 'separadores') { 
                 document.querySelectorAll('.tab-btn').forEach((b,i) => { 
                     if([0, 1, 2, 3, 6].includes(i)) b.style.display='inline-block'; 
                     else b.style.display='none'; 
                 }); 
-                if(boxAdminMenu) boxAdminMenu.style.display = 'none';
                 btnsAdminOnly.forEach(b => b.style.display = 'none');
+                btnsCoordOnly.forEach(b => b.style.display = 'none');
             } else if(p === 'controle') {
                 document.querySelectorAll('.tab-btn').forEach((b,i) => { 
                     if(i !== 8) b.style.display='inline-block'; 
                     else b.style.display='none'; 
                 });
-                if(boxAdminMenu) boxAdminMenu.style.display = 'none';
                 btnsAdminOnly.forEach(b => b.style.display = 'none');
+                btnsCoordOnly.forEach(b => b.style.display = 'block');
             } else if(p === 'admin') {
                 document.querySelectorAll('.tab-btn').forEach(b => b.style.display='inline-block');
-                if(boxAdminMenu) boxAdminMenu.style.display = 'block';
                 btnsAdminOnly.forEach(b => b.style.display = 'inline-block');
+                btnsCoordOnly.forEach(b => b.style.display = 'block');
                 let inputMeta = document.getElementById('input-meta-diaria');
                 if(inputMeta) inputMeta.value = estado.metaDiaria || '';
             }
@@ -747,6 +855,10 @@
             }
 
             estado.mapaSaidasPorModelo = {};
+            estado.filaReposicao = {};
+            estado.analiseSaidas = {};
+            EQUIPES[estado.setor].forEach(p => estado.analiseSaidas[p] = 0);
+
             let totalSaidasHoje = 0;
             let hojeStr = new Date().toLocaleDateString('pt-BR');
 
@@ -754,17 +866,30 @@
                 let cH = hist[0].map(h => h.toString().trim());
                 let hData = cH.indexOf("Data"); if(hData === -1) hData = 1;
                 let hAcao = cH.indexOf("Ação"); if(hAcao === -1) hAcao = 2;
+                let hPess = cH.indexOf("Separador"); if(hPess === -1) hPess = 3;
                 let hMod = cH.indexOf("Modelo"); if(hMod === -1) hMod = 4;
                 let hQtd = cH.indexOf("Quantidade"); if(hQtd === -1) hQtd = 5;
 
                 for(let i = 1; i < hist.length; i++) {
-                    if(hist[i][hAcao] === 'Saída' && hist[i][hMod]) {
-                        let nomeLinha = String(hist[i][hMod]).split(' - ')[0].trim();
-                        let q = Number(hist[i][hQtd]) || 0;
+                    let a = hist[i][hAcao]; let p = String(hist[i][hPess]); let m = String(hist[i][hMod]); let q = Number(hist[i][hQtd]) || 0;
+                    
+                    if(!m) continue;
+
+                    // Verifica se é pedido de reposição (O Hack de Comunicação)
+                    if(p.startsWith('⏳ REPOSIÇÃO|')) {
+                        estado.filaReposicao[m] = parseInt(p.split('|')[1]) || 0;
+                    } else if (p === '✅ FIM REPOSIÇÃO') {
+                        delete estado.filaReposicao[m];
+                    }
+
+                    if(a === 'Saída' && !p.includes('REPOSIÇÃO')) {
+                        let nomeLinha = m.split(' - ')[0].trim();
                         estado.mapaSaidasPorModelo[nomeLinha] = (estado.mapaSaidasPorModelo[nomeLinha] || 0) + q;
 
                         let dtStr = String(hist[i][hData]).split(' ')[0];
                         if(dtStr === hojeStr) totalSaidasHoje += q;
+
+                        if(estado.analiseSaidas[p] !== undefined) estado.analiseSaidas[p] += q;
                     }
                 }
             }
@@ -812,70 +937,118 @@
             renderizarReposicao();
             atualizarPreviewInventario();
             renderizarHistorico(''); 
-
-            estado.analiseSaidas = {};
-            if(hist && hist.length > 0) {
-                let cH = hist[0].map(h => h.toString().trim());
-                let hAcao = cH.indexOf("Ação"); if(hAcao === -1) hAcao = 2;
-                let hPess = cH.indexOf("Separador"); if(hPess === -1) hPess = 3;
-                let hMod = cH.indexOf("Modelo"); if(hMod === -1) hMod = 4;
-                let hQtd = cH.indexOf("Quantidade"); if(hQtd === -1) hQtd = 5;
-
-                EQUIPES[estado.setor].forEach(p => estado.analiseSaidas[p] = 0);
-
-                for(let i = hist.length - 1; i > 0; i--) { 
-                    if(!hist[i][hMod]) continue; 
-                    let a = hist[i][hAcao]; let p = hist[i][hPess]; let q = Number(hist[i][hQtd]);
-                    if(a === 'Saída' && estado.analiseSaidas[p] !== undefined) estado.analiseSaidas[p] += q;
-                }
-            }
             renderizarGraficos();
             if(estado.perfil === 'admin') gerarRelatorioFeedback();
         }
 
+        // ================= FUNÇÕES DA NOVA ABA DE REPOSIÇÃO =================
+        
+        async function solicitarReposicao() {
+            let m = document.getElementById('rep-modelo').value;
+            let q = document.getElementById('rep-qtd').value;
+            if(!m || !q) return alert('⚠️ Preencha o modelo e a quantidade que deseja pedir!');
+            
+            let btn = document.getElementById('btn-pedir-rep');
+            let txtOriginal = btn.innerText;
+            btn.disabled = true; btn.innerText = 'Solicitando...';
+            
+            // O hack inteligente: Entrada com Qtd 0 não afeta o estoque!
+            let payload = { setor: estado.setor, acao: 'Entrada', pessoa: '⏳ REPOSIÇÃO|' + q, modelo: m, quantidade: 0 };
+
+            if (!navigator.onLine) {
+                filaOffline.push(payload);
+                localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
+                playSomSucesso(); toast(`📶 Salvo offline!`);
+                document.getElementById('rep-modelo').value = ''; document.getElementById('rep-qtd').value = '';
+                btn.innerText = txtOriginal; btn.disabled = false;
+                atualizarStatusRede(); return;
+            }
+
+            try {
+                await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
+                playSomSucesso(); toast('✅ Ordem enviada para a equipe!');
+                document.getElementById('rep-modelo').value = ''; document.getElementById('rep-qtd').value = '';
+                setTimeout(() => { btn.innerText = txtOriginal; btn.disabled = false; carregarDados(true); }, 1200);
+            } catch(e) { 
+                filaOffline.push(payload); localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
+                toast(`📶 Queda de rede. Salvo offline!`);
+                btn.innerText = txtOriginal; btn.disabled = false; atualizarStatusRede();
+            }
+        }
+
+        async function concluirReposicao(modelo) {
+            if(!confirm(`Deseja marcar o pedido de "${modelo}" como concluído e retirar da fila?`)) return;
+            
+            let payload = { setor: estado.setor, acao: 'Entrada', pessoa: '✅ FIM REPOSIÇÃO', modelo: modelo, quantidade: 0 };
+
+            if (!navigator.onLine) {
+                filaOffline.push(payload); localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
+                playSomSucesso(); toast(`📶 Salvo offline!`); atualizarStatusRede(); return;
+            }
+
+            try {
+                toast('⏳ Processando conclusão...');
+                await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
+                playSomSucesso(); toast('✅ Pedido finalizado!');
+                carregarDados(true);
+            } catch(e) { 
+                filaOffline.push(payload); localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
+                toast(`📶 Queda de rede. Salvo offline!`); atualizarStatusRede();
+            }
+        }
+
         function renderizarReposicao() {
             let html = '';
-            let reposicaoFiltrada = estado.catalogoAgrupado.filter(x => x.total < 10);
+            let modelosSolicitados = Object.keys(estado.filaReposicao);
             
-            if(reposicaoFiltrada.length === 0) {
-                document.getElementById('lista-reposicao').innerHTML = '<p style="color:#10b981; font-weight:700;">✅ Nenhum item crítico! O estoque de todos os modelos está seguro.</p>';
+            if(modelosSolicitados.length === 0) {
+                document.getElementById('lista-reposicao-solicitada').innerHTML = '<p style="color:var(--text-sub);">✅ Nenhuma ordem de produção/reposição solicitada no momento.</p>';
                 return;
             }
 
-            reposicaoFiltrada.forEach(item => {
-                let statusClass = item.total === 0 ? 'esgotado' : 'critico';
-                let badgeText = item.total === 0 ? '🔴 Esgotado' : '🔴 Crítico';
-                let badgeClass = 'status-crit';
-                let idxOriginal = estado.catalogoAgrupado.indexOf(item);
+            modelosSolicitados.forEach(modeloCor => {
+                let qtdPedida = estado.filaReposicao[modeloCor];
+                
+                let qtdAtual = 0;
+                estado.catalogoAgrupado.forEach(g => {
+                    let det = g.detalhes.find(d => d.nomeC === modeloCor);
+                    if(det) qtdAtual = det.qtd;
+                });
 
                 html += `
-                <div class="item-card ${statusClass}" onclick="abrirModal(${idxOriginal})">
-                    <div><span class="badge-status ${badgeClass}">${badgeText}</span></div>
-                    <div class="qtd-num">${item.total} <small style="font-size:12px; font-weight:400; color:var(--text-sub)">un.</small></div>
-                    <div style="font-weight:800; font-size:16px; margin-bottom:4px;">${item.linha}</div>
-                    <small style="color:var(--text-sub); font-size:11px;">🔍 Clique para ver as cores faltantes</small>
+                <div class="history-card" style="grid-template-columns: 1fr; background:rgba(243,128,32,0.1); border-color:var(--prim);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                        <div style="text-align:left;">
+                            <div style="font-size:11px; color:var(--prim); font-weight:900;">🚨 ORDEM DE PRODUÇÃO ATIVA</div>
+                            <div style="font-size:16px; font-weight:bold; color:var(--text-main); margin-bottom:4px;">${modeloCor}</div>
+                            <div style="font-size:13px; color:var(--text-sub);">Meta Solicitada: <b style="color:#fff;">${qtdPedida} un</b> • Saldo Atual: <b>${qtdAtual} un</b></div>
+                        </div>
+                        <div style="display:flex; gap:8px;">
+                            <button class="btn btn-primary" style="margin:0; padding:8px 12px; font-size:12px; height:38px;" onclick="irParaLancamentoRapido('Entrada', '${modeloCor}')">📥 Lançar Produção</button>
+                            <button class="btn coord-only" style="margin:0; padding:8px 12px; font-size:12px; height:38px; background:rgba(16,185,129,0.2); color:#10b981; border:1px solid #10b981;" onclick="concluirReposicao('${modeloCor}')">✅ Concluir Ordem</button>
+                        </div>
+                    </div>
                 </div>`;
             });
-            document.getElementById('lista-reposicao').innerHTML = html;
+            
+            document.getElementById('lista-reposicao-solicitada').innerHTML = html;
+
+            // Re-aplica bloqueio visual caso seja separador
+            if(estado.perfil === 'separadores') {
+                document.querySelectorAll('#lista-reposicao-solicitada .coord-only').forEach(b => b.style.display = 'none');
+            }
         }
 
         function enviarWhatsAppReposicao() {
-            let itensFaltantes = [];
+            let modelosSolicitados = Object.keys(estado.filaReposicao);
+            if(modelosSolicitados.length === 0) return alert('Não há pedidos de reposição ativos no momento.');
             
-            estado.catalogoAgrupado.forEach(m => {
-                m.detalhes.forEach(d => {
-                    if(d.qtd < 10) {
-                        itensFaltantes.push(`- ${d.qtd}x ${d.nomeC}`);
-                    }
-                });
-            });
+            let itensTexto = modelosSolicitados.map(m => `- ${estado.filaReposicao[m]}x ${m}`).join('\n');
 
-            if(itensFaltantes.length === 0) return alert('Não há itens críticos para repor no momento.');
-
-            let msg = `*🚨 SOLICITAÇÃO DE REPOSIÇÃO URGENTE (${estado.setor.toUpperCase()})*\n\n` +
-                      `Equipe, por favor iniciar a reposição/produção dos seguintes itens que estão em estado crítico:\n\n` +
-                      itensFaltantes.join('\n') + `\n\n` +
-                      `_Mensagem automática do Portal Logística_`;
+            let msg = `*🚨 ORDEM DE PRODUÇÃO URGENTE (${estado.setor.toUpperCase()})*\n\n` +
+                      `Equipe, por favor iniciar a reposição/produção dos seguintes itens que foram solicitados no painel:\n\n` +
+                      itensTexto + `\n\n` +
+                      `_Lembrem de lançar a Entrada no aplicativo quando estiver pronto._`;
             window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
@@ -899,13 +1072,20 @@
                     if(!hist[i][hMod]) continue; 
                     
                     let d = String(hist[i][hData]); let a = hist[i][hAcao]; 
-                    let p = String(hist[i][hPess]); let m = String(hist[i][hMod]); let q = Number(hist[i][hQtd]);
+                    let p = String(hist[i][hPess]); let m = String(hist[i][hMod]); let q = String(hist[i][hQtd]);
                     
                     let textoDaLinha = `${d} ${a} ${p} ${m} ${q}`.toLowerCase();
                     if(b !== '' && !textoDaLinha.includes(b)) continue; 
 
+                    // Formata os eventos ocultos (Hacks) para ficarem bonitos no Histórico
+                    if(p.startsWith('⏳ REPOSIÇÃO|')) {
+                        p = `🚨 Ordem Aberta (${p.split('|')[1]} un)`; q = '-';
+                    } else if (p === '✅ FIM REPOSIÇÃO') {
+                        p = `✅ Ordem Concluída`; q = '-';
+                    }
+
                     let isSaida = a === 'Saída'; let cAcao = isSaida ? 'acao-saida' : 'acao-entrada'; let icone = isSaida ? '📤' : '📥';
-                    let btnPDF = isSaida ? `<button class="btn btn-pdf" onclick="gerarPDF('${d}','${p}','${m}','${q}')">📄 PDF</button>` : '';
+                    let btnPDF = (isSaida && q !== '-') ? `<button class="btn btn-pdf" onclick="gerarPDF('${d}','${p}','${m}','${q}')">📄 PDF</button>` : '';
 
                     htmlHist += `<div class='history-card'>
                         <div>${d.split(' ')[0]}</div>
@@ -1052,7 +1232,6 @@
             document.getElementById('grid-cat').innerHTML = html;
         }
 
-        // ================= FUNÇÕES DO NOVO LANÇAMENTO DIRETO DO MODAL =================
         function mudarQtdModal(id, delta) {
             let el = document.getElementById(id);
             if(el) {
@@ -1067,12 +1246,11 @@
             let q = parseInt(document.getElementById(inputId).value) || 0;
             let p = estado.nomeAtivo;
 
-            // Se for Admin/Controle, pega a pessoa que está selecionada na aba
             if(!p) {
                 let pfx = acao === 'Entrada' ? 'e' : 's';
                 p = document.getElementById(`${pfx}-pessoa`).value;
                 if(!p) {
-                    alert('⚠️ Administrador: Para lançar por aqui, selecione uma pessoa na aba de ' + acao + ' antes, ou logue como Separador.');
+                    alert('⚠️ Administrador: Para lançar por aqui, primeiro selecione o nome da pessoa lá na aba de ' + acao + ' ou faça login como Separador.');
                     fecharModal();
                     let tabId = acao === 'Saída' ? 'saida' : 'entrada';
                     let btnTab = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(`'${tabId}'`));
@@ -1227,6 +1405,21 @@
                 alert('Erro ao salvar ajuste.');
                 btn.innerText = '⚙️ Confirmar Ajuste de Inventário'; btn.disabled = false;
             }
+        }
+
+        // ================= FUNÇÃO: LANÇAMENTO RÁPIDO PARA REDIRECIONAR A ABA =================
+        function irParaLancamentoRapido(acao, modelo) {
+            let tabId = acao === 'Saída' ? 'saida' : 'entrada';
+            let pfx = acao === 'Saída' ? 's' : 'e';
+            
+            let btnTab = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(`'${tabId}'`));
+            if(btnTab) btnTab.click();
+            
+            setTimeout(() => {
+                document.getElementById(`${pfx}-modelo`).value = modelo;
+                document.getElementById(`${pfx}-qtd`).value = '1';
+                document.getElementById(`${pfx}-qtd`).focus();
+            }, 150);
         }
 
         async function lancar(tipo) {
