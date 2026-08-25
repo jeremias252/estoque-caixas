@@ -103,7 +103,6 @@
         .btn-pdf { background: #374151 !important; color: white !important; padding: 8px 12px; font-size: 11px; width: auto; margin:0;}
         .btn-wsp { background: #16a34a !important; color: white !important; padding: 8px 12px; font-size: 11px; width: auto; margin:0; margin-left: 4px;}
 
-        /* ESTILO PARA O INPUT TYPE DATE FICAR BONITO IGUAL OS OUTROS */
         input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.8); cursor: pointer; }
         body.light-mode input[type="date"]::-webkit-calendar-picker-indicator { filter: none; }
 
@@ -113,7 +112,6 @@
 
         #app-layout { display: none; height: 100vh; overflow: hidden; }
         
-        /* BARRA LATERAL (SIDEBAR) COM BOTÃO DE FECHAR ❮ */
         .sidebar {
             width: 280px; background: rgba(10, 12, 18, 0.85); backdrop-filter: blur(25px);
             border-right: 1px solid var(--border-color); height: 100%; padding: 20px;
@@ -136,7 +134,6 @@
         .profile-pill { background: rgba(5,7,12,0.54); border: 1px solid var(--border-color); border-radius: 18px; padding: 12px; text-align: center; color: var(--text-sub); margin-bottom: 15px; }
         .profile-pill b { color: var(--prim); display: block; font-size: 16px;}
 
-        /* ÁREA EXCLUSIVA DE FERRAMENTAS DO ADMIN NO MENU */
         .admin-box-menu {
             background: rgba(243, 128, 32, 0.08); border: 1px solid rgba(243, 128, 32, 0.25);
             border-radius: 18px; padding: 14px; margin-bottom: 15px; display: none;
@@ -154,7 +151,6 @@
         .hero h1 { margin: 0 0 5px; font-size: 32px; font-weight: 900; color: var(--text-main); }
         .hero p { margin: 0; color: var(--text-sub); font-size: 14px; }
         
-        /* BARRA DE META NEON */
         .meta-container { margin-top: 18px; background: rgba(5,7,12,0.48); border: 1px solid var(--border-color); padding: 14px; border-radius: 18px; display: none; }
         .meta-info { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; margin-bottom: 8px; }
         .meta-bar-wrap { width: 100%; height: 10px; background: rgba(255,255,255,0.08); border-radius: 10px; overflow: hidden; }
@@ -179,22 +175,33 @@
 
         .grid-catalogo { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 16px; }
         .item-card { background: var(--card-item-bg); border: 2px solid var(--border-color); border-radius: 22px; padding: 22px; text-align: center; transition: all 0.3s ease; position: relative; overflow: hidden; cursor: pointer; backdrop-filter: blur(15px); }
-        .item-card:hover { transform: translateY(-4px); border-color: var(--prim); }
+        .item-card:hover { transform: translateY(-4px); }
+        
+        /* SEMÁFORO DE ESTOQUE NAS CAIXAS */
         .item-card.disponivel { border-color: rgba(16, 185, 129, 0.4); box-shadow: 0 8px 20px rgba(16, 185, 129, 0.08); }
-        .item-card.disponivel .qtd-num { color: var(--prim); font-size: 34px; font-weight: 900; margin: 6px 0; }
+        .item-card.disponivel .qtd-num { color: #10b981; font-size: 34px; font-weight: 900; margin: 6px 0; }
+        
+        .item-card.atencao { border-color: rgba(245, 158, 11, 0.4); box-shadow: 0 8px 20px rgba(245, 158, 11, 0.08); }
+        .item-card.atencao .qtd-num { color: #f59e0b; font-size: 34px; font-weight: 900; margin: 6px 0; }
+        
+        .item-card.critico { border-color: rgba(239, 68, 68, 0.4); box-shadow: 0 8px 20px rgba(239, 68, 68, 0.08); }
+        .item-card.critico .qtd-num { color: #ef4444; font-size: 34px; font-weight: 900; margin: 6px 0; }
+        
         .item-card.esgotado { border-color: rgba(239, 68, 68, 0.6); background: rgba(239, 68, 68, 0.08) !important; box-shadow: 0 8px 20px rgba(239, 68, 68, 0.12); }
         .item-card.esgotado .qtd-num { color: #ef4444; font-size: 34px; font-weight: 900; margin: 6px 0; }
 
+        /* BADGES (SELOS) DE STATUS */
         .badge-status { font-size: 10px; font-weight: 900; letter-spacing: 0.5px; padding: 4px 10px; border-radius: 999px; text-transform: uppercase; display: inline-block; }
         .status-ok { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.4); }
-        .status-off { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.5); }
-        .status-hot { background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.5); margin-top: 5px; }
+        .status-warn { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.4); }
+        .status-crit { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.4); }
+        .status-hot { background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.4); margin-top: 5px; }
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 1000; display: none; align-items: center; justify-content: center; }
         .modal { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 28px; padding: 30px; width: 90%; max-width: 480px; max-height: 85vh; overflow-y: auto; box-shadow: 0 25px 60px rgba(0,0,0,0.6); animation: fadeSlideUp 0.3s forwards; }
         .card-detalhe { background: var(--card-item-bg); border: 1px solid var(--border-color); border-radius: 18px; padding: 16px; text-align: center; margin-bottom: 12px; }
         .card-detalhe span { font-size: 12px; color: var(--text-sub); text-transform: uppercase; font-weight: 900;}
-        .card-detalhe b { display: block; font-size: 30px; color: var(--prim); font-weight: 900; margin: 5px 0;}
+        .card-detalhe b { display: block; font-size: 30px; color: var(--text-main); font-weight: 900; margin: 5px 0;}
 
         .history-card { display: grid; grid-template-columns: 1fr 1fr 1fr 2fr 0.5fr 1fr; gap: 10px; align-items: center; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-color); border-radius: 18px; padding: 12px 14px; margin-bottom: 10px; font-size: 13px; text-align: center; color: var(--text-main); }
         .hist-head { color: var(--text-sub); font-size: 11px; font-weight: 900; text-transform: uppercase; border: none; background: transparent; padding: 0 14px;}
@@ -571,7 +578,7 @@
         }
 
         function logarComoSeparador(nome) {
-            estado.nomeAtivo = nome; // Guarda quem é o separador atual
+            estado.nomeAtivo = nome; 
             logar('separadores');
         }
 
@@ -584,7 +591,6 @@
         function voltar(p) { 
             document.querySelectorAll('.step').forEach(e => e.classList.remove('active')); 
             document.getElementById('step'+p).classList.add('active'); 
-            // Se voltou da tela de separador, limpa o nome ativo
             if(p === 2) estado.nomeAtivo = '';
         }
         
@@ -592,7 +598,7 @@
             let s = document.getElementById('senha-input').value;
             let senhaCorreta = estado.perfil === 'admin' ? SENHAS.admin : SENHAS[estado.setor];
             if(s === senhaCorreta) {
-                estado.nomeAtivo = ''; // Zera o nome ativo para Admin/Controle terem acesso a todos os nomes
+                estado.nomeAtivo = ''; 
                 logar(estado.perfil);
             } else {
                 alert('❌ Senha Incorreta');
@@ -611,7 +617,6 @@
             let rotulosPerfil = { 'separadores': 'SEPARADOR', 'controle': 'CONTROLE OPERACIONAL', 'admin': 'ADMINISTRADOR' };
             let nomeExibicao = rotulosPerfil[p] || p.toUpperCase();
 
-            // Se for separador, o nome dele aparece em destaque no aplicativo
             if(p === 'separadores' && estado.nomeAtivo) {
                 nomeExibicao = `${estado.nomeAtivo} (Separador)`;
             }
@@ -643,7 +648,7 @@
                 if(boxAdminMenu) boxAdminMenu.style.display = 'none';
                 btnsAdminOnly.forEach(b => b.style.display = 'none');
             } else if(p === 'admin') {
-                // Admin vê absolutamente tudo
+                // Admin vê tudo
                 document.querySelectorAll('.tab-btn').forEach(b => b.style.display='inline-block');
                 if(boxAdminMenu) boxAdminMenu.style.display = 'block';
                 btnsAdminOnly.forEach(b => b.style.display = 'inline-block');
@@ -699,7 +704,6 @@
             if(filaOffline.length === 0) { toast('✅ Fila limpa com sucesso!'); carregarDados(); }
         }
 
-        /* ANIMAÇÃO DE NÚMEROS (ODÔMETRO) */
         function animarNumero(id, valorFinal) {
             let el = document.getElementById(id);
             if (!el) return;
@@ -727,21 +731,20 @@
             
             selectPessoaSaida.innerHTML = htmlPessoas;
             document.getElementById('rel-pessoa').innerHTML = htmlPessoas;
-            // Na entrada, adicionamos a opção de Devolução (Só Admin e Controle verão por causa da trava abaixo)
+            // Na entrada, adicionamos a opção de Devolução
             selectPessoaEntrada.innerHTML = htmlPessoas + '<option value="Devolução (Retorno)" style="font-weight:bold; color:var(--prim)">🔄 Devolução / Cancelamento</option>';
 
             // TRAVA DE SEGURANÇA PARA SEPARADORES: Eles não podem escolher a pessoa, é o nome deles e ponto!
             if(estado.perfil === 'separadores' && estado.nomeAtivo) {
                 selectPessoaSaida.value = estado.nomeAtivo;
-                selectPessoaSaida.disabled = true; // Bloqueia o campo
+                selectPessoaSaida.disabled = true; 
                 selectPessoaEntrada.value = estado.nomeAtivo;
-                selectPessoaEntrada.disabled = true; // Bloqueia o campo
+                selectPessoaEntrada.disabled = true; 
             } else {
                 selectPessoaSaida.disabled = false;
                 selectPessoaEntrada.disabled = false;
             }
 
-            // Garantir que a data do relatório sempre tenha uma data inicial (Hoje)
             let inputDataRel = document.getElementById('rel-data');
             if(inputDataRel && !inputDataRel.value) {
                 inputDataRel.value = new Date().toISOString().split('T')[0];
@@ -847,7 +850,6 @@
             if(estado.perfil === 'admin') gerarRelatorioFeedback();
         }
 
-        /* SISTEMA DE META DIÁRIA */
         function salvarMetaDiaria(val) {
             estado.metaDiaria = Number(val) || 0;
             localStorage.setItem('metaDiaria', estado.metaDiaria);
@@ -865,13 +867,11 @@
             document.getElementById('meta-bar-fill').style.width = pct + '%';
         }
 
-        /* TOGGLE MODO TV */
         function toggleModoTV() {
             document.body.classList.toggle('tv-mode');
             if(document.body.classList.contains('tv-mode')) toast('📺 Modo Painel TV Ativado!');
         }
 
-        /* LANÇAMENTO POR VOZ (SPEECH RECOGNITION) */
         function iniciarVoz(tipo) {
             const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
             if(!Speech) return alert('⚠️ Seu navegador não suporta reconhecimento de voz.');
@@ -899,7 +899,6 @@
             };
         }
 
-        /* COMPARTILHAMENTO WHATSAPP */
         function enviarWhatsAppFeedback() {
             if(!estado.relatorioAtual || !estado.relatorioAtual.pessoa) return alert('⚠️ Selecione um separador primeiro!');
             let r = estado.relatorioAtual;
@@ -925,10 +924,27 @@
             let corteQuente = volumes.length >= 3 ? volumes[2] : (volumes[0] || 999);
 
             modelosFiltrados.forEach((item) => {
-                let isDisponivel = item.total > 0;
-                let statusClass = isDisponivel ? 'disponivel' : 'esgotado';
-                let badgeText = isDisponivel ? '✅ Em Estoque' : '🔴 Zerado / Esgotado';
-                let badgeClass = isDisponivel ? 'status-ok' : 'status-off';
+                // ====== SEMÁFORO DO ESTOQUE ======
+                let statusClass, badgeText, badgeClass;
+                
+                if (item.total === 0) {
+                    statusClass = 'esgotado';
+                    badgeText = '🔴 Esgotado';
+                    badgeClass = 'status-crit';
+                } else if (item.total < 10) {
+                    statusClass = 'critico';
+                    badgeText = '🔴 Estoque Crítico';
+                    badgeClass = 'status-crit';
+                } else if (item.total <= 25) {
+                    statusClass = 'atencao';
+                    badgeText = '🟡 Estoque Médio';
+                    badgeClass = 'status-warn';
+                } else {
+                    statusClass = 'disponivel';
+                    badgeText = '🟢 Estoque OK';
+                    badgeClass = 'status-ok';
+                }
+
                 let idxOriginal = estado.catalogoAgrupado.indexOf(item);
 
                 let saidasLinha = estado.mapaSaidasPorModelo[item.linha] || 0;
@@ -954,7 +970,8 @@
             document.getElementById('modal-titulo').innerText = item.linha; document.getElementById('modal-total').innerText = `Estoque Total: ${item.total} un.`;
             let html = '';
             item.detalhes.forEach(d => {
-                let statusText = d.qtd === 0 ? '🔴 Zerado' : (d.qtd <= 5 ? '🟡 Baixo' : '🟢 OK');
+                // Semáforo também nas cores específicas
+                let statusText = d.qtd === 0 ? '🔴 Esgotado' : (d.qtd < 10 ? '🔴 Crítico' : (d.qtd <= 25 ? '🟡 Atenção' : '🟢 OK'));
                 html += `
                 <div class="card-detalhe">
                     <span>${d.cor}</span><b>${d.qtd}</b><small style="color:var(--text-sub); font-weight:700;">${statusText}</small>
