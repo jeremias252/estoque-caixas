@@ -177,7 +177,6 @@
         .item-card { background: var(--card-item-bg); border: 2px solid var(--border-color); border-radius: 22px; padding: 22px; text-align: center; transition: all 0.3s ease; position: relative; overflow: hidden; cursor: pointer; backdrop-filter: blur(15px); }
         .item-card:hover { transform: translateY(-4px); }
         
-        /* SEMÁFORO DE ESTOQUE NAS CAIXAS */
         .item-card.disponivel { border-color: rgba(16, 185, 129, 0.4); box-shadow: 0 8px 20px rgba(16, 185, 129, 0.08); }
         .item-card.disponivel .qtd-num { color: #10b981; font-size: 34px; font-weight: 900; margin: 6px 0; }
         
@@ -190,7 +189,6 @@
         .item-card.esgotado { border-color: rgba(239, 68, 68, 0.6); background: rgba(239, 68, 68, 0.08) !important; box-shadow: 0 8px 20px rgba(239, 68, 68, 0.12); }
         .item-card.esgotado .qtd-num { color: #ef4444; font-size: 34px; font-weight: 900; margin: 6px 0; }
 
-        /* BADGES (SELOS) DE STATUS */
         .badge-status { font-size: 10px; font-weight: 900; letter-spacing: 0.5px; padding: 4px 10px; border-radius: 999px; text-transform: uppercase; display: inline-block; }
         .status-ok { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.4); }
         .status-warn { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.4); }
@@ -237,6 +235,9 @@
     <button id="btn-exit-tv" onclick="toggleModoTV()">❌ Sair do Modo TV</button>
     <div class="bg-overlay"></div>
 
+    <!-- DATALIST GLOBAL PARA BUSCA INTELIGENTE NOS INPUTS -->
+    <datalist id="lista-modelos"></datalist>
+
     <!-- VÍDEO DE FUNDO DO LOGIN -->
     <div id="login-bg-container">
         <video autoplay muted loop playsinline id="login-video">
@@ -257,7 +258,6 @@
         let estado = { setor: '', perfil: '', nomeAtivo: '', dados: null, graficos: {}, relatorioAtual: null, mapaSaidasPorModelo: {}, metaDiaria: Number(localStorage.getItem('metaDiaria')) || 0 };
         let filaOffline = JSON.parse(localStorage.getItem('filaLogistica')) || [];
         
-        // --- EQUIPES ATUALIZADAS AQUI ---
         const EQUIPES = { 'Caixas': ['Marcello', 'Fabiano', 'Sérgio', 'Ana', 'Gustavo'], 'Torres': ['Fran', 'Henrique', 'Leonardo', 'Patrick', 'Fanuel', 'Miguel', 'Jeremias', 'Douglas'] };
         const SENHAS = { 'Caixas': 'marcello123', 'Torres': 'fran123', 'admin': 'coord123' };
 
@@ -355,7 +355,6 @@
         </div>
 
         <div class="sidebar" id="sidebar">
-            <!-- BOTÃO PARA ESCONDER A BARRA LATERAL -->
             <button class="sidebar-close-btn" onclick="toggleMenu()">❮ Fechar Menu</button>
 
             <div class="logo-side-wrap">
@@ -364,7 +363,6 @@
             </div>
             <div class="profile-pill"><span>PERFIL ATIVO</span><br><b id="side-perfil">PERFIL</b></div>
             
-            <!-- ÁREA VIP DO ADMINISTRADOR -->
             <div class="admin-box-menu" id="admin-box-menu">
                 <h4>🛠️ Gestão Admin</h4>
                 <button class="btn" style="padding:10px; font-size:12px; margin-bottom:8px;" onclick="toggleModoTV()">📺 Abrir Modo TV</button>
@@ -393,7 +391,6 @@
                     <div class="kpi"><span>Itens Zerados</span><b id="kpi-zerados" style="color: #ef4444;">0</b></div>
                 </div>
 
-                <!-- BARRA DE META EXIBIDA NO DASHBOARD -->
                 <div class="meta-container" id="box-meta-dashboard">
                     <div class="meta-info">
                         <span>🎯 Progresso da Meta Diária:</span>
@@ -407,16 +404,16 @@
 
             <div class="tabs-list" id="nav-tabs">
                 <button class="tab-btn active" onclick="abrirAba('catalogo', this)">🗂️ Catálogo</button>
+                <button class="tab-btn" onclick="abrirAba('reposicao', this)">🚨 Reposição</button>
                 <button class="tab-btn" onclick="abrirAba('saida', this)">📤 Saídas</button>
                 <button class="tab-btn" onclick="abrirAba('entrada', this)">📥 Entradas</button>
                 <button class="tab-btn" id="btn-tab-novo" onclick="abrirAba('novo-item', this)">➕ Novo Item</button>
                 <button class="tab-btn" id="btn-tab-inv" onclick="abrirAba('inventario', this)">🔎 Inventário</button>
                 <button class="tab-btn" onclick="abrirAba('historico', this)">🕒 Histórico</button>
                 <button class="tab-btn" onclick="abrirAba('stats', this)">📊 Estatísticas</button>
-                <button class="tab-btn" id="btn-tab-relatorio" onclick="abrirAba('relatorio', this)">📋 Relatório Feedback</button>
+                <button class="tab-btn" id="btn-tab-relatorio" onclick="abrirAba('relatorio', this)">📋 Relatório</button>
             </div>
 
-            <!-- ABA CATÁLOGO -->
             <div id="tab-catalogo" class="tab-content active panel">
                 <h3>🗂️ Catálogo de Estoque</h3>
                 <p class="sub">Clique em qualquer modelo para abrir o detalhamento das cores.</p>
@@ -424,19 +421,26 @@
                 <div class="grid-catalogo" id="grid-cat"></div>
             </div>
 
-            <!-- ABA SAÍDA -->
+            <div id="tab-reposicao" class="tab-content panel">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 10px;">
+                    <h3>🚨 Fila de Reposição / Produção</h3>
+                    <button class="btn btn-admin-only btn-wsp" style="font-size: 13px; font-weight: bold; padding: 10px 20px;" onclick="enviarWhatsAppReposicao()">📲 Cobrar Equipe (WhatsApp)</button>
+                </div>
+                <p class="sub">Modelos e cores com estoque crítico (abaixo de 10) que precisam ser repostos imediatamente.</p>
+                <div id="lista-reposicao" class="grid-catalogo"></div>
+            </div>
+
             <div id="tab-saida" class="tab-content panel">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <h3>📤 Registrar Saída</h3>
                     <button class="btn btn-admin-only" style="width:auto; padding:6px 12px; font-size:12px;" onclick="iniciarVoz('Saída')">🎙️ Preencher por Voz</button>
                 </div>
                 <select id="s-pessoa"></select>
-                <select id="s-modelo"></select>
+                <input type="text" list="lista-modelos" id="s-modelo" placeholder="🔍 Digite para buscar o modelo..." autocomplete="off">
                 <input type="number" id="s-qtd" value="1" min="1">
                 <button class="btn btn-primary" id="btn-saida" onclick="lancar('Saída')">Confirmar Retirada</button>
             </div>
 
-            <!-- ABA ENTRADA (COM OPÇÃO DE DEVOLUÇÃO PARA ADMIN) -->
             <div id="tab-entrada" class="tab-content panel">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <h3>📥 Registrar Entrada / Devolução</h3>
@@ -444,12 +448,11 @@
                 </div>
                 <p class="sub btn-admin-only">Selecione "Devolução / Cancelamento" na lista abaixo se o item estiver retornando.</p>
                 <select id="e-pessoa"></select>
-                <select id="e-modelo"></select>
+                <input type="text" list="lista-modelos" id="e-modelo" placeholder="🔍 Digite para buscar o modelo..." autocomplete="off">
                 <input type="number" id="e-qtd" value="1" min="1">
                 <button class="btn btn-primary" id="btn-entrada" onclick="lancar('Entrada')">Lançar no Estoque</button>
             </div>
 
-            <!-- ABA NOVO ITEM -->
             <div id="tab-novo-item" class="tab-content panel">
                 <h3>➕ Cadastrar Novo Item no Estoque</h3>
                 <p class="sub">Adicione modelos ou variações diretamente pelo aplicativo.</p>
@@ -459,12 +462,11 @@
                 <button class="btn btn-primary" id="btn-cadastrar-item" onclick="cadastrarNovoItem()">✨ Cadastrar Item no Sistema</button>
             </div>
 
-            <!-- ABA AUDITORIA E INVENTÁRIO -->
             <div id="tab-inventario" class="tab-content panel">
                 <h3>🔎 Modo Auditoria & Inventário Rápido</h3>
                 <p class="sub">Selecione o item e informe a quantidade contada na prateleira para ajuste automático.</p>
                 
-                <select id="inv-modelo" onchange="atualizarPreviewInventario()"></select>
+                <input type="text" list="lista-modelos" id="inv-modelo" placeholder="🔍 Digite para buscar o modelo..." oninput="atualizarPreviewInventario()" autocomplete="off">
                 
                 <div class="kpis" style="margin-top:0; margin-bottom: 20px;">
                     <div class="kpi"><span>Saldo Cadastrado no Sistema</span><b id="inv-saldo-sistema">0</b></div>
@@ -477,23 +479,24 @@
                 <button class="btn btn-primary" id="btn-inv-ajustar" onclick="confirmarAjusteInventario()">⚙️ Confirmar Ajuste de Inventário</button>
             </div>
 
-            <!-- ABA HISTÓRICO -->
             <div id="tab-historico" class="tab-content panel">
-                <h3>🕒 Histórico Recente</h3>
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:15px;">
+                    <h3 style="margin:0;">🕒 Histórico Recente</h3>
+                    <button class="btn btn-admin-only" style="width:auto; margin:0; padding:10px 15px; font-size:12px; background:#10b981; border:none; color:white; font-weight:bold; border-radius:12px;" onclick="baixarCSV()">📊 Exportar Excel (.csv)</button>
+                </div>
+                <input type="text" id="busca-hist" placeholder="🔍 Filtrar por data, pessoa, ação ou modelo..." oninput="renderizarHistorico(this.value)">
                 <div class="history-card hist-head">
                     <div>Data</div><div>Ação</div><div>Pessoa / Registro</div><div>Modelo</div><div>Qtd</div><div>Doc</div>
                 </div>
                 <div id="lista-historico"></div>
             </div>
 
-            <!-- ABA ESTATÍSTICAS -->
             <div id="tab-stats" class="tab-content panel">
                 <h3>📊 Análise de Retiradas</h3>
                 <p class="sub">Volume de saídas por membro da equipe.</p>
                 <div class="chart-container"><canvas id="graficoEquipe"></canvas></div>
             </div>
 
-            <!-- ABA RELATÓRIO DO ADMINISTRADOR -->
             <div id="tab-relatorio" class="tab-content panel">
                 <h3>📋 Relatório de Desempenho Operacional</h3>
                 <p class="sub">Selecione os parâmetros abaixo para auditar Retiradas ou Lançamentos no estoque.</p>
@@ -566,7 +569,6 @@
             }
         }
 
-        // ================= FUNÇÕES DE LOGIN =================
         function abrirSelecaoSeparador() {
             let html = '';
             EQUIPES[estado.setor].forEach(nome => {
@@ -630,25 +632,21 @@
             let boxAdminMenu = document.getElementById('admin-box-menu');
             let btnsAdminOnly = document.querySelectorAll('.btn-admin-only');
 
-            // CONTROLE DE PERMISSÕES NAS ABAS
             if(p === 'separadores') { 
-                // Separadores veem: Catálogo (0), Saídas (1), Entradas (2) e Histórico (5)
                 document.querySelectorAll('.tab-btn').forEach((b,i) => { 
-                    if([0, 1, 2, 5].includes(i)) b.style.display='inline-block'; 
+                    if([0, 1, 2, 3, 6].includes(i)) b.style.display='inline-block'; 
                     else b.style.display='none'; 
                 }); 
                 if(boxAdminMenu) boxAdminMenu.style.display = 'none';
                 btnsAdminOnly.forEach(b => b.style.display = 'none');
             } else if(p === 'controle') {
-                // Controle vê tudo menos Relatório (7)
                 document.querySelectorAll('.tab-btn').forEach((b,i) => { 
-                    if(i !== 7) b.style.display='inline-block'; 
+                    if(i !== 8) b.style.display='inline-block'; 
                     else b.style.display='none'; 
                 });
                 if(boxAdminMenu) boxAdminMenu.style.display = 'none';
                 btnsAdminOnly.forEach(b => b.style.display = 'none');
             } else if(p === 'admin') {
-                // Admin vê tudo
                 document.querySelectorAll('.tab-btn').forEach(b => b.style.display='inline-block');
                 if(boxAdminMenu) boxAdminMenu.style.display = 'block';
                 btnsAdminOnly.forEach(b => b.style.display = 'inline-block');
@@ -731,10 +729,8 @@
             
             selectPessoaSaida.innerHTML = htmlPessoas;
             document.getElementById('rel-pessoa').innerHTML = htmlPessoas;
-            // Na entrada, adicionamos a opção de Devolução
             selectPessoaEntrada.innerHTML = htmlPessoas + '<option value="Devolução (Retorno)" style="font-weight:bold; color:var(--prim)">🔄 Devolução / Cancelamento</option>';
 
-            // TRAVA DE SEGURANÇA PARA SEPARADORES: Eles não podem escolher a pessoa, é o nome deles e ponto!
             if(estado.perfil === 'separadores' && estado.nomeAtivo) {
                 selectPessoaSaida.value = estado.nomeAtivo;
                 selectPessoaSaida.disabled = true; 
@@ -777,7 +773,7 @@
             let idxMod = cabecalhoEst.indexOf("Modelo"); if(idxMod === -1) idxMod = 0;
             let idxQtd = cabecalhoEst.indexOf("Quantidade"); if(idxQtd === -1) idxQtd = 1;
 
-            let htmlModelos = '<option value="">Selecione o Modelo...</option>';
+            let htmlModelos = '';
             let totPecas = 0, zerados = []; estado.catalogoAgrupado = []; 
 
             for(let i=1; i<est.length; i++) {
@@ -786,7 +782,8 @@
                 if(!nomeCompleto) continue;
                 
                 totPecas += qtd; if(qtd === 0) zerados.push(nomeCompleto);
-                htmlModelos += `<option value="${nomeCompleto}">${nomeCompleto} (Saldo: ${qtd})</option>`;
+                
+                htmlModelos += `<option value="${nomeCompleto}">Saldo: ${qtd} un</option>`;
                 
                 let partes = String(nomeCompleto).split(' - ');
                 let linha = partes[0].trim();
@@ -801,9 +798,7 @@
                 modeloExistente.detalhes.push({ nomeC: nomeCompleto, cor: cor, qtd: qtd });
             }
 
-            document.getElementById('s-modelo').innerHTML = htmlModelos; 
-            document.getElementById('e-modelo').innerHTML = htmlModelos;
-            document.getElementById('inv-modelo').innerHTML = htmlModelos;
+            document.getElementById('lista-modelos').innerHTML = htmlModelos;
             
             animarNumero('kpi-pecas', totPecas);
             animarNumero('kpi-modelos', estado.catalogoAgrupado.length);
@@ -812,13 +807,15 @@
             document.getElementById('alerta-zerados').innerHTML = zerados.length > 0 ? `<div class="danger-glow">🚨 <b>ALERTA:</b> Há ${zerados.length} variação(ões) com estoque zerado.</div>` : '';
 
             atualizarBarraMeta(totalSaidasHoje);
-            renderizarCatalogo('');
-            atualizarPreviewInventario();
             
-            let htmlHist = ''; estado.analiseSaidas = {};
+            renderizarCatalogo('');
+            renderizarReposicao();
+            atualizarPreviewInventario();
+            renderizarHistorico(''); 
+
+            estado.analiseSaidas = {};
             if(hist && hist.length > 0) {
                 let cH = hist[0].map(h => h.toString().trim());
-                let hData = cH.indexOf("Data"); if(hData === -1) hData = 1;
                 let hAcao = cH.indexOf("Ação"); if(hAcao === -1) hAcao = 2;
                 let hPess = cH.indexOf("Separador"); if(hPess === -1) hPess = 3;
                 let hMod = cH.indexOf("Modelo"); if(hMod === -1) hMod = 4;
@@ -828,9 +825,84 @@
 
                 for(let i = hist.length - 1; i > 0; i--) { 
                     if(!hist[i][hMod]) continue; 
-                    let d = String(hist[i][hData]); let a = hist[i][hAcao]; 
-                    let p = hist[i][hPess]; let m = hist[i][hMod]; let q = Number(hist[i][hQtd]);
+                    let a = hist[i][hAcao]; let p = hist[i][hPess]; let q = Number(hist[i][hQtd]);
                     if(a === 'Saída' && estado.analiseSaidas[p] !== undefined) estado.analiseSaidas[p] += q;
+                }
+            }
+            renderizarGraficos();
+            if(estado.perfil === 'admin') gerarRelatorioFeedback();
+        }
+
+        function renderizarReposicao() {
+            let html = '';
+            let reposicaoFiltrada = estado.catalogoAgrupado.filter(x => x.total < 10);
+            
+            if(reposicaoFiltrada.length === 0) {
+                document.getElementById('lista-reposicao').innerHTML = '<p style="color:#10b981; font-weight:700;">✅ Nenhum item crítico! O estoque de todos os modelos está seguro.</p>';
+                return;
+            }
+
+            reposicaoFiltrada.forEach(item => {
+                let statusClass = item.total === 0 ? 'esgotado' : 'critico';
+                let badgeText = item.total === 0 ? '🔴 Esgotado' : '🔴 Crítico';
+                let badgeClass = 'status-crit';
+                let idxOriginal = estado.catalogoAgrupado.indexOf(item);
+
+                html += `
+                <div class="item-card ${statusClass}" onclick="abrirModal(${idxOriginal})">
+                    <div><span class="badge-status ${badgeClass}">${badgeText}</span></div>
+                    <div class="qtd-num">${item.total} <small style="font-size:12px; font-weight:400; color:var(--text-sub)">un.</small></div>
+                    <div style="font-weight:800; font-size:16px; margin-bottom:4px;">${item.linha}</div>
+                    <small style="color:var(--text-sub); font-size:11px;">🔍 Clique para ver as cores faltantes</small>
+                </div>`;
+            });
+            document.getElementById('lista-reposicao').innerHTML = html;
+        }
+
+        function enviarWhatsAppReposicao() {
+            let itensFaltantes = [];
+            
+            estado.catalogoAgrupado.forEach(m => {
+                m.detalhes.forEach(d => {
+                    if(d.qtd < 10) {
+                        itensFaltantes.push(`- ${d.qtd}x ${d.nomeC}`);
+                    }
+                });
+            });
+
+            if(itensFaltantes.length === 0) return alert('Não há itens críticos para repor no momento.');
+
+            let msg = `*🚨 SOLICITAÇÃO DE REPOSIÇÃO URGENTE (${estado.setor.toUpperCase()})*\n\n` +
+                      `Equipe, por favor iniciar a reposição/produção dos seguintes itens que estão em estado crítico:\n\n` +
+                      itensFaltantes.join('\n') + `\n\n` +
+                      `_Mensagem automática do Portal Logística_`;
+            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        function renderizarHistorico(busca = '') {
+            let hist = estado.dados ? estado.dados.historico : [];
+            let htmlHist = '';
+            let b = busca.toLowerCase().trim();
+
+            if(hist && hist.length > 0) {
+                let cH = hist[0].map(h => h.toString().trim());
+                let hData = cH.indexOf("Data"); if(hData === -1) hData = 1;
+                let hAcao = cH.indexOf("Ação"); if(hAcao === -1) hAcao = 2;
+                let hPess = cH.indexOf("Separador"); if(hPess === -1) hPess = 3;
+                let hMod = cH.indexOf("Modelo"); if(hMod === -1) hMod = 4;
+                let hQtd = cH.indexOf("Quantidade"); if(hQtd === -1) hQtd = 5;
+
+                let limiteLinhas = 100; 
+                let contagem = 0;
+
+                for(let i = hist.length - 1; i > 0; i--) { 
+                    if(!hist[i][hMod]) continue; 
+                    
+                    let d = String(hist[i][hData]); let a = hist[i][hAcao]; 
+                    let p = String(hist[i][hPess]); let m = String(hist[i][hMod]); let q = Number(hist[i][hQtd]);
+                    
+                    let textoDaLinha = `${d} ${a} ${p} ${m} ${q}`.toLowerCase();
+                    if(b !== '' && !textoDaLinha.includes(b)) continue; 
 
                     let isSaida = a === 'Saída'; let cAcao = isSaida ? 'acao-saida' : 'acao-entrada'; let icone = isSaida ? '📤' : '📥';
                     let btnPDF = isSaida ? `<button class="btn btn-pdf" onclick="gerarPDF('${d}','${p}','${m}','${q}')">📄 PDF</button>` : '';
@@ -843,11 +915,34 @@
                         <div style="font-weight:900; color:var(--prim)">${q}</div>
                         <div>${btnPDF}</div>
                     </div>`;
+                    
+                    contagem++;
+                    if(contagem >= limiteLinhas) break; 
                 }
             }
-            document.getElementById('lista-historico').innerHTML = htmlHist || '<p>Nenhum histórico registrado.</p>';
-            renderizarGraficos();
-            if(estado.perfil === 'admin') gerarRelatorioFeedback();
+            document.getElementById('lista-historico').innerHTML = htmlHist || '<p style="color:var(--text-sub)">Nenhum histórico encontrado com esse filtro.</p>';
+        }
+
+        function baixarCSV() {
+            if(!estado.dados || !estado.dados.historico) return alert('Sem dados para exportar.');
+            
+            let csv = '';
+            estado.dados.historico.forEach(row => {
+                let rowLimpa = row.map(valor => `"${String(valor).replace(/"/g, '""')}"`);
+                csv += rowLimpa.join(';') + '\n';
+            });
+            
+            let blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' }); 
+            let link = document.createElement("a");
+            let url = URL.createObjectURL(blob);
+            
+            link.setAttribute("href", url);
+            link.setAttribute("download", `Historico_${estado.setor}_${new Date().toLocaleDateString('pt-BR').replace(/\//g,'-')}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         function salvarMetaDiaria(val) {
@@ -883,35 +978,28 @@
                 toast(`🎙️ Entendido: "${text}"`);
                 let numMatch = text.match(/\d+/);
                 if(numMatch) document.getElementById(tipo==='Entrada'?'e-qtd':'s-qtd').value = numMatch[0];
+                
                 EQUIPES[estado.setor].forEach(p => {
-                    if(text.includes(p.toLowerCase())) document.getElementById(tipo==='Entrada'?'e-pessoa':'s-pessoa').value = p;
+                    if(text.includes(p.toLowerCase())) {
+                        let selPessoa = document.getElementById(tipo==='Entrada'?'e-pessoa':'s-pessoa');
+                        if(!selPessoa.disabled) selPessoa.value = p; 
+                    }
                 });
+                
                 if(estado.catalogoAgrupado) {
                     estado.catalogoAgrupado.forEach(m => {
                         if(text.includes(m.linha.toLowerCase())) {
-                            let sel = document.getElementById(tipo==='Entrada'?'e-modelo':'s-modelo');
-                            for(let i=0; i<sel.options.length; i++) {
-                                if(sel.options[i].value.toLowerCase().includes(m.linha.toLowerCase())) { sel.selectedIndex = i; break; }
+                            let inputModelo = document.getElementById(tipo==='Entrada'?'e-modelo':'s-modelo');
+                            let corAchada = m.detalhes.find(d => text.includes(d.cor.toLowerCase()));
+                            if (corAchada) {
+                                inputModelo.value = corAchada.nomeC;
+                            } else {
+                                inputModelo.value = m.detalhes[0].nomeC; 
                             }
                         }
                     });
                 }
             };
-        }
-
-        function enviarWhatsAppFeedback() {
-            if(!estado.relatorioAtual || !estado.relatorioAtual.pessoa) return alert('⚠️ Selecione um separador primeiro!');
-            let r = estado.relatorioAtual;
-            let acaoText = r.acao === 'Saída' ? 'Retiradas' : 'Lançadas';
-            
-            let msg = `*RESUMO DE DESEMPENHO - LOGÍSTICA (${estado.setor.toUpperCase()})*\n\n` +
-                      `👤 *Membro da Equipe:* ${r.pessoa}\n` +
-                      `📅 *Data:* ${r.dataRelatorio}\n` +
-                      `🔄 *Tipo de Ação:* ${r.acao}s\n` +
-                      `📦 *Total de Peças ${acaoText}:* ${r.totalPecas} un.\n` +
-                      `📊 *Total de Registros:* ${r.totalOps} lançamentos\n\n` +
-                      `_Relatório gerado pelo Portal Logística._`;
-            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
         function renderizarCatalogo(busca) {
@@ -924,7 +1012,6 @@
             let corteQuente = volumes.length >= 3 ? volumes[2] : (volumes[0] || 999);
 
             modelosFiltrados.forEach((item) => {
-                // ====== SEMÁFORO DO ESTOQUE ======
                 let statusClass, badgeText, badgeClass;
                 
                 if (item.total === 0) {
@@ -965,16 +1052,88 @@
             document.getElementById('grid-cat').innerHTML = html;
         }
 
+        // ================= FUNÇÕES DO NOVO LANÇAMENTO DIRETO DO MODAL =================
+        function mudarQtdModal(id, delta) {
+            let el = document.getElementById(id);
+            if(el) {
+                let v = parseInt(el.value) || 1;
+                v += delta;
+                if(v < 1) v = 1;
+                el.value = v;
+            }
+        }
+
+        async function lancarDoModal(btn, acao, modelo, inputId) {
+            let q = parseInt(document.getElementById(inputId).value) || 0;
+            let p = estado.nomeAtivo;
+
+            // Se for Admin/Controle, pega a pessoa que está selecionada na aba
+            if(!p) {
+                let pfx = acao === 'Entrada' ? 'e' : 's';
+                p = document.getElementById(`${pfx}-pessoa`).value;
+                if(!p) {
+                    alert('⚠️ Administrador: Para lançar por aqui, selecione uma pessoa na aba de ' + acao + ' antes, ou logue como Separador.');
+                    fecharModal();
+                    let tabId = acao === 'Saída' ? 'saida' : 'entrada';
+                    let btnTab = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(`'${tabId}'`));
+                    if(btnTab) btnTab.click();
+                    return;
+                }
+            }
+
+            if(q < 1) return alert('⚠️ Quantidade inválida!');
+
+            let txtOri = btn.innerText;
+            btn.innerText = '⏳...';
+            btn.disabled = true;
+
+            let payload = { setor: estado.setor, acao: acao, pessoa: p, modelo: modelo, quantidade: q };
+
+            if (!navigator.onLine) {
+                filaOffline.push(payload);
+                localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
+                playSomSucesso(); toast(`📶 Salvo offline!`);
+                fecharModal();
+                atualizarStatusRede();
+                return;
+            }
+
+            try {
+                await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
+                playSomSucesso(); 
+                toast(`✅ ${q}x ${acao} registrada com sucesso!`);
+                fecharModal();
+                carregarDados(true);
+            } catch(e) { 
+                filaOffline.push(payload);
+                localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
+                toast(`📶 Queda de rede. Salvo offline!`);
+                fecharModal();
+                atualizarStatusRede();
+            }
+        }
+
         function abrirModal(idx) {
             let item = estado.catalogoAgrupado[idx];
             document.getElementById('modal-titulo').innerText = item.linha; document.getElementById('modal-total').innerText = `Estoque Total: ${item.total} un.`;
             let html = '';
-            item.detalhes.forEach(d => {
-                // Semáforo também nas cores específicas
+            item.detalhes.forEach((d, i) => {
                 let statusText = d.qtd === 0 ? '🔴 Esgotado' : (d.qtd < 10 ? '🔴 Crítico' : (d.qtd <= 25 ? '🟡 Atenção' : '🟢 OK'));
+                let inpId = `mqtd-${idx}-${i}`;
                 html += `
                 <div class="card-detalhe">
-                    <span>${d.cor}</span><b>${d.qtd}</b><small style="color:var(--text-sub); font-weight:700;">${statusText}</small>
+                    <span>${d.cor}</span><b>${d.qtd}</b><small style="color:var(--text-sub); font-weight:700; display:block; margin-bottom:12px;">${statusText}</small>
+                    
+                    <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:12px;">
+                        <button onclick="mudarQtdModal('${inpId}', -1)" style="background:rgba(239, 68, 68, 0.2); color:#ef4444; border:none; border-radius:8px; width:32px; height:32px; font-weight:900; font-size:16px; cursor:pointer;">-</button>
+                        <input type="number" id="${inpId}" value="1" min="1" style="width:60px; margin:0; padding:5px; text-align:center; font-weight:bold; height:32px; border-radius:8px; color:var(--text-main); background:rgba(0,0,0,0.2); border:1px solid var(--border-color);">
+                        <button onclick="mudarQtdModal('${inpId}', 1)" style="background:rgba(16, 185, 129, 0.2); color:#10b981; border:none; border-radius:8px; width:32px; height:32px; font-weight:900; font-size:16px; cursor:pointer;">+</button>
+                    </div>
+
+                    <div style="display:flex; gap:6px;">
+                        <button class="btn btn-primary" style="margin:0; padding:8px 4px; font-size:11px; flex:1;" onclick="lancarDoModal(this, 'Saída', '${d.nomeC}', '${inpId}')">📤 Retirar</button>
+                        <button class="btn" style="margin:0; padding:8px 4px; font-size:11px; flex:1; background:#10b981; border:none; color:white; font-weight:bold; border-radius:18px;" onclick="lancarDoModal(this, 'Entrada', '${d.nomeC}', '${inpId}')">📥 Lançar</button>
+                    </div>
                 </div>`;
             });
             document.getElementById('modal-grid').innerHTML = html; document.getElementById('modal-detalhe').style.display = 'flex';
@@ -1073,7 +1232,7 @@
         async function lancar(tipo) {
             let pfx = tipo === 'Entrada' ? 'e' : 's';
             let p = document.getElementById(`${pfx}-pessoa`).value; let m = document.getElementById(`${pfx}-modelo`).value; let q = document.getElementById(`${pfx}-qtd`).value;
-            if(!p || !m) return alert('⚠️ Preencha todos os campos!');
+            if(!p || !m) return alert('⚠️ Preencha todos os campos corretamente!');
             
             let btn = document.getElementById(tipo === 'Entrada' ? 'btn-entrada' : 'btn-saida');
             let nomeOriginal = btn.innerText;
@@ -1095,6 +1254,10 @@
                 await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
                 playSomSucesso(); 
                 btn.innerText = 'Sucesso!'; toast(`✅ ${tipo} registrada!`);
+                
+                document.getElementById(`${pfx}-modelo`).value = '';
+                document.getElementById(`${pfx}-qtd`).value = '1';
+
                 setTimeout(() => { btn.innerText = nomeOriginal; btn.disabled = false; carregarDados(true); document.querySelectorAll('.tab-btn')[0].click(); }, 1200);
             } catch(e) { 
                 filaOffline.push(payload);
