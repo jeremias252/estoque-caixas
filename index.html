@@ -140,12 +140,10 @@
         }
         .admin-box-menu h4 { margin: 0 0 10px; font-size: 12px; color: var(--prim); text-transform: uppercase; letter-spacing: 1px; }
 
-        /* NOVA LÓGICA DO MENU EXPANSÍVEL (DESKTOP E MOBILE) */
         .main-content { margin-left: 280px; padding: 30px; height: 100vh; overflow-y: auto; width: calc(100% - 280px); transition: margin-left 0.3s ease, width 0.3s ease; }
         .mobile-header { display: none; padding: 15px; background: rgba(10,12,18,0.85); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-color); align-items: center; justify-content: space-between;}
         .menu-toggle { background: transparent; border: none; color: white; font-size: 24px; cursor: pointer; }
         
-        /* Botão extra para reabrir menu no desktop */
         .menu-toggle-desktop { display: none; position: fixed; top: 20px; left: 20px; z-index: 90; background: var(--panel-bg); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 12px; padding: 10px 15px; cursor: pointer; font-weight: 800; backdrop-filter: blur(10px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: 0.3s; }
         .menu-toggle-desktop:hover { border-color: var(--prim); color: var(--prim); }
 
@@ -373,7 +371,6 @@
                 <div class="grid-catalogo" id="grid-cat"></div>
             </div>
 
-            <!-- ABA REPOSIÇÃO -->
             <div id="tab-reposicao" class="tab-content panel">
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 10px;">
                     <h3>🚨 Fila de Reposição / Produção</h3>
@@ -568,7 +565,6 @@
             if(estado.dados) renderizarGraficos(); 
         }
 
-        // SISTEMA DE TOGGLE DO MENU OTIMIZADO
         function toggleMenu() { 
             document.body.classList.toggle('collapsed');
             let sidebar = document.getElementById('sidebar');
@@ -701,7 +697,9 @@
 
             if(forcarSync) toast('⏳ Sincronizando com o servidor...');
             try {
-                let r = await fetch(`${API_URL}?setor=${estado.setor}`);
+                // Adiciona um timestamp na URL para o Google não usar cache antigo
+                let url = `${API_URL}?setor=${estado.setor}&t=${new Date().getTime()}`;
+                let r = await fetch(url);
                 let json = await r.json();
                 if(json.erro) return alert("⚠️ Erro API:\n" + json.erro);
                 estado.dados = json;
@@ -926,7 +924,7 @@
             fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) })
             .catch(e => {
                 filaOffline.push(payload); localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
-                setTimeout(() => toast(`📶 Salvo offline!`), 1500); 
+                setTimeout(() => toast(`📶 Queda de rede. Salvo offline!`), 1500); 
                 atualizarStatusRede();
             });
         }
@@ -1223,7 +1221,6 @@
             if(q < 1) return alert('⚠️ Quantidade inválida!');
 
             fecharModal(); 
-            
             atualizarEstoqueLocal(acao, p, modelo, q);
             
             let payload = { setor: estado.setor, acao: acao, pessoa: p, modelo: modelo, quantidade: q };
@@ -1290,9 +1287,7 @@
             let payload = { setor: estado.setor, acao: 'Entrada', pessoa: 'Cadastro', modelo: modeloCompleto, quantidade: qtd };
             enviarPayloadSilencioso(payload, `✨ Item "${modeloCompleto}" cadastrado com sucesso!`);
             
-            document.getElementById('ni-nome').value = '';
-            document.getElementById('ni-cor').value = '';
-            document.getElementById('ni-qtd').value = '0';
+            document.getElementById('ni-nome').value = ''; document.getElementById('ni-cor').value = ''; document.getElementById('ni-qtd').value = '0';
             document.querySelectorAll('.tab-btn')[0].click();
         }
 
@@ -1341,21 +1336,16 @@
             let tipoAcao = diff > 0 ? 'Entrada' : 'Saída';
             let qtdAjuste = Math.abs(diff);
 
-            // Ajuste instantâneo na tela
-            let btn = document.getElementById('btn-inv-ajustar');
-            let catItem = estado.catalogoAgrupado.find(c => c.linha === modelo.split(' - ')[0].trim());
-            if(catItem) {
-                let det = catItem.detalhes.find(d => d.nomeC === modelo);
-                if(det) det.qtd = qtdFisica; 
-                catItem.total = catItem.detalhes.reduce((acc, curr) => acc + curr.qtd, 0);
-            }
-            
+            // Reseta botões e inputs imediatamente
             document.getElementById('inv-qtd-fisica').value = '0';
             document.getElementById('inv-modelo').value = '';
-            atualizarPreviewInventario();
-            document.querySelectorAll('.tab-btn')[0].click(); // Volta pro catálogo
+            let btn = document.getElementById('btn-inv-ajustar');
+            btn.innerText = '⚙️ Confirmar Ajuste de Inventário'; 
+            btn.disabled = false;
 
-            // Manda pro Google em segundo plano
+            atualizarEstoqueLocal(tipoAcao, 'Ajuste Inventário', modelo, qtdAjuste);
+            document.querySelectorAll('.tab-btn')[0].click(); 
+
             let payload = { setor: estado.setor, acao: tipoAcao, pessoa: 'Ajuste Inventário', modelo: modelo, quantidade: qtdAjuste };
             enviarPayloadSilencioso(payload, `⚙️ Ajuste de ${qtdAjuste}x concluído!`);
         }
