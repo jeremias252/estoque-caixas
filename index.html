@@ -1,3 +1,10 @@
+Pelo print que você mandou, eu vi exatamente o que aconteceu! Como fizemos o aplicativo ficar "otimista" (atualizando a tela antes mesmo de o Google responder para ficar mais rápido), o botão do Inventário acabou se perdendo e esqueceu de voltar ao normal depois de enviar o dado. Ele ficou preso no estado de "carregando".
+
+Eu corrigi essa trava. Agora ele atualiza a tela na hora e, assim que o Google confirma o recebimento no fundo, ele libera o botão de novo.
+
+Aqui está o código com essa correção aplicada. Pode substituir tudo:
+
+```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -1530,3 +1537,5 @@
     </script>
 </body>
 </html>
+
+```
