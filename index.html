@@ -323,7 +323,7 @@
             <button class="btn" onclick="toggleTema()">🌓 Alternar Tema</button>
             
             <div style="flex:1"></div>
-            <button class="btn" onclick="carregarDados(true)">🔄 Sincronizar</button>
+            <button id="btn-sincronizar" class="btn" onclick="forcarSincronizacao()">🔄 Sincronizar</button>
             <button class="btn btn-primary" onclick="location.reload()">🚪 Sair (Logout)</button>
         </div>
 
@@ -371,6 +371,7 @@
                 <div class="grid-catalogo" id="grid-cat"></div>
             </div>
 
+            <!-- ABA REPOSIÇÃO -->
             <div id="tab-reposicao" class="tab-content panel">
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 10px;">
                     <h3>🚨 Fila de Reposição / Produção</h3>
@@ -687,6 +688,46 @@
             carregarDados();
         }
 
+        // ================= FUNÇÃO DE HARD RESET =================
+        async function forcarSincronizacao() {
+            if(!navigator.onLine) return alert('Você está offline. Conecte-se à internet para sincronizar.');
+            
+            let btn = document.getElementById('btn-sincronizar');
+            if(btn) { btn.disabled = true; btn.innerText = '⏳ Sincronizando...'; }
+            
+            toast('⏳ Forçando atualização do estoque...');
+            
+            if (filaOffline.length > 0) {
+                await sincronizarFila();
+                await new Promise(resolve => setTimeout(resolve, 2000)); 
+            }
+
+            try {
+                let url = `${API_URL}?setor=${estado.setor}&t=${new Date().getTime()}`;
+                let r = await fetch(url);
+                let json = await r.json();
+                if(json.erro) throw new Error(json.erro);
+                
+                estado.dados = json;
+                localStorage.setItem('cachePortal_' + estado.setor, JSON.stringify(json));
+                
+                fecharModal();
+                document.querySelectorAll('input').forEach(inp => {
+                    if(inp.type === 'number') inp.value = (inp.id.includes('qtd') ? '1' : '0');
+                    else if(inp.type === 'text' || inp.type === 'date') inp.value = '';
+                });
+                
+                renderizarInterface();
+                document.querySelectorAll('.tab-btn')[0].click(); 
+                
+                toast('✅ Estoque 100% atualizado e resetado!');
+            } catch(e) {
+                alert("⚠️ Erro ao sincronizar:\n" + e);
+            }
+            
+            if(btn) { btn.disabled = false; btn.innerText = '🔄 Sincronizar'; }
+        }
+
         async function carregarDados(forcarSync = false) {
             if(!navigator.onLine && !forcarSync) {
                 toast('📶 Sem internet. Usando estoque salvo.');
@@ -695,7 +736,7 @@
                 return;
             }
 
-            if(forcarSync) toast('⏳ Sincronizando...');
+            if(forcarSync) toast('⏳ Sincronizando com o servidor...');
             try {
                 let url = `${API_URL}?setor=${estado.setor}&t=${new Date().getTime()}`;
                 let r = await fetch(url);
@@ -834,7 +875,6 @@
             let totalSaidasHoje = 0;
             let hojeStr = new Date().toLocaleDateString('pt-BR');
 
-            // LÊ HISTÓRICO COM LIMPEZA DE ESPAÇOS (TRIM GLOBAL)
             if(hist && hist.length > 0) {
                 let cH = hist[0].map(h => String(h).trim());
                 let hData = cH.indexOf("Data"); if(hData === -1) hData = 1;
