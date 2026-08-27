@@ -140,6 +140,7 @@
         }
         .admin-box-menu h4 { margin: 0 0 10px; font-size: 12px; color: var(--prim); text-transform: uppercase; letter-spacing: 1px; }
 
+        /* LÓGICA DO MENU EXPANSÍVEL (DESKTOP E MOBILE) */
         .main-content { margin-left: 280px; padding: 30px; height: 100vh; overflow-y: auto; width: calc(100% - 280px); transition: margin-left 0.3s ease, width 0.3s ease; }
         .mobile-header { display: none; padding: 15px; background: rgba(10,12,18,0.85); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-color); align-items: center; justify-content: space-between;}
         .menu-toggle { background: transparent; border: none; color: white; font-size: 24px; cursor: pointer; }
@@ -371,7 +372,6 @@
                 <div class="grid-catalogo" id="grid-cat"></div>
             </div>
 
-            <!-- ABA REPOSIÇÃO -->
             <div id="tab-reposicao" class="tab-content panel">
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 10px;">
                     <h3>🚨 Fila de Reposição / Produção</h3>
@@ -688,7 +688,6 @@
             carregarDados();
         }
 
-        // ================= FUNÇÃO DE HARD RESET =================
         async function forcarSincronizacao() {
             if(!navigator.onLine) return alert('Você está offline. Conecte-se à internet para sincronizar.');
             
@@ -800,7 +799,7 @@
             if (qtd > 0) {
                 let achou = false;
                 for(let i=1; i<est.length; i++) {
-                    if(String(est[i][idxMod]).trim() === String(modelo).trim()) {
+                    if(String(est[i][idxMod]) === String(modelo)) {
                         let qtdAtual = Number(est[i][idxQtd]) || 0;
                         if(acao === 'Entrada') est[i][idxQtd] = qtdAtual + qtd;
                         else est[i][idxQtd] = Math.max(0, qtdAtual - qtd);
@@ -809,7 +808,7 @@
                 }
                 if(!achou && acao === 'Entrada') {
                     let novaLinha = new Array(est[0].length).fill('');
-                    novaLinha[idxMod] = String(modelo).trim(); 
+                    novaLinha[idxMod] = String(modelo); 
                     novaLinha[idxQtd] = qtd;
                     est.push(novaLinha);
                 }
@@ -829,7 +828,7 @@
                 novaLinhaHist[idxData] = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR');
                 novaLinhaHist[idxAcao] = acao;
                 novaLinhaHist[idxPess] = pessoa;
-                novaLinhaHist[idxM] = String(modelo).trim();
+                novaLinhaHist[idxM] = String(modelo);
                 novaLinhaHist[idxQ] = qtd;
                 
                 hist.splice(1, 0, novaLinhaHist); 
@@ -886,7 +885,7 @@
                 for(let i = 1; i < hist.length; i++) {
                     let a = String(hist[i][hAcao]).trim(); 
                     let p = String(hist[i][hPess]).trim(); 
-                    let m = String(hist[i][hMod]).trim(); 
+                    let m = String(hist[i][hMod]); 
                     let q = Number(hist[i][hQtd]) || 0;
                     if(!m) continue;
 
@@ -900,7 +899,7 @@
                     }
 
                     if(a === 'Saída' && !p.includes('REPOSIÇÃO') && !p.includes('FAZENDO')) {
-                        let nomeLinha = m.split(' - ')[0].trim();
+                        let nomeLinha = m.split('-')[0].trim();
                         estado.mapaSaidasPorModelo[nomeLinha] = (estado.mapaSaidasPorModelo[nomeLinha] || 0) + q;
 
                         let dtStr = String(hist[i][hData]).split(' ')[0];
@@ -919,17 +918,19 @@
             let totPecas = 0, zerados = []; estado.catalogoAgrupado = []; 
 
             for(let i=1; i<est.length; i++) {
-                let nomeCompleto = String(est[i][idxMod]).trim(); 
+                let nomeOriginal = est[i][idxMod];
+                if(nomeOriginal === undefined || nomeOriginal === null || nomeOriginal === '') continue;
+                
+                let nomeCompleto = String(nomeOriginal); 
                 let qtd = Number(est[i][idxQtd]) || 0;
-                if(!nomeCompleto) continue;
                 
                 totPecas += qtd; if(qtd === 0) zerados.push(nomeCompleto);
                 
                 htmlModelos += `<option value="${nomeCompleto}">Saldo: ${qtd} un</option>`;
                 
-                let partes = String(nomeCompleto).split(' - ');
+                let partes = nomeCompleto.split('-');
                 let linha = partes[0].trim();
-                let cor = partes.length > 1 ? partes[1].trim() : 'Padrão';
+                let cor = partes.length > 1 ? partes.slice(1).join('-').trim() : 'Padrão';
                 
                 let modeloExistente = estado.catalogoAgrupado.find(x => x.linha === linha);
                 if(!modeloExistente) { 
@@ -958,62 +959,161 @@
             if(estado.perfil === 'admin') gerarRelatorioFeedback();
         }
 
-        function enviarPayloadSilencioso(payload, msgSucesso) {
-            playSomSucesso(); 
-            toast(msgSucesso);
-            
-            if (!navigator.onLine) {
-                filaOffline.push(payload); localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
-                setTimeout(() => toast(`📶 Salvo offline!`), 1500); 
-                atualizarStatusRede(); return;
-            }
-            
-            fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) })
-            .then(() => {
-                setTimeout(() => carregarDados(false), 4000); 
-            })
-            .catch(e => {
-                filaOffline.push(payload); localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
-                setTimeout(() => toast(`📶 Queda de rede. Salvo offline!`), 1500); 
-                atualizarStatusRede();
+        function abrirModal(idx) {
+            let item = estado.catalogoAgrupado[idx];
+            document.getElementById('modal-titulo').innerText = item.linha; document.getElementById('modal-total').innerText = `Estoque Total: ${item.total} un.`;
+            let html = '';
+            item.detalhes.forEach((d, i) => {
+                let statusText = d.qtd === 0 ? '🔴 Esgotado' : (d.qtd < 10 ? '🔴 Crítico' : (d.qtd <= 25 ? '🟡 Atenção' : '🟢 OK'));
+                let inpId = `mqtd-${idx}-${i}`;
+                let safeName = d.nomeC.replace(/'/g, "\\'");
+                
+                let produtor = estado.emProducao[d.nomeC];
+                let avisoProducao = ''; let btnAcaoProd = '';
+
+                if (produtor) {
+                    if (produtor === (estado.nomeAtivo || estado.perfil.toUpperCase())) {
+                        avisoProducao = `<div style="background:rgba(16,185,129,0.2); color:#10b981; font-size:11px; padding:6px; border-radius:6px; margin-bottom:8px; font-weight:800;">👨‍🔧 Você está repondo isto</div>`;
+                        btnAcaoProd = `<button class="btn" style="margin:0 0 10px 0; padding:6px; font-size:11px; background:transparent; border:1px solid #10b981; color:#10b981; font-weight:800;" onclick="concluirProducao(this, '${safeName}')">✅ Concluir Reposição</button>`;
+                    } else {
+                        avisoProducao = `<div style="background:rgba(245,158,11,0.2); color:#f59e0b; font-size:11px; padding:6px; border-radius:6px; margin-bottom:8px; font-weight:800;">⚠️ ${produtor} está repondo</div>`;
+                    }
+                } else {
+                    btnAcaoProd = `<button class="btn" style="margin:0 0 10px 0; padding:6px; font-size:11px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.2); color:var(--text-main);" onclick="assumirProducao(this, '${safeName}')">✋ Assumir Reposição</button>`;
+                }
+
+                html += `
+                <div class="card-detalhe">
+                    <span>${d.cor}</span><b>${d.qtd}</b><small style="color:var(--text-sub); font-weight:700; display:block; margin-bottom:12px;">${statusText}</small>
+                    
+                    ${avisoProducao}
+                    ${btnAcaoProd}
+                    
+                    <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:12px;">
+                        <button onclick="mudarQtdModal('${inpId}', -1)" style="background:rgba(239, 68, 68, 0.2); color:#ef4444; border:none; border-radius:8px; width:32px; height:32px; font-weight:900; font-size:16px; cursor:pointer;">-</button>
+                        <input type="number" id="${inpId}" value="1" min="1" style="width:60px; margin:0; padding:5px; text-align:center; font-weight:bold; height:32px; border-radius:8px; color:var(--text-main); background:rgba(0,0,0,0.2); border:1px solid var(--border-color);">
+                        <button onclick="mudarQtdModal('${inpId}', 1)" style="background:rgba(16, 185, 129, 0.2); color:#10b981; border:none; border-radius:8px; width:32px; height:32px; font-weight:900; font-size:16px; cursor:pointer;">+</button>
+                    </div>
+
+                    <div style="display:flex; gap:6px;">
+                        <button class="btn btn-primary" style="margin:0; padding:8px 4px; font-size:11px; flex:1;" onclick="lancarDoModal(this, 'Saída', '${safeName}', '${inpId}')">📤 Retirar</button>
+                        <button class="btn" style="margin:0; padding:8px 4px; font-size:11px; flex:1; background:#10b981; border:none; color:white; font-weight:bold; border-radius:18px;" onclick="lancarDoModal(this, 'Entrada', '${safeName}', '${inpId}')">📥 Lançar</button>
+                    </div>
+                </div>`;
             });
+            document.getElementById('modal-grid').innerHTML = html; document.getElementById('modal-detalhe').style.display = 'flex';
         }
 
-        function assumirProducao(modelo) {
+        function fecharModal() { document.getElementById('modal-detalhe').style.display = 'none'; }
+
+        async function lancarDoModal(btn, acao, modelo, inputId) {
+            let q = parseInt(document.getElementById(inputId).value) || 0;
+            let p = estado.nomeAtivo;
+
+            if(!p) {
+                let pfx = acao === 'Entrada' ? 'e' : 's';
+                p = document.getElementById(`${pfx}-pessoa`).value;
+                if(!p) {
+                    alert('⚠️ Administrador: Para lançar por aqui, selecione o nome na aba de ' + acao + ' primeiro.');
+                    fecharModal();
+                    let tabId = acao === 'Saída' ? 'saida' : 'entrada';
+                    let btnTab = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(`'${tabId}'`));
+                    if(btnTab) btnTab.click();
+                    return;
+                }
+            }
+
+            if(q < 1) return alert('⚠️ Quantidade inválida!');
+
+            let txtOriginal = btn.innerHTML;
+            btn.innerHTML = '⏳...'; btn.disabled = true;
+
+            let payload = { setor: estado.setor, acao: acao, pessoa: p, modelo: modelo, quantidade: q };
+            
+            try {
+                await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
+                atualizarEstoqueLocal(acao, p, modelo, q);
+                fecharModal();
+                playSomSucesso(); 
+                toast(`✅ ${q}x ${acao} de ${modelo.split('-')[0].trim()} registrada!`);
+            } catch(e) {
+                filaOffline.push(payload); localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
+                atualizarEstoqueLocal(acao, p, modelo, q);
+                fecharModal();
+                playSomSucesso(); toast(`📶 Salvo offline!`);
+                atualizarStatusRede();
+            }
+        }
+
+        async function assumirProducao(btn, modelo) {
             let p = estado.nomeAtivo || estado.perfil.toUpperCase();
-            fecharModal();
-            atualizarEstoqueLocal('Entrada', '⚙️ FAZENDO|' + p, modelo, 0); 
-            
+            let txtOriginal = btn.innerHTML;
+            btn.innerHTML = '⏳...'; btn.disabled = true;
+
             let payload = { setor: estado.setor, acao: 'Entrada', pessoa: '⚙️ FAZENDO|' + p, modelo: modelo, quantidade: 0 };
-            enviarPayloadSilencioso(payload, '✋ Você assumiu a reposição deste item!');
+            try {
+                await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
+                atualizarEstoqueLocal('Entrada', '⚙️ FAZENDO|' + p, modelo, 0);
+                fecharModal();
+                playSomSucesso(); toast('✋ Você assumiu a reposição!');
+            } catch(e) { 
+                btn.innerHTML = txtOriginal; btn.disabled = false;
+                toast('Erro de rede.');
+            }
         }
 
-        function concluirProducao(modelo) {
-            fecharModal();
-            atualizarEstoqueLocal('Entrada', '✅ FIM REPOSIÇÃO', modelo, 0);
-            
+        async function concluirProducao(btn, modelo) {
+            let txtOriginal = btn.innerHTML;
+            btn.innerHTML = '⏳...'; btn.disabled = true;
             let payload = { setor: estado.setor, acao: 'Entrada', pessoa: '✅ FIM REPOSIÇÃO', modelo: modelo, quantidade: 0 };
-            enviarPayloadSilencioso(payload, '✅ Reposição liberada/concluída!');
+            try {
+                await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
+                atualizarEstoqueLocal('Entrada', '✅ FIM REPOSIÇÃO', modelo, 0);
+                fecharModal();
+                playSomSucesso(); toast('✅ Reposição concluída!');
+            } catch(e) { 
+                btn.innerHTML = txtOriginal; btn.disabled = false;
+                toast('Erro de rede.');
+            }
         }
 
-        function solicitarReposicao() {
+        async function solicitarReposicao() {
             let m = document.getElementById('rep-modelo').value; let q = document.getElementById('rep-qtd').value;
             if(!m || !q) return alert('⚠️ Preencha o modelo e a quantidade que deseja pedir!');
             
-            atualizarEstoqueLocal('Entrada', '⏳ REPOSIÇÃO|' + q, m, 0);
-            document.getElementById('rep-modelo').value = ''; document.getElementById('rep-qtd').value = '';
-
+            let btn = document.getElementById('btn-pedir-rep'); let txtOriginal = btn.innerText;
+            btn.disabled = true; btn.innerText = '⏳ Solicitando...';
+            
             let payload = { setor: estado.setor, acao: 'Entrada', pessoa: '⏳ REPOSIÇÃO|' + q, modelo: m, quantidade: 0 };
-            enviarPayloadSilencioso(payload, '✅ Ordem enviada para a equipe!');
+
+            try {
+                await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
+                atualizarEstoqueLocal('Entrada', '⏳ REPOSIÇÃO|' + q, m, 0);
+                document.getElementById('rep-modelo').value = ''; document.getElementById('rep-qtd').value = '';
+                btn.innerText = txtOriginal; btn.disabled = false;
+                playSomSucesso(); toast('✅ Ordem enviada para a equipe!');
+            } catch(e) { 
+                btn.innerText = txtOriginal; btn.disabled = false;
+                toast('Erro ao solicitar.');
+            }
         }
 
-        function concluirReposicao(modelo) {
+        async function concluirReposicao(btn, modelo) {
             if(!confirm(`Deseja forçar a conclusão da ordem de "${modelo}" e remover da lista?`)) return;
             
-            atualizarEstoqueLocal('Entrada', '✅ FIM REPOSIÇÃO', modelo, 0);
-
+            let txtOriginal = btn.innerText;
+            btn.innerText = '⏳...'; btn.disabled = true;
+            
             let payload = { setor: estado.setor, acao: 'Entrada', pessoa: '✅ FIM REPOSIÇÃO', modelo: modelo, quantidade: 0 };
-            enviarPayloadSilencioso(payload, '✅ Pedido finalizado!');
+            
+            try {
+                await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
+                atualizarEstoqueLocal('Entrada', '✅ FIM REPOSIÇÃO', modelo, 0);
+                playSomSucesso(); toast('✅ Pedido finalizado!');
+            } catch(e) { 
+                btn.innerText = txtOriginal; btn.disabled = false;
+                toast('Erro de rede.');
+            }
         }
 
         function renderizarReposicao() {
@@ -1025,9 +1125,10 @@
             } else {
                 modelosSolicitados.forEach(modeloCor => {
                     let qtdPedida = estado.filaReposicao[modeloCor];
-                    let linhaPrincipal = modeloCor.split(' - ')[0].trim();
+                    let linhaPrincipal = modeloCor.split('-')[0].trim();
                     let idxOriginal = estado.catalogoAgrupado.findIndex(x => x.linha === linhaPrincipal);
                     let onclickEvt = idxOriginal !== -1 ? `onclick="if(event.target.tagName !== 'BUTTON') abrirModal(${idxOriginal})"` : '';
+                    let safeModeloCor = modeloCor.replace(/'/g, "\\'");
                     
                     let qtdAtual = 0;
                     if (idxOriginal !== -1) {
@@ -1048,7 +1149,7 @@
                                 ${tagFazendo}
                             </div>
                             <div style="display:flex; gap:8px;">
-                                <button class="btn coord-only" style="margin:0; padding:8px 12px; font-size:12px; height:38px; background:rgba(16,185,129,0.2); color:#10b981; border:1px solid #10b981;" onclick="concluirReposicao('${modeloCor}')">✅ Concluir Ordem</button>
+                                <button class="btn coord-only" style="margin:0; padding:8px 12px; font-size:12px; height:38px; background:rgba(16,185,129,0.2); color:#10b981; border:1px solid #10b981;" onclick="concluirReposicao(this, '${safeModeloCor}')">✅ Concluir Ordem</button>
                             </div>
                         </div>
                     </div>`;
@@ -1114,8 +1215,8 @@
                 let contagem = 0;
 
                 for(let i = hist.length - 1; i > 0; i--) { 
-                    let m = String(hist[i][hMod]).trim();
-                    if(!m) continue; 
+                    let m = String(hist[i][hMod]);
+                    if(!m || m === 'undefined') continue; 
                     
                     let d = String(hist[i][hData]).split(' ')[0]; let a = String(hist[i][hAcao]).trim(); 
                     let p = String(hist[i][hPess]).trim(); let q = String(hist[i][hQtd]).trim();
@@ -1252,79 +1353,7 @@
             if(el) { let v = parseInt(el.value) || 1; v += delta; if(v < 1) v = 1; el.value = v; }
         }
 
-        function lancarDoModal(btn, acao, modelo, inputId) {
-            let q = parseInt(document.getElementById(inputId).value) || 0;
-            let p = estado.nomeAtivo;
-
-            if(!p) {
-                let pfx = acao === 'Entrada' ? 'e' : 's';
-                p = document.getElementById(`${pfx}-pessoa`).value;
-                if(!p) {
-                    alert('⚠️ Administrador: Para lançar por aqui, selecione o nome na aba de ' + acao + ' primeiro.');
-                    fecharModal();
-                    let tabId = acao === 'Saída' ? 'saida' : 'entrada';
-                    let btnTab = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(`'${tabId}'`));
-                    if(btnTab) btnTab.click();
-                    return;
-                }
-            }
-
-            if(q < 1) return alert('⚠️ Quantidade inválida!');
-
-            fecharModal(); 
-            atualizarEstoqueLocal(acao, p, modelo, q);
-            
-            let payload = { setor: estado.setor, acao: acao, pessoa: p, modelo: modelo, quantidade: q };
-            enviarPayloadSilencioso(payload, `✅ ${q}x ${acao} registrada!`);
-        }
-
-        function abrirModal(idx) {
-            let item = estado.catalogoAgrupado[idx];
-            document.getElementById('modal-titulo').innerText = item.linha; document.getElementById('modal-total').innerText = `Estoque Total: ${item.total} un.`;
-            let html = '';
-            item.detalhes.forEach((d, i) => {
-                let statusText = d.qtd === 0 ? '🔴 Esgotado' : (d.qtd < 10 ? '🔴 Crítico' : (d.qtd <= 25 ? '🟡 Atenção' : '🟢 OK'));
-                let inpId = `mqtd-${idx}-${i}`;
-                
-                let produtor = estado.emProducao[d.nomeC];
-                let avisoProducao = ''; let btnAcaoProd = '';
-
-                if (produtor) {
-                    if (produtor === (estado.nomeAtivo || estado.perfil.toUpperCase())) {
-                        avisoProducao = `<div style="background:rgba(16,185,129,0.2); color:#10b981; font-size:11px; padding:6px; border-radius:6px; margin-bottom:8px; font-weight:800;">👨‍🔧 Você está repondo isto</div>`;
-                        btnAcaoProd = `<button class="btn" style="margin:0 0 10px 0; padding:6px; font-size:11px; background:transparent; border:1px solid #10b981; color:#10b981; font-weight:800;" onclick="concluirProducao('${d.nomeC}')">✅ Concluir Reposição</button>`;
-                    } else {
-                        avisoProducao = `<div style="background:rgba(245,158,11,0.2); color:#f59e0b; font-size:11px; padding:6px; border-radius:6px; margin-bottom:8px; font-weight:800;">⚠️ ${produtor} está repondo</div>`;
-                    }
-                } else {
-                    btnAcaoProd = `<button class="btn" style="margin:0 0 10px 0; padding:6px; font-size:11px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.2); color:var(--text-main);" onclick="assumirProducao('${d.nomeC}')">✋ Assumir Reposição</button>`;
-                }
-
-                html += `
-                <div class="card-detalhe">
-                    <span>${d.cor}</span><b>${d.qtd}</b><small style="color:var(--text-sub); font-weight:700; display:block; margin-bottom:12px;">${statusText}</small>
-                    
-                    ${avisoProducao}
-                    ${btnAcaoProd}
-                    
-                    <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:12px;">
-                        <button onclick="mudarQtdModal('${inpId}', -1)" style="background:rgba(239, 68, 68, 0.2); color:#ef4444; border:none; border-radius:8px; width:32px; height:32px; font-weight:900; font-size:16px; cursor:pointer;">-</button>
-                        <input type="number" id="${inpId}" value="1" min="1" style="width:60px; margin:0; padding:5px; text-align:center; font-weight:bold; height:32px; border-radius:8px; color:var(--text-main); background:rgba(0,0,0,0.2); border:1px solid var(--border-color);">
-                        <button onclick="mudarQtdModal('${inpId}', 1)" style="background:rgba(16, 185, 129, 0.2); color:#10b981; border:none; border-radius:8px; width:32px; height:32px; font-weight:900; font-size:16px; cursor:pointer;">+</button>
-                    </div>
-
-                    <div style="display:flex; gap:6px;">
-                        <button class="btn btn-primary" style="margin:0; padding:8px 4px; font-size:11px; flex:1;" onclick="lancarDoModal(this, 'Saída', '${d.nomeC}', '${inpId}')">📤 Retirar</button>
-                        <button class="btn" style="margin:0; padding:8px 4px; font-size:11px; flex:1; background:#10b981; border:none; color:white; font-weight:bold; border-radius:18px;" onclick="lancarDoModal(this, 'Entrada', '${d.nomeC}', '${inpId}')">📥 Lançar</button>
-                    </div>
-                </div>`;
-            });
-            document.getElementById('modal-grid').innerHTML = html; document.getElementById('modal-detalhe').style.display = 'flex';
-        }
-
-        function fecharModal() { document.getElementById('modal-detalhe').style.display = 'none'; }
-
-        function cadastrarNovoItem() {
+        async function cadastrarNovoItem() {
             let nome = document.getElementById('ni-nome').value.trim();
             let cor = document.getElementById('ni-cor').value.trim();
             let qtd = Number(document.getElementById('ni-qtd').value) || 0;
@@ -1332,14 +1361,28 @@
             if(!nome) return alert('⚠️ Digite o nome do modelo/linha!');
 
             let modeloCompleto = cor ? `${nome} - ${cor}` : nome;
-            
-            atualizarEstoqueLocal('Entrada', 'Cadastro', modeloCompleto, qtd);
+            let btn = document.getElementById('btn-cadastrar-item');
+            let txtOriginal = btn.innerText;
+            btn.disabled = true; btn.innerText = '⏳ Cadastrando...';
 
             let payload = { setor: estado.setor, acao: 'Entrada', pessoa: 'Cadastro', modelo: modeloCompleto, quantidade: qtd };
-            enviarPayloadSilencioso(payload, `✨ Item "${modeloCompleto}" cadastrado com sucesso!`);
-            
-            document.getElementById('ni-nome').value = ''; document.getElementById('ni-cor').value = ''; document.getElementById('ni-qtd').value = '0';
-            document.querySelectorAll('.tab-btn')[0].click();
+
+            try {
+                await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
+                atualizarEstoqueLocal('Entrada', 'Cadastro', modeloCompleto, qtd);
+                playSomSucesso(); toast(`✨ Item "${modeloCompleto}" cadastrado com sucesso!`);
+                document.getElementById('ni-nome').value = ''; document.getElementById('ni-cor').value = ''; document.getElementById('ni-qtd').value = '0';
+                btn.innerText = txtOriginal; btn.disabled = false;
+                document.querySelectorAll('.tab-btn')[0].click();
+            } catch(e) {
+                filaOffline.push(payload); localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
+                atualizarEstoqueLocal('Entrada', 'Cadastro', modeloCompleto, qtd);
+                playSomSucesso(); toast(`📶 Salvo offline!`);
+                document.getElementById('ni-nome').value = ''; document.getElementById('ni-cor').value = ''; document.getElementById('ni-qtd').value = '0';
+                btn.innerText = txtOriginal; btn.disabled = false;
+                document.querySelectorAll('.tab-btn')[0].click();
+                atualizarStatusRede();
+            }
         }
 
         function atualizarPreviewInventario() {
@@ -1357,7 +1400,7 @@
 
             let saldoSistema = 0;
             for(let i=1; i<est.length; i++) {
-                if(String(est[i][idxMod]).trim() === String(sel).trim()) { saldoSistema = Number(est[i][idxQtd]) || 0; break; }
+                if(String(est[i][idxMod]) === String(sel)) { saldoSistema = Number(est[i][idxQtd]) || 0; break; }
             }
 
             let qtdFisica = Number(document.getElementById('inv-qtd-fisica').value) || 0;
@@ -1374,7 +1417,7 @@
             }
         }
 
-        function confirmarAjusteInventario() {
+        async function confirmarAjusteInventario() {
             let modelo = document.getElementById('inv-modelo').value;
             let qtdFisica = Number(document.getElementById('inv-qtd-fisica').value);
             let saldoSistema = Number(document.getElementById('inv-saldo-sistema').innerText) || 0;
@@ -1387,34 +1430,63 @@
             let tipoAcao = diff > 0 ? 'Entrada' : 'Saída';
             let qtdAjuste = Math.abs(diff);
 
-            document.getElementById('inv-qtd-fisica').value = '0';
-            document.getElementById('inv-modelo').value = '';
-            
             let btn = document.getElementById('btn-inv-ajustar');
-            btn.innerText = '⚙️ Confirmar Ajuste de Inventário'; 
-            btn.disabled = false;
-
-            atualizarEstoqueLocal(tipoAcao, 'Ajuste Inventário', modelo, qtdAjuste);
-            atualizarPreviewInventario();
-            document.querySelectorAll('.tab-btn')[0].click(); 
+            let txtOriginal = btn.innerText;
+            btn.innerText = '⏳ Processando Ajuste...'; btn.disabled = true;
 
             let payload = { setor: estado.setor, acao: tipoAcao, pessoa: 'Ajuste Inventário', modelo: modelo, quantidade: qtdAjuste };
-            enviarPayloadSilencioso(payload, `⚙️ Ajuste de ${qtdAjuste}x concluído!`);
+
+            try {
+                await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
+                atualizarEstoqueLocal(tipoAcao, 'Ajuste Inventário', modelo, qtdAjuste);
+                
+                document.getElementById('inv-qtd-fisica').value = '0'; document.getElementById('inv-modelo').value = '';
+                btn.innerText = txtOriginal; btn.disabled = false;
+                atualizarPreviewInventario(); document.querySelectorAll('.tab-btn')[0].click(); 
+                
+                playSomSucesso(); toast(`⚙️ Ajuste de ${qtdAjuste}x concluído!`);
+            } catch(e) {
+                filaOffline.push(payload); localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
+                atualizarEstoqueLocal(tipoAcao, 'Ajuste Inventário', modelo, qtdAjuste);
+                
+                document.getElementById('inv-qtd-fisica').value = '0'; document.getElementById('inv-modelo').value = '';
+                btn.innerText = txtOriginal; btn.disabled = false;
+                atualizarPreviewInventario(); document.querySelectorAll('.tab-btn')[0].click(); 
+
+                playSomSucesso(); toast(`📶 Ajuste salvo offline!`); atualizarStatusRede();
+            }
         }
 
-        function lancar(tipo) {
+        async function lancar(tipo) {
             let pfx = tipo === 'Entrada' ? 'e' : 's';
             let p = document.getElementById(`${pfx}-pessoa`).value; let m = document.getElementById(`${pfx}-modelo`).value; let q = Number(document.getElementById(`${pfx}-qtd`).value);
             if(!p || !m || q < 1) return alert('⚠️ Preencha todos os campos corretamente!');
             
-            atualizarEstoqueLocal(tipo, p, m, q);
+            let btn = document.getElementById(tipo === 'Entrada' ? 'btn-entrada' : 'btn-saida');
+            let txtOriginal = btn.innerText;
+            btn.disabled = true; btn.innerText = '⏳ Processando...';
             
-            document.getElementById(`${pfx}-modelo`).value = '';
-            document.getElementById(`${pfx}-qtd`).value = '1';
-            document.querySelectorAll('.tab-btn')[0].click(); 
-
             let payload = { setor: estado.setor, acao: tipo, pessoa: p, modelo: m, quantidade: q };
-            enviarPayloadSilencioso(payload, `✅ ${q}x ${tipo} registrada!`);
+
+            try {
+                await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
+                atualizarEstoqueLocal(tipo, p, m, q);
+                
+                document.getElementById(`${pfx}-modelo`).value = ''; document.getElementById(`${pfx}-qtd`).value = '1';
+                btn.innerText = txtOriginal; btn.disabled = false;
+                document.querySelectorAll('.tab-btn')[0].click(); 
+
+                playSomSucesso(); toast(`✅ ${q}x ${tipo} registrada!`);
+            } catch(e) { 
+                filaOffline.push(payload); localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
+                atualizarEstoqueLocal(tipo, p, m, q);
+                
+                document.getElementById(`${pfx}-modelo`).value = ''; document.getElementById(`${pfx}-qtd`).value = '1';
+                btn.innerText = txtOriginal; btn.disabled = false;
+                document.querySelectorAll('.tab-btn')[0].click(); 
+
+                playSomSucesso(); toast(`📶 Sem internet. Salvo para enviar depois!`); atualizarStatusRede();
+            }
         }
 
         function parseData(strData) {
@@ -1462,7 +1534,7 @@
                         if(dt.getTime() === dataFiltro.getTime()) {
                             let q = Number(hist[i][hQtd]) || 0;
                             totalPecas += q; totalOps++;
-                            listaSaidas.push({ data: hist[i][hData], modelo: String(hist[i][hMod]).trim(), qtd: q });
+                            listaSaidas.push({ data: hist[i][hData], modelo: String(hist[i][hMod]), qtd: q });
                         }
                     }
                 }
