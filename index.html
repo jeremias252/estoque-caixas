@@ -1,10 +1,3 @@
-Pelo print que você mandou, eu vi exatamente o que aconteceu! Como fizemos o aplicativo ficar "otimista" (atualizando a tela antes mesmo de o Google responder para ficar mais rápido), o botão do Inventário acabou se perdendo e esqueceu de voltar ao normal depois de enviar o dado. Ele ficou preso no estado de "carregando".
-
-Eu corrigi essa trava. Agora ele atualiza a tela na hora e, assim que o Google confirma o recebimento no fundo, ele libera o botão de novo.
-
-Aqui está o código com essa correção aplicada. Pode substituir tudo:
-
-```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -147,9 +140,20 @@ Aqui está o código com essa correção aplicada. Pode substituir tudo:
         }
         .admin-box-menu h4 { margin: 0 0 10px; font-size: 12px; color: var(--prim); text-transform: uppercase; letter-spacing: 1px; }
 
-        .main-content { margin-left: 280px; padding: 30px; height: 100vh; overflow-y: auto; width: calc(100% - 280px); }
+        /* NOVA LÓGICA DO MENU EXPANSÍVEL (DESKTOP E MOBILE) */
+        .main-content { margin-left: 280px; padding: 30px; height: 100vh; overflow-y: auto; width: calc(100% - 280px); transition: margin-left 0.3s ease, width 0.3s ease; }
         .mobile-header { display: none; padding: 15px; background: rgba(10,12,18,0.85); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-color); align-items: center; justify-content: space-between;}
         .menu-toggle { background: transparent; border: none; color: white; font-size: 24px; cursor: pointer; }
+        
+        /* Botão extra para reabrir menu no desktop */
+        .menu-toggle-desktop { display: none; position: fixed; top: 20px; left: 20px; z-index: 90; background: var(--panel-bg); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 12px; padding: 10px 15px; cursor: pointer; font-weight: 800; backdrop-filter: blur(10px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: 0.3s; }
+        .menu-toggle-desktop:hover { border-color: var(--prim); color: var(--prim); }
+
+        @media (min-width: 769px) {
+            body.collapsed .sidebar { transform: translateX(-100%); }
+            body.collapsed .main-content { margin-left: 0; width: 100%; }
+            body.collapsed .menu-toggle-desktop { display: block; animation: fadeSlideUp 0.3s forwards; }
+        }
 
         .hero { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 28px; padding: 26px; margin-bottom: 22px; animation: fadeSlideUp 0.6s; position:relative; backdrop-filter: blur(20px);}
         .badge-status-conn { position: absolute; top: 26px; right: 26px; font-size: 12px; font-weight: 800; padding: 6px 12px; border-radius: 12px; background: rgba(255,255,255,0.05); }
@@ -229,11 +233,12 @@ Aqui está o código com essa correção aplicada. Pode substituir tudo:
         @media (max-width: 768px) {
             .sidebar { transform: translateX(-100%); }
             .sidebar.open { transform: translateX(0); }
-            .main-content { margin-left: 0; width: 100%; padding: 15px; }
+            .main-content { margin-left: 0 !important; width: 100% !important; padding: 15px; }
             .mobile-header { display: flex; }
             .badge-status-conn { position: static; display: inline-block; margin-top: 10px;}
             .history-card { grid-template-columns: 1fr; gap: 5px; padding: 15px;}
             .hist-head { display: none; }
+            .menu-toggle-desktop { display: none !important; }
         }
     </style>
 </head>
@@ -253,71 +258,10 @@ Aqui está o código com essa correção aplicada. Pode substituir tudo:
         <div class="login-video-overlay"></div>
     </div>
 
-    <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbwRLsipTraGo72XeJTTG-JG_Wt6qzJRJ_iSQ2V2babralKh3aC_n8eNG0oh3b1dOw099g/exec";
-        const URL_LOGO_EMPRESA = "https://comprar.caixatomada.com/wp-content/uploads/2026/06/Logo-CaixaTomada-w.png"; 
+    <!-- BOTÃO EXTRA PARA ABRIR MENU NO DESKTOP QUANDO ESTIVER OCULTO -->
+    <button class="menu-toggle-desktop" onclick="toggleMenu()">☰ Menu</button>
 
-        const BGS_SETORES = {
-            'Caixas': 'https://i0.wp.com/comprar.caixatomada.com/wp-content/uploads/2020/11/CX02Q-02-scaled.jpg?w=1920&ssl=1',
-            'Torres': 'https://i0.wp.com/comprar.caixatomada.com/wp-content/uploads/2021/04/TR03W-scaled.jpg?w=1920&ssl=1'
-        };
-
-        let estado = { 
-            setor: '', perfil: '', nomeAtivo: '', dados: null, graficos: {}, relatorioAtual: null, 
-            mapaSaidasPorModelo: {}, filaReposicao: {}, emProducao: {}, 
-            metaDiaria: Number(localStorage.getItem('metaDiaria')) || 0 
-        };
-        let filaOffline = JSON.parse(localStorage.getItem('filaLogistica')) || [];
-        
-        const EQUIPES = { 'Caixas': ['Marcello', 'Fabiano', 'Sérgio', 'Ana', 'Gustavo'], 'Torres': ['Fran', 'Henrique', 'Leonardo', 'Patrick', 'Fanuel', 'Miguel', 'Jeremias', 'Douglas'] };
-        const SENHAS = { 'Caixas': 'marcello123', 'Torres': 'fran123', 'admin': 'coord123' };
-
-        function atualizarStatusRede() {
-            let badge = document.getElementById('status-rede');
-            if(!badge) return;
-            if (navigator.onLine) {
-                if (filaOffline.length > 0) {
-                    badge.innerHTML = '🔄 Sincronizando...'; badge.style.color = 'var(--prim)';
-                    sincronizarFila();
-                } else {
-                    badge.innerHTML = '🟢 Online'; badge.style.color = '#10b981';
-                }
-            } else {
-                badge.innerHTML = `🔴 Offline (${filaOffline.length} pendentes)`; badge.style.color = '#ef4444';
-            }
-        }
-        window.addEventListener('online', atualizarStatusRede);
-        window.addEventListener('offline', atualizarStatusRede);
-
-        function playSomSucesso() {
-            try { if (navigator.vibrate) navigator.vibrate([100, 50, 100]); } catch(e){}
-            try {
-                const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = ctx.createOscillator(); const gain = ctx.createGain();
-                osc.connect(gain); gain.connect(ctx.destination);
-                osc.type = 'sine'; osc.frequency.value = 850;
-                gain.gain.setValueAtTime(0.5, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
-                osc.start(); osc.stop(ctx.currentTime + 0.15);
-            } catch(e){}
-        }
-
-        function toggleTema() {
-            document.body.classList.toggle('light-mode');
-            localStorage.setItem('temaPortal', document.body.classList.contains('light-mode') ? 'claro' : 'escuro');
-            if(estado.dados) renderizarGraficos(); 
-        }
-        
-        window.onload = () => { 
-            if(localStorage.getItem('temaPortal') === 'claro') document.body.classList.add('light-mode'); 
-            let elLogoLogin = document.getElementById('img-logo-login');
-            if(elLogoLogin && URL_LOGO_EMPRESA) elLogoLogin.src = URL_LOGO_EMPRESA;
-            let elLogoSide = document.getElementById('img-logo-side');
-            if(elLogoSide && URL_LOGO_EMPRESA) elLogoSide.src = URL_LOGO_EMPRESA;
-        }
-    </script>
-
-    <!-- TELA LOGIN PREMIUM -->
+    <!-- TELA DE LOGIN -->
     <div id="login-screen">
         <div class="login-card">
             <div class="login-logo-container">
@@ -429,6 +373,7 @@ Aqui está o código com essa correção aplicada. Pode substituir tudo:
                 <div class="grid-catalogo" id="grid-cat"></div>
             </div>
 
+            <!-- ABA REPOSIÇÃO -->
             <div id="tab-reposicao" class="tab-content panel">
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 10px;">
                     <h3>🚨 Fila de Reposição / Produção</h3>
@@ -569,6 +514,75 @@ Aqui está o código com essa correção aplicada. Pode substituir tudo:
     </div>
 
     <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycbwRLsipTraGo72XeJTTG-JG_Wt6qzJRJ_iSQ2V2babralKh3aC_n8eNG0oh3b1dOw099g/exec";
+        const URL_LOGO_EMPRESA = "https://comprar.caixatomada.com/wp-content/uploads/2026/06/Logo-CaixaTomada-w.png"; 
+
+        const BGS_SETORES = {
+            'Caixas': 'https://i0.wp.com/comprar.caixatomada.com/wp-content/uploads/2020/11/CX02Q-02-scaled.jpg?w=1920&ssl=1',
+            'Torres': 'https://i0.wp.com/comprar.caixatomada.com/wp-content/uploads/2021/04/TR03W-scaled.jpg?w=1920&ssl=1'
+        };
+
+        let estado = { 
+            setor: '', perfil: '', nomeAtivo: '', dados: null, graficos: {}, relatorioAtual: null, 
+            mapaSaidasPorModelo: {}, filaReposicao: {}, emProducao: {}, 
+            metaDiaria: Number(localStorage.getItem('metaDiaria')) || 0 
+        };
+        let filaOffline = JSON.parse(localStorage.getItem('filaLogistica')) || [];
+        
+        const EQUIPES = { 'Caixas': ['Marcello', 'Fabiano', 'Sérgio', 'Ana', 'Gustavo'], 'Torres': ['Fran', 'Henrique', 'Leonardo', 'Patrick', 'Fanuel', 'Miguel', 'Jeremias', 'Douglas'] };
+        const SENHAS = { 'Caixas': 'marcello123', 'Torres': 'fran123', 'admin': 'coord123' };
+
+        function atualizarStatusRede() {
+            let badge = document.getElementById('status-rede');
+            if(!badge) return;
+            if (navigator.onLine) {
+                if (filaOffline.length > 0) {
+                    badge.innerHTML = '🔄 Sincronizando...'; badge.style.color = 'var(--prim)';
+                    sincronizarFila();
+                } else {
+                    badge.innerHTML = '🟢 Online'; badge.style.color = '#10b981';
+                }
+            } else {
+                badge.innerHTML = `🔴 Offline (${filaOffline.length} pendentes)`; badge.style.color = '#ef4444';
+            }
+        }
+        window.addEventListener('online', atualizarStatusRede);
+        window.addEventListener('offline', atualizarStatusRede);
+
+        function playSomSucesso() {
+            try { if (navigator.vibrate) navigator.vibrate([100, 50, 100]); } catch(e){}
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator(); const gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.type = 'sine'; osc.frequency.value = 850;
+                gain.gain.setValueAtTime(0.5, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+                osc.start(); osc.stop(ctx.currentTime + 0.15);
+            } catch(e){}
+        }
+
+        function toggleTema() {
+            document.body.classList.toggle('light-mode');
+            localStorage.setItem('temaPortal', document.body.classList.contains('light-mode') ? 'claro' : 'escuro');
+            if(estado.dados) renderizarGraficos(); 
+        }
+
+        // SISTEMA DE TOGGLE DO MENU OTIMIZADO
+        function toggleMenu() { 
+            document.body.classList.toggle('collapsed');
+            let sidebar = document.getElementById('sidebar');
+            if(sidebar) sidebar.classList.toggle('open'); 
+        }
+        
+        window.onload = () => { 
+            if(localStorage.getItem('temaPortal') === 'claro') document.body.classList.add('light-mode'); 
+            let elLogoLogin = document.getElementById('img-logo-login');
+            if(elLogoLogin && URL_LOGO_EMPRESA) elLogoLogin.src = URL_LOGO_EMPRESA;
+            let elLogoSide = document.getElementById('img-logo-side');
+            if(elLogoSide && URL_LOGO_EMPRESA) elLogoSide.src = URL_LOGO_EMPRESA;
+        }
+
         function escolherSetor(s) {
             estado.setor = s;
             document.getElementById('step1').classList.remove('active');
@@ -685,7 +699,7 @@ Aqui está o código com essa correção aplicada. Pode substituir tudo:
                 return;
             }
 
-            if(forcarSync) toast('⏳ Sincronizando...');
+            if(forcarSync) toast('⏳ Sincronizando com o servidor...');
             try {
                 let r = await fetch(`${API_URL}?setor=${estado.setor}`);
                 let json = await r.json();
@@ -735,6 +749,51 @@ Aqui está o código com essa correção aplicada. Pode substituir tudo:
                 if (progresso < 1) { window.requestAnimationFrame(step); } else { el.innerText = valorFinal; }
             }
             window.requestAnimationFrame(step);
+        }
+
+        function atualizarEstoqueLocal(acao, pessoa, modelo, qtd) {
+            if(!estado.dados || !estado.dados.estoque || !estado.dados.historico) return;
+
+            if (qtd > 0) {
+                let est = estado.dados.estoque;
+                let idxMod = est[0].findIndex(h => String(h).trim() === "Modelo");
+                let idxQtd = est[0].findIndex(h => String(h).trim() === "Quantidade");
+                if(idxMod === -1) idxMod = 0; if(idxQtd === -1) idxQtd = 1;
+
+                let achou = false;
+                for(let i=1; i<est.length; i++) {
+                    if(est[i][idxMod] === modelo) {
+                        let qtdAtual = Number(est[i][idxQtd]) || 0;
+                        if(acao === 'Entrada') est[i][idxQtd] = qtdAtual + qtd;
+                        else est[i][idxQtd] = Math.max(0, qtdAtual - qtd);
+                        achou = true; break;
+                    }
+                }
+                if(!achou && acao === 'Entrada') {
+                    let novaLinha = new Array(est[0].length).fill('');
+                    novaLinha[idxMod] = modelo; novaLinha[idxQtd] = qtd;
+                    est.push(novaLinha);
+                }
+            }
+
+            let hist = estado.dados.historico;
+            let novaLinhaHist = new Array(hist[0].length).fill('');
+            let idxData = hist[0].findIndex(h => String(h).trim() === "Data"); if(idxData === -1) idxData = 1;
+            let idxAcao = hist[0].findIndex(h => String(h).trim() === "Ação"); if(idxAcao === -1) idxAcao = 2;
+            let idxPess = hist[0].findIndex(h => String(h).trim() === "Separador"); if(idxPess === -1) idxPess = 3;
+            let idxM = hist[0].findIndex(h => String(h).trim() === "Modelo"); if(idxM === -1) idxM = 4;
+            let idxQ = hist[0].findIndex(h => String(h).trim() === "Quantidade"); if(idxQ === -1) idxQ = 5;
+
+            let agora = new Date();
+            novaLinhaHist[idxData] = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR');
+            novaLinhaHist[idxAcao] = acao;
+            novaLinhaHist[idxPess] = pessoa;
+            novaLinhaHist[idxM] = modelo;
+            novaLinhaHist[idxQ] = qtd;
+            
+            hist.splice(1, 0, novaLinhaHist); 
+
+            renderizarInterface();
         }
 
         function renderizarInterface() {
@@ -854,75 +913,57 @@ Aqui está o código com essa correção aplicada. Pode substituir tudo:
             if(estado.perfil === 'admin') gerarRelatorioFeedback();
         }
 
-        async function enviarPayloadSilencioso(payload, msgSucesso) {
+        function enviarPayloadSilencioso(payload, msgSucesso) {
+            playSomSucesso(); 
+            toast(msgSucesso);
+            
             if (!navigator.onLine) {
                 filaOffline.push(payload); localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
-                toast(`📶 Salvo offline!`); atualizarStatusRede(); return;
+                setTimeout(() => toast(`📶 Salvo offline!`), 1500); 
+                atualizarStatusRede(); return;
             }
             
             fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) })
-            .then(() => {
-                playSomSucesso(); toast(msgSucesso); 
-                setTimeout(() => carregarDados(false), 3000); 
-            })
             .catch(e => {
                 filaOffline.push(payload); localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
-                toast(`📶 Queda de rede. Salvo offline!`); atualizarStatusRede();
+                setTimeout(() => toast(`📶 Salvo offline!`), 1500); 
+                atualizarStatusRede();
             });
         }
 
         function assumirProducao(modelo) {
             let p = estado.nomeAtivo || estado.perfil.toUpperCase();
-            estado.emProducao[modelo] = p;
             fecharModal();
-            renderizarReposicao(); 
+            atualizarEstoqueLocal('Entrada', '⚙️ FAZENDO|' + p, modelo, 0); 
             
             let payload = { setor: estado.setor, acao: 'Entrada', pessoa: '⚙️ FAZENDO|' + p, modelo: modelo, quantidade: 0 };
             enviarPayloadSilencioso(payload, '✋ Você assumiu a reposição deste item!');
         }
 
         function concluirProducao(modelo) {
-            delete estado.emProducao[modelo];
             fecharModal();
-            renderizarReposicao();
+            atualizarEstoqueLocal('Entrada', '✅ FIM REPOSIÇÃO', modelo, 0);
             
             let payload = { setor: estado.setor, acao: 'Entrada', pessoa: '✅ FIM REPOSIÇÃO', modelo: modelo, quantidade: 0 };
             enviarPayloadSilencioso(payload, '✅ Reposição liberada/concluída!');
         }
 
-        async function solicitarReposicao() {
+        function solicitarReposicao() {
             let m = document.getElementById('rep-modelo').value; let q = document.getElementById('rep-qtd').value;
             if(!m || !q) return alert('⚠️ Preencha o modelo e a quantidade que deseja pedir!');
             
-            let btn = document.getElementById('btn-pedir-rep'); let txtOriginal = btn.innerText;
-            btn.disabled = true; btn.innerText = 'Solicitando...';
-            
+            atualizarEstoqueLocal('Entrada', '⏳ REPOSIÇÃO|' + q, m, 0);
+            document.getElementById('rep-modelo').value = ''; document.getElementById('rep-qtd').value = '';
+
             let payload = { setor: estado.setor, acao: 'Entrada', pessoa: '⏳ REPOSIÇÃO|' + q, modelo: m, quantidade: 0 };
-
-            if (!navigator.onLine) {
-                filaOffline.push(payload); localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
-                playSomSucesso(); toast(`📶 Salvo offline!`);
-                document.getElementById('rep-modelo').value = ''; document.getElementById('rep-qtd').value = '';
-                btn.innerText = txtOriginal; btn.disabled = false; atualizarStatusRede(); return;
-            }
-
-            try {
-                await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
-                playSomSucesso(); toast('✅ Ordem enviada para a equipe!');
-                document.getElementById('rep-modelo').value = ''; document.getElementById('rep-qtd').value = '';
-                setTimeout(() => { btn.innerText = txtOriginal; btn.disabled = false; carregarDados(true); }, 1200);
-            } catch(e) { 
-                filaOffline.push(payload); localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
-                toast(`📶 Queda de rede. Salvo offline!`); btn.innerText = txtOriginal; btn.disabled = false; atualizarStatusRede();
-            }
+            enviarPayloadSilencioso(payload, '✅ Ordem enviada para a equipe!');
         }
 
         function concluirReposicao(modelo) {
             if(!confirm(`Deseja forçar a conclusão da ordem de "${modelo}" e remover da lista?`)) return;
             
-            delete estado.filaReposicao[modelo];
-            renderizarReposicao();
-            
+            atualizarEstoqueLocal('Entrada', '✅ FIM REPOSIÇÃO', modelo, 0);
+
             let payload = { setor: estado.setor, acao: 'Entrada', pessoa: '✅ FIM REPOSIÇÃO', modelo: modelo, quantidade: 0 };
             enviarPayloadSilencioso(payload, '✅ Pedido finalizado!');
         }
@@ -1080,7 +1121,7 @@ Aqui está o código com essa correção aplicada. Pode substituir tudo:
             let box = document.getElementById('box-meta-dashboard');
             if(!estado.metaDiaria || estado.metaDiaria <= 0) { box.style.display = 'none'; return; }
             box.style.display = 'block';
-            let pct = Math.min(Math.round((saidasHoje / saidasHoje) * 100), 100);
+            let pct = Math.min(Math.round((saidasHoje / estado.metaDiaria) * 100), 100);
             document.getElementById('meta-porcentagem').innerText = `${saidasHoje} / ${estado.metaDiaria} un. (${pct}%)`;
             document.getElementById('meta-bar-fill').style.width = pct + '%';
         }
@@ -1170,7 +1211,7 @@ Aqui está o código com essa correção aplicada. Pode substituir tudo:
                 let pfx = acao === 'Entrada' ? 'e' : 's';
                 p = document.getElementById(`${pfx}-pessoa`).value;
                 if(!p) {
-                    alert('⚠️ Administrador: Para lançar por aqui, primeiro selecione o nome da pessoa lá na aba de ' + acao + ' ou faça login como Separador.');
+                    alert('⚠️ Administrador: Para lançar por aqui, selecione o nome na aba de ' + acao + ' primeiro.');
                     fecharModal();
                     let tabId = acao === 'Saída' ? 'saida' : 'entrada';
                     let btnTab = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(`'${tabId}'`));
@@ -1182,37 +1223,11 @@ Aqui está o código com essa correção aplicada. Pode substituir tudo:
             if(q < 1) return alert('⚠️ Quantidade inválida!');
 
             fecharModal(); 
-            toast(`⏳ Registrando ${acao} de ${q}x...`);
-
+            
+            atualizarEstoqueLocal(acao, p, modelo, q);
+            
             let payload = { setor: estado.setor, acao: acao, pessoa: p, modelo: modelo, quantidade: q };
-
-            let catItem = estado.catalogoAgrupado.find(c => c.linha === modelo.split(' - ')[0].trim());
-            if(catItem) {
-                let det = catItem.detalhes.find(d => d.nomeC === modelo);
-                if(det) {
-                    if(acao === 'Entrada') det.qtd += q; else det.qtd -= q;
-                    if(det.qtd < 0) det.qtd = 0;
-                }
-                catItem.total = catItem.detalhes.reduce((acc, curr) => acc + curr.qtd, 0);
-            }
-            renderizarCatalogo(''); 
-            renderizarReposicao();
-
-            if (!navigator.onLine) {
-                filaOffline.push(payload); localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
-                playSomSucesso(); toast(`📶 Salvo offline!`); atualizarStatusRede(); return;
-            }
-
-            try {
-                fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) })
-                .then(() => {
-                    playSomSucesso(); toast(`✅ ${q}x ${acao} registrada no servidor!`);
-                    setTimeout(() => carregarDados(false), 2000); 
-                }).catch(e => {
-                    filaOffline.push(payload); localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
-                    toast(`📶 Queda de rede. Salvo offline!`); atualizarStatusRede();
-                });
-            } catch(e) {}
+            enviarPayloadSilencioso(payload, `✅ ${q}x ${acao} registrada!`);
         }
 
         function abrirModal(idx) {
@@ -1261,7 +1276,7 @@ Aqui está o código com essa correção aplicada. Pode substituir tudo:
 
         function fecharModal() { document.getElementById('modal-detalhe').style.display = 'none'; }
 
-        async function cadastrarNovoItem() {
+        function cadastrarNovoItem() {
             let nome = document.getElementById('ni-nome').value.trim();
             let cor = document.getElementById('ni-cor').value.trim();
             let qtd = Number(document.getElementById('ni-qtd').value) || 0;
@@ -1269,23 +1284,16 @@ Aqui está o código com essa correção aplicada. Pode substituir tudo:
             if(!nome) return alert('⚠️ Digite o nome do modelo/linha!');
 
             let modeloCompleto = cor ? `${nome} - ${cor}` : nome;
-            let btn = document.getElementById('btn-cadastrar-item');
-            btn.disabled = true; btn.innerText = 'Cadastrando...';
+            
+            atualizarEstoqueLocal('Entrada', 'Cadastro', modeloCompleto, qtd);
 
             let payload = { setor: estado.setor, acao: 'Entrada', pessoa: 'Cadastro', modelo: modeloCompleto, quantidade: qtd };
-
-            try {
-                await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
-                playSomSucesso();
-                toast(`✨ Item "${modeloCompleto}" cadastrado com sucesso!`);
-                document.getElementById('ni-nome').value = '';
-                document.getElementById('ni-cor').value = '';
-                document.getElementById('ni-qtd').value = '0';
-                setTimeout(() => { btn.innerText = '✨ Cadastrar Item no Sistema'; btn.disabled = false; carregarDados(true); abrirAba('catalogo', document.querySelectorAll('.tab-btn')[0]); }, 1200);
-            } catch(e) {
-                alert('Erro ao cadastrar novo item.');
-                btn.innerText = '✨ Cadastrar Item no Sistema'; btn.disabled = false;
-            }
+            enviarPayloadSilencioso(payload, `✨ Item "${modeloCompleto}" cadastrado com sucesso!`);
+            
+            document.getElementById('ni-nome').value = '';
+            document.getElementById('ni-cor').value = '';
+            document.getElementById('ni-qtd').value = '0';
+            document.querySelectorAll('.tab-btn')[0].click();
         }
 
         function atualizarPreviewInventario() {
@@ -1320,7 +1328,7 @@ Aqui está o código com essa correção aplicada. Pode substituir tudo:
             }
         }
 
-        async function confirmarAjusteInventario() {
+        function confirmarAjusteInventario() {
             let modelo = document.getElementById('inv-modelo').value;
             let qtdFisica = Number(document.getElementById('inv-qtd-fisica').value);
             let saldoSistema = Number(document.getElementById('inv-saldo-sistema').innerText) || 0;
@@ -1333,77 +1341,38 @@ Aqui está o código com essa correção aplicada. Pode substituir tudo:
             let tipoAcao = diff > 0 ? 'Entrada' : 'Saída';
             let qtdAjuste = Math.abs(diff);
 
+            // Ajuste instantâneo na tela
             let btn = document.getElementById('btn-inv-ajustar');
-            btn.disabled = true; btn.innerText = 'Processando Ajuste...';
-
-            let payload = { setor: estado.setor, acao: tipoAcao, pessoa: 'Ajuste Inventário', modelo: modelo, quantidade: qtdAjuste };
-
             let catItem = estado.catalogoAgrupado.find(c => c.linha === modelo.split(' - ')[0].trim());
             if(catItem) {
                 let det = catItem.detalhes.find(d => d.nomeC === modelo);
                 if(det) det.qtd = qtdFisica; 
                 catItem.total = catItem.detalhes.reduce((acc, curr) => acc + curr.qtd, 0);
             }
+            
             document.getElementById('inv-qtd-fisica').value = '0';
+            document.getElementById('inv-modelo').value = '';
             atualizarPreviewInventario();
+            document.querySelectorAll('.tab-btn')[0].click(); // Volta pro catálogo
 
-            if (!navigator.onLine) {
-                filaOffline.push(payload); localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
-                playSomSucesso(); toast(`📶 Ajuste salvo offline!`);
-                btn.innerText = '⚙️ Confirmar Ajuste de Inventário'; btn.disabled = false;
-                atualizarStatusRede(); return;
-            }
-
-            try {
-                await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
-                playSomSucesso(); toast(`⚙️ Ajuste concluído!`);
-                btn.innerText = '⚙️ Confirmar Ajuste de Inventário'; btn.disabled = false;
-                setTimeout(() => carregarDados(false), 2000);
-            } catch(e) {
-                filaOffline.push(payload); localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
-                toast(`📶 Queda de rede. Salvo offline!`);
-                btn.innerText = '⚙️ Confirmar Ajuste de Inventário'; btn.disabled = false;
-                atualizarStatusRede();
-            }
+            // Manda pro Google em segundo plano
+            let payload = { setor: estado.setor, acao: tipoAcao, pessoa: 'Ajuste Inventário', modelo: modelo, quantidade: qtdAjuste };
+            enviarPayloadSilencioso(payload, `⚙️ Ajuste de ${qtdAjuste}x concluído!`);
         }
 
-        async function lancar(tipo) {
+        function lancar(tipo) {
             let pfx = tipo === 'Entrada' ? 'e' : 's';
-            let p = document.getElementById(`${pfx}-pessoa`).value; let m = document.getElementById(`${pfx}-modelo`).value; let q = document.getElementById(`${pfx}-qtd`).value;
-            if(!p || !m) return alert('⚠️ Preencha todos os campos corretamente!');
+            let p = document.getElementById(`${pfx}-pessoa`).value; let m = document.getElementById(`${pfx}-modelo`).value; let q = Number(document.getElementById(`${pfx}-qtd`).value);
+            if(!p || !m || q < 1) return alert('⚠️ Preencha todos os campos corretamente!');
             
-            let btn = document.getElementById(tipo === 'Entrada' ? 'btn-entrada' : 'btn-saida');
-            let nomeOriginal = btn.innerText;
+            atualizarEstoqueLocal(tipo, p, m, q);
             
-            btn.disabled = true; btn.innerText = 'Processando...';
+            document.getElementById(`${pfx}-modelo`).value = '';
+            document.getElementById(`${pfx}-qtd`).value = '1';
+            document.querySelectorAll('.tab-btn')[0].click(); 
+
             let payload = { setor: estado.setor, acao: tipo, pessoa: p, modelo: m, quantidade: q };
-
-            if (!navigator.onLine) {
-                filaOffline.push(payload);
-                localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
-                playSomSucesso(); toast(`📶 Sem internet. Salvo para enviar depois!`);
-                btn.innerText = nomeOriginal; btn.disabled = false;
-                atualizarStatusRede();
-                document.querySelectorAll('.tab-btn')[0].click();
-                return;
-            }
-
-            try {
-                await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
-                playSomSucesso(); 
-                btn.innerText = 'Sucesso!'; toast(`✅ ${tipo} registrada!`);
-                
-                document.getElementById(`${pfx}-modelo`).value = '';
-                document.getElementById(`${pfx}-qtd`).value = '1';
-
-                setTimeout(() => { btn.innerText = nomeOriginal; btn.disabled = false; carregarDados(true); document.querySelectorAll('.tab-btn')[0].click(); }, 1200);
-            } catch(e) { 
-                filaOffline.push(payload);
-                localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
-                toast(`📶 Queda de rede. Salvo offline!`);
-                btn.innerText = nomeOriginal; btn.disabled = false;
-                atualizarStatusRede(); document.querySelectorAll('.tab-btn')[0].click();
-            }
+            enviarPayloadSilencioso(payload, `✅ ${q}x ${tipo} registrada!`);
         }
 
         function parseData(strData) {
@@ -1532,10 +1501,7 @@ Aqui está o código com essa correção aplicada. Pode substituir tudo:
         }
 
         function abrirAba(id, btn) { document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active')); document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.getElementById('tab-' + id).classList.add('active'); btn.classList.add('active'); }
-        function toggleMenu() { document.getElementById('sidebar').classList.toggle('open'); }
         function toast(msg) { let t = document.getElementById('toast'); t.innerText = msg; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 3000); }
     </script>
 </body>
 </html>
-
-```
