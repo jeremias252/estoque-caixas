@@ -88,7 +88,7 @@
         .btn-login {
             background: rgba(24, 28, 37, 0.85); border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 22px; color: white; padding: 16px; width: 100%; font-weight: 700;
-            font-size: 15px; cursor: pointer; margin-bottom: 12px; display: flex;
+            font-size: 15px; cursor: margin-bottom: 12px; display: flex;
             align-items: center; justify-content: center; gap: 12px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.3); transition: all 0.3s ease; font-family: inherit;
         }
@@ -246,10 +246,8 @@
     <button id="btn-exit-tv" onclick="toggleModoTV()">❌ Sair do Modo TV</button>
     <div class="bg-overlay"></div>
 
-    <!-- DATALIST GLOBAL PARA BUSCA INTELIGENTE NOS INPUTS -->
     <datalist id="lista-modelos"></datalist>
 
-    <!-- VÍDEO DE FUNDO DO LOGIN -->
     <div id="login-bg-container">
         <video autoplay muted loop playsinline id="login-video">
             <source src="https://comprar.caixatomada.com/wp-content/uploads/2026/04/video-home-04-26-02.mp4" type="video/mp4">
@@ -257,10 +255,8 @@
         <div class="login-video-overlay"></div>
     </div>
 
-    <!-- BOTÃO EXTRA PARA ABRIR MENU NO DESKTOP QUANDO ESTIVER OCULTO -->
     <button class="menu-toggle-desktop" onclick="toggleMenu()">☰ Menu</button>
 
-    <!-- TELA DE LOGIN -->
     <div id="login-screen">
         <div class="login-card">
             <div class="login-logo-container">
@@ -298,7 +294,6 @@
         </div>
     </div>
 
-    <!-- SISTEMA PRINCIPAL -->
     <div id="app-layout">
         <div class="mobile-header">
             <div style="font-weight: 900; font-size: 18px;">⬢ <span id="mob-setor">SISTEMA</span></div>
@@ -536,7 +531,7 @@
             if (navigator.onLine) {
                 if (filaOffline.length > 0) {
                     badge.innerHTML = '🔄 Sincronizando...'; badge.style.color = 'var(--prim)';
-                    sincronizarFila();
+                    sincronizarFila(true);
                 } else {
                     badge.innerHTML = '🟢 Online'; badge.style.color = '#10b981';
                 }
@@ -689,22 +684,26 @@
         }
 
         async function forcarSincronizacao() {
-            if(!navigator.onLine) return alert('Você está offline. Conecte-se à internet para sincronizar.');
-            
             let btn = document.getElementById('btn-sincronizar');
-            if(btn) { btn.disabled = true; btn.innerText = '⏳ Sincronizando...'; }
             
-            toast('⏳ Forçando atualização do estoque...');
-            
-            if (filaOffline.length > 0) {
-                await sincronizarFila();
-                await new Promise(resolve => setTimeout(resolve, 2000)); 
-            }
-
             try {
-                let url = `${API_URL}?setor=${estado.setor}`;
-                let r = await fetch(url);
+                if(!navigator.onLine) {
+                    toast('Você está offline. Conecte-se à internet.');
+                    return;
+                }
+                
+                if(btn) { btn.disabled = true; btn.innerText = '⏳ Sincronizando...'; }
+                toast('⏳ Forçando atualização do estoque...');
+                
+                if (filaOffline.length > 0) {
+                    await sincronizarFila(false);
+                    await new Promise(resolve => setTimeout(resolve, 1500)); 
+                }
+
+                // USO DO CACHE: NO-STORE IMPEDE QUE O NAVEGADOR GUARDE DADO VELHO
+                let r = await fetch(`${API_URL}?setor=${estado.setor}`, { cache: 'no-store' });
                 let json = await r.json();
+                
                 if(json.erro) throw new Error(json.erro);
                 
                 estado.dados = json;
@@ -718,13 +717,15 @@
                 
                 renderizarInterface();
                 document.querySelectorAll('.tab-btn')[0].click(); 
-                
                 toast('✅ Estoque 100% atualizado e resetado!');
+                
             } catch(e) {
-                alert("⚠️ Erro ao sincronizar:\n" + e);
+                toast('⚠️ Falha ao sincronizar. Usando dados salvos localmente.');
+                console.error(e);
+            } finally {
+                // TRAVA DE SEGURANÇA: SEMPRE VOLTA O BOTÃO AO NORMAL MESMO SE DER ERRO
+                if(btn) { btn.disabled = false; btn.innerText = '🔄 Sincronizar'; }
             }
-            
-            if(btn) { btn.disabled = false; btn.innerText = '🔄 Sincronizar'; }
         }
 
         async function carregarDados(forcarSync = false) {
@@ -737,23 +738,25 @@
 
             if(forcarSync) toast('⏳ Sincronizando...');
             try {
-                let url = `${API_URL}?setor=${estado.setor}`;
-                let r = await fetch(url);
+                let r = await fetch(`${API_URL}?setor=${estado.setor}`, { cache: 'no-store' });
                 let json = await r.json();
-                if(json.erro) return alert("⚠️ Erro API:\n" + json.erro);
+                if(json.erro) {
+                    toast("⚠️ Erro API:\n" + json.erro);
+                    return;
+                }
                 estado.dados = json;
                 localStorage.setItem('cachePortal_' + estado.setor, JSON.stringify(json));
                 renderizarInterface();
                 if(forcarSync) toast('✅ Base 100% atualizada!');
-                sincronizarFila();
+                sincronizarFila(false);
             } catch(e) { 
-                toast('📶 Conexão falhou. Mostrando dados salvos.');
+                if(forcarSync) toast('📶 Conexão falhou. Mostrando dados salvos.');
                 let cache = localStorage.getItem('cachePortal_' + estado.setor);
                 if(cache) { estado.dados = JSON.parse(cache); renderizarInterface(); }
             }
         }
 
-        async function sincronizarFila() {
+        async function sincronizarFila(chamarCarregarDados = false) {
             if (filaOffline.length === 0 || !navigator.onLine) return;
             toast(`Sincronizando ${filaOffline.length} envios pendentes...`);
             
@@ -769,7 +772,10 @@
                 } catch(e) { break; }
             }
             atualizarStatusRede();
-            if(filaOffline.length === 0) { toast('✅ Fila limpa com sucesso!'); carregarDados(); }
+            if(filaOffline.length === 0) { 
+                toast('✅ Fila limpa com sucesso!'); 
+                if(chamarCarregarDados) carregarDados(false); 
+            }
         }
 
         function animarNumero(id, valorFinal) {
@@ -792,14 +798,14 @@
             if(!estado.dados || !estado.dados.estoque || !estado.dados.historico) return;
 
             let est = estado.dados.estoque;
-            let cabecalhoEst = est[0];
-            let idxMod = cabecalhoEst.findIndex(h => h && h.toString().trim() === "Modelo"); if(idxMod === -1) idxMod = 0;
-            let idxQtd = cabecalhoEst.findIndex(h => h && h.toString().trim() === "Quantidade"); if(idxQtd === -1) idxQtd = 1;
+            let cabecalhoEst = est[0].map(h => String(h).trim());
+            let idxMod = cabecalhoEst.indexOf("Modelo"); if(idxMod === -1) idxMod = 0;
+            let idxQtd = cabecalhoEst.indexOf("Quantidade"); if(idxQtd === -1) idxQtd = 1;
 
             if (qtd > 0) {
                 let achou = false;
                 for(let i=1; i<est.length; i++) {
-                    if(est[i][idxMod] === modelo) {
+                    if(String(est[i][idxMod]).trim() === String(modelo).trim()) {
                         let qtdAtual = Number(est[i][idxQtd]) || 0;
                         if(acao === 'Entrada') est[i][idxQtd] = qtdAtual + qtd;
                         else est[i][idxQtd] = Math.max(0, qtdAtual - qtd);
@@ -808,7 +814,7 @@
                 }
                 if(!achou && acao === 'Entrada') {
                     let novaLinha = new Array(est[0].length).fill('');
-                    novaLinha[idxMod] = modelo; 
+                    novaLinha[idxMod] = String(modelo).trim(); 
                     novaLinha[idxQtd] = qtd;
                     est.push(novaLinha);
                 }
@@ -816,19 +822,19 @@
 
             let hist = estado.dados.historico;
             if(hist && hist.length > 0) {
-                let cabHist = hist[0];
-                let idxData = cabHist.findIndex(h => h && h.toString().trim() === "Data"); if(idxData === -1) idxData = 1;
-                let idxAcao = cabHist.findIndex(h => h && h.toString().trim() === "Ação"); if(idxAcao === -1) idxAcao = 2;
-                let idxPess = cabHist.findIndex(h => h && h.toString().trim() === "Separador"); if(idxPess === -1) idxPess = 3;
-                let idxM = cabHist.findIndex(h => h && h.toString().trim() === "Modelo"); if(idxM === -1) idxM = 4;
-                let idxQ = cabHist.findIndex(h => h && h.toString().trim() === "Quantidade"); if(idxQ === -1) idxQ = 5;
+                let cabHist = hist[0].map(h => String(h).trim());
+                let idxData = cabHist.indexOf("Data"); if(idxData === -1) idxData = 1;
+                let idxAcao = cabHist.indexOf("Ação"); if(idxAcao === -1) idxAcao = 2;
+                let idxPess = cabHist.indexOf("Separador"); if(idxPess === -1) idxPess = 3;
+                let idxM = cabHist.indexOf("Modelo"); if(idxM === -1) idxM = 4;
+                let idxQ = cabHist.indexOf("Quantidade"); if(idxQ === -1) idxQ = 5;
 
                 let novaLinhaHist = new Array(hist[0].length).fill('');
                 let agora = new Date();
                 novaLinhaHist[idxData] = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR');
                 novaLinhaHist[idxAcao] = acao;
                 novaLinhaHist[idxPess] = pessoa;
-                novaLinhaHist[idxM] = modelo;
+                novaLinhaHist[idxM] = String(modelo).trim();
                 novaLinhaHist[idxQ] = qtd;
                 
                 hist.splice(1, 0, novaLinhaHist); 
@@ -874,9 +880,8 @@
             let totalSaidasHoje = 0;
             let hojeStr = new Date().toLocaleDateString('pt-BR');
 
-            // LÊ HISTÓRICO COM EXATIDÃO (SEM MODIFICAR STRING)
             if(hist && hist.length > 0) {
-                let cH = hist[0].map(h => h ? h.toString().trim() : '');
+                let cH = hist[0].map(h => String(h).trim());
                 let hData = cH.indexOf("Data"); if(hData === -1) hData = 1;
                 let hAcao = cH.indexOf("Ação"); if(hAcao === -1) hAcao = 2;
                 let hPess = cH.indexOf("Separador"); if(hPess === -1) hPess = 3;
@@ -884,7 +889,10 @@
                 let hQtd = cH.indexOf("Quantidade"); if(hQtd === -1) hQtd = 5;
 
                 for(let i = 1; i < hist.length; i++) {
-                    let a = hist[i][hAcao]; let p = hist[i][hPess]; let m = hist[i][hMod]; let q = Number(hist[i][hQtd]) || 0;
+                    let a = String(hist[i][hAcao]).trim(); 
+                    let p = String(hist[i][hPess]).trim(); 
+                    let m = String(hist[i][hMod]).trim(); 
+                    let q = Number(hist[i][hQtd]) || 0;
                     if(!m) continue;
 
                     if(p.startsWith('⏳ REPOSIÇÃO|')) {
@@ -897,7 +905,7 @@
                     }
 
                     if(a === 'Saída' && !p.includes('REPOSIÇÃO') && !p.includes('FAZENDO')) {
-                        let nomeLinha = String(m).split('-')[0].trim();
+                        let nomeLinha = m.split('-')[0].trim();
                         estado.mapaSaidasPorModelo[nomeLinha] = (estado.mapaSaidasPorModelo[nomeLinha] || 0) + q;
 
                         let dtStr = String(hist[i][hData]).split(' ')[0];
@@ -908,7 +916,7 @@
                 }
             }
 
-            let cabecalhoEst = est[0].map(h => h ? h.toString().trim() : '');
+            let cabecalhoEst = est[0].map(h => String(h).trim());
             let idxMod = cabecalhoEst.indexOf("Modelo"); if(idxMod === -1) idxMod = 0;
             let idxQtd = cabecalhoEst.indexOf("Quantidade"); if(idxQtd === -1) idxQtd = 1;
 
@@ -916,7 +924,7 @@
             let totPecas = 0, zerados = []; estado.catalogoAgrupado = []; 
 
             for(let i=1; i<est.length; i++) {
-                let nomeCompleto = est[i][idxMod]; 
+                let nomeCompleto = String(est[i][idxMod]).trim(); 
                 let qtd = Number(est[i][idxQtd]) || 0;
                 if(!nomeCompleto) continue;
                 
@@ -965,7 +973,6 @@
             fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) })
             .then(() => {
                 playSomSucesso(); toast(msgSucesso); 
-                setTimeout(() => carregarDados(false), 2000); 
             })
             .catch(e => {
                 filaOffline.push(payload); localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
@@ -1106,7 +1113,7 @@
             let b = busca.toLowerCase().trim();
 
             if(hist && hist.length > 0) {
-                let cH = hist[0].map(h => h ? h.toString().trim() : '');
+                let cH = hist[0].map(h => String(h).trim());
                 let hData = cH.indexOf("Data"); if(hData === -1) hData = 1;
                 let hAcao = cH.indexOf("Ação"); if(hAcao === -1) hAcao = 2;
                 let hPess = cH.indexOf("Separador"); if(hPess === -1) hPess = 3;
@@ -1117,11 +1124,11 @@
                 let contagem = 0;
 
                 for(let i = hist.length - 1; i > 0; i--) { 
-                    let m = hist[i][hMod];
-                    if(m === undefined || m === null || m === '') continue; 
+                    let m = String(hist[i][hMod]).trim();
+                    if(!m || m === 'undefined') continue; 
                     
-                    let d = String(hist[i][hData]).split(' ')[0]; let a = String(hist[i][hAcao]); 
-                    let p = String(hist[i][hPess]); let q = String(hist[i][hQtd]);
+                    let d = String(hist[i][hData]).split(' ')[0]; let a = String(hist[i][hAcao]).trim(); 
+                    let p = String(hist[i][hPess]).trim(); let q = String(hist[i][hQtd]).trim();
                     
                     let textoDaLinha = `${d} ${a} ${p} ${m} ${q}`.toLowerCase();
                     if(b !== '' && !textoDaLinha.includes(b)) continue; 
@@ -1275,12 +1282,9 @@
 
             if(q < 1) return alert('⚠️ Quantidade inválida!');
 
-            let txtOriginal = btn.innerHTML;
-            btn.innerHTML = '⏳...'; btn.disabled = true;
-
+            fecharModal(); 
             atualizarEstoqueLocal(acao, p, modelo, q);
-            fecharModal();
-
+            
             let payload = { setor: estado.setor, acao: acao, pessoa: p, modelo: modelo, quantidade: q };
             enviarPayloadSilencioso(payload, `✅ ${q}x ${acao} de ${modelo.split('-')[0].trim()} registrada!`);
         }
@@ -1370,7 +1374,7 @@
 
             let saldoSistema = 0;
             for(let i=1; i<est.length; i++) {
-                if(String(est[i][idxMod]) === String(sel)) { saldoSistema = Number(est[i][idxQtd]) || 0; break; }
+                if(String(est[i][idxMod]).trim() === String(sel).trim()) { saldoSistema = Number(est[i][idxQtd]) || 0; break; }
             }
 
             let qtdFisica = Number(document.getElementById('inv-qtd-fisica').value) || 0;
@@ -1403,6 +1407,10 @@
             document.getElementById('inv-qtd-fisica').value = '0';
             document.getElementById('inv-modelo').value = '';
             
+            let btn = document.getElementById('btn-inv-ajustar');
+            btn.innerText = '⚙️ Confirmar Ajuste de Inventário'; 
+            btn.disabled = false;
+
             atualizarEstoqueLocal(tipoAcao, 'Ajuste Inventário', modelo, qtdAjuste);
             atualizarPreviewInventario();
             document.querySelectorAll('.tab-btn')[0].click(); 
@@ -1477,7 +1485,7 @@
                         if(dt.getTime() === dataFiltro.getTime()) {
                             let q = Number(hist[i][hQtd]) || 0;
                             totalPecas += q; totalOps++;
-                            listaSaidas.push({ data: hist[i][hData], modelo: String(hist[i][hMod]), qtd: q });
+                            listaSaidas.push({ data: hist[i][hData], modelo: String(hist[i][hMod]).trim(), qtd: q });
                         }
                     }
                 }
