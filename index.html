@@ -695,9 +695,8 @@
                 return;
             }
 
-            if(forcarSync) toast('⏳ Sincronizando com o servidor...');
+            if(forcarSync) toast('⏳ Sincronizando...');
             try {
-                // Adiciona um timestamp na URL para o Google não usar cache antigo
                 let url = `${API_URL}?setor=${estado.setor}&t=${new Date().getTime()}`;
                 let r = await fetch(url);
                 let json = await r.json();
@@ -752,15 +751,15 @@
         function atualizarEstoqueLocal(acao, pessoa, modelo, qtd) {
             if(!estado.dados || !estado.dados.estoque || !estado.dados.historico) return;
 
-            if (qtd > 0) {
-                let est = estado.dados.estoque;
-                let idxMod = est[0].findIndex(h => String(h).trim() === "Modelo");
-                let idxQtd = est[0].findIndex(h => String(h).trim() === "Quantidade");
-                if(idxMod === -1) idxMod = 0; if(idxQtd === -1) idxQtd = 1;
+            let est = estado.dados.estoque;
+            let cabecalhoEst = est[0].map(h => String(h).trim());
+            let idxMod = cabecalhoEst.indexOf("Modelo"); if(idxMod === -1) idxMod = 0;
+            let idxQtd = cabecalhoEst.indexOf("Quantidade"); if(idxQtd === -1) idxQtd = 1;
 
+            if (qtd > 0) {
                 let achou = false;
                 for(let i=1; i<est.length; i++) {
-                    if(est[i][idxMod] === modelo) {
+                    if(String(est[i][idxMod]).trim() === String(modelo).trim()) {
                         let qtdAtual = Number(est[i][idxQtd]) || 0;
                         if(acao === 'Entrada') est[i][idxQtd] = qtdAtual + qtd;
                         else est[i][idxQtd] = Math.max(0, qtdAtual - qtd);
@@ -769,27 +768,31 @@
                 }
                 if(!achou && acao === 'Entrada') {
                     let novaLinha = new Array(est[0].length).fill('');
-                    novaLinha[idxMod] = modelo; novaLinha[idxQtd] = qtd;
+                    novaLinha[idxMod] = String(modelo).trim(); 
+                    novaLinha[idxQtd] = qtd;
                     est.push(novaLinha);
                 }
             }
 
             let hist = estado.dados.historico;
-            let novaLinhaHist = new Array(hist[0].length).fill('');
-            let idxData = hist[0].findIndex(h => String(h).trim() === "Data"); if(idxData === -1) idxData = 1;
-            let idxAcao = hist[0].findIndex(h => String(h).trim() === "Ação"); if(idxAcao === -1) idxAcao = 2;
-            let idxPess = hist[0].findIndex(h => String(h).trim() === "Separador"); if(idxPess === -1) idxPess = 3;
-            let idxM = hist[0].findIndex(h => String(h).trim() === "Modelo"); if(idxM === -1) idxM = 4;
-            let idxQ = hist[0].findIndex(h => String(h).trim() === "Quantidade"); if(idxQ === -1) idxQ = 5;
+            if(hist && hist.length > 0) {
+                let cabHist = hist[0].map(h => String(h).trim());
+                let idxData = cabHist.indexOf("Data"); if(idxData === -1) idxData = 1;
+                let idxAcao = cabHist.indexOf("Ação"); if(idxAcao === -1) idxAcao = 2;
+                let idxPess = cabHist.indexOf("Separador"); if(idxPess === -1) idxPess = 3;
+                let idxM = cabHist.indexOf("Modelo"); if(idxM === -1) idxM = 4;
+                let idxQ = cabHist.indexOf("Quantidade"); if(idxQ === -1) idxQ = 5;
 
-            let agora = new Date();
-            novaLinhaHist[idxData] = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR');
-            novaLinhaHist[idxAcao] = acao;
-            novaLinhaHist[idxPess] = pessoa;
-            novaLinhaHist[idxM] = modelo;
-            novaLinhaHist[idxQ] = qtd;
-            
-            hist.splice(1, 0, novaLinhaHist); 
+                let novaLinhaHist = new Array(hist[0].length).fill('');
+                let agora = new Date();
+                novaLinhaHist[idxData] = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR');
+                novaLinhaHist[idxAcao] = acao;
+                novaLinhaHist[idxPess] = pessoa;
+                novaLinhaHist[idxM] = String(modelo).trim();
+                novaLinhaHist[idxQ] = qtd;
+                
+                hist.splice(1, 0, novaLinhaHist); 
+            }
 
             renderizarInterface();
         }
@@ -831,8 +834,9 @@
             let totalSaidasHoje = 0;
             let hojeStr = new Date().toLocaleDateString('pt-BR');
 
+            // LÊ HISTÓRICO COM LIMPEZA DE ESPAÇOS (TRIM GLOBAL)
             if(hist && hist.length > 0) {
-                let cH = hist[0].map(h => h.toString().trim());
+                let cH = hist[0].map(h => String(h).trim());
                 let hData = cH.indexOf("Data"); if(hData === -1) hData = 1;
                 let hAcao = cH.indexOf("Ação"); if(hAcao === -1) hAcao = 2;
                 let hPess = cH.indexOf("Separador"); if(hPess === -1) hPess = 3;
@@ -840,7 +844,10 @@
                 let hQtd = cH.indexOf("Quantidade"); if(hQtd === -1) hQtd = 5;
 
                 for(let i = 1; i < hist.length; i++) {
-                    let a = hist[i][hAcao]; let p = String(hist[i][hPess]); let m = String(hist[i][hMod]); let q = Number(hist[i][hQtd]) || 0;
+                    let a = String(hist[i][hAcao]).trim(); 
+                    let p = String(hist[i][hPess]).trim(); 
+                    let m = String(hist[i][hMod]).trim(); 
+                    let q = Number(hist[i][hQtd]) || 0;
                     if(!m) continue;
 
                     if(p.startsWith('⏳ REPOSIÇÃO|')) {
@@ -864,7 +871,7 @@
                 }
             }
 
-            let cabecalhoEst = est[0].map(h => h.toString().trim());
+            let cabecalhoEst = est[0].map(h => String(h).trim());
             let idxMod = cabecalhoEst.indexOf("Modelo"); if(idxMod === -1) idxMod = 0;
             let idxQtd = cabecalhoEst.indexOf("Quantidade"); if(idxQtd === -1) idxQtd = 1;
 
@@ -872,7 +879,7 @@
             let totPecas = 0, zerados = []; estado.catalogoAgrupado = []; 
 
             for(let i=1; i<est.length; i++) {
-                let nomeCompleto = est[i][idxMod]; 
+                let nomeCompleto = String(est[i][idxMod]).trim(); 
                 let qtd = Number(est[i][idxQtd]) || 0;
                 if(!nomeCompleto) continue;
                 
@@ -922,6 +929,9 @@
             }
             
             fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) })
+            .then(() => {
+                setTimeout(() => carregarDados(false), 4000); 
+            })
             .catch(e => {
                 filaOffline.push(payload); localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
                 setTimeout(() => toast(`📶 Queda de rede. Salvo offline!`), 1500); 
@@ -1053,7 +1063,7 @@
             let b = busca.toLowerCase().trim();
 
             if(hist && hist.length > 0) {
-                let cH = hist[0].map(h => h.toString().trim());
+                let cH = hist[0].map(h => String(h).trim());
                 let hData = cH.indexOf("Data"); if(hData === -1) hData = 1;
                 let hAcao = cH.indexOf("Ação"); if(hAcao === -1) hAcao = 2;
                 let hPess = cH.indexOf("Separador"); if(hPess === -1) hPess = 3;
@@ -1064,10 +1074,11 @@
                 let contagem = 0;
 
                 for(let i = hist.length - 1; i > 0; i--) { 
-                    if(!hist[i][hMod]) continue; 
+                    let m = String(hist[i][hMod]).trim();
+                    if(!m) continue; 
                     
-                    let d = String(hist[i][hData]); let a = hist[i][hAcao]; 
-                    let p = String(hist[i][hPess]); let m = String(hist[i][hMod]); let q = String(hist[i][hQtd]);
+                    let d = String(hist[i][hData]).split(' ')[0]; let a = String(hist[i][hAcao]).trim(); 
+                    let p = String(hist[i][hPess]).trim(); let q = String(hist[i][hQtd]).trim();
                     
                     let textoDaLinha = `${d} ${a} ${p} ${m} ${q}`.toLowerCase();
                     if(b !== '' && !textoDaLinha.includes(b)) continue; 
@@ -1080,7 +1091,7 @@
                     let btnPDF = (isSaida && q !== '-') ? `<button class="btn btn-pdf" onclick="gerarPDF('${d}','${p}','${m}','${q}')">📄 PDF</button>` : '';
 
                     htmlHist += `<div class='history-card'>
-                        <div>${d.split(' ')[0]}</div>
+                        <div>${d}</div>
                         <div class='badge-acao ${cAcao}'>${icone} ${a}</div>
                         <div>${p}</div>
                         <div>${m}</div>
@@ -1300,13 +1311,13 @@
             }
 
             let est = estado.dados.estoque;
-            let cabecalhoEst = est[0].map(h => h.toString().trim());
+            let cabecalhoEst = est[0].map(h => String(h).trim());
             let idxMod = cabecalhoEst.indexOf("Modelo"); if(idxMod === -1) idxMod = 0;
             let idxQtd = cabecalhoEst.indexOf("Quantidade"); if(idxQtd === -1) idxQtd = 1;
 
             let saldoSistema = 0;
             for(let i=1; i<est.length; i++) {
-                if(est[i][idxMod] === sel) { saldoSistema = Number(est[i][idxQtd]) || 0; break; }
+                if(String(est[i][idxMod]).trim() === String(sel).trim()) { saldoSistema = Number(est[i][idxQtd]) || 0; break; }
             }
 
             let qtdFisica = Number(document.getElementById('inv-qtd-fisica').value) || 0;
@@ -1336,14 +1347,15 @@
             let tipoAcao = diff > 0 ? 'Entrada' : 'Saída';
             let qtdAjuste = Math.abs(diff);
 
-            // Reseta botões e inputs imediatamente
             document.getElementById('inv-qtd-fisica').value = '0';
             document.getElementById('inv-modelo').value = '';
+            
             let btn = document.getElementById('btn-inv-ajustar');
             btn.innerText = '⚙️ Confirmar Ajuste de Inventário'; 
             btn.disabled = false;
 
             atualizarEstoqueLocal(tipoAcao, 'Ajuste Inventário', modelo, qtdAjuste);
+            atualizarPreviewInventario();
             document.querySelectorAll('.tab-btn')[0].click(); 
 
             let payload = { setor: estado.setor, acao: tipoAcao, pessoa: 'Ajuste Inventário', modelo: modelo, quantidade: qtdAjuste };
@@ -1396,13 +1408,13 @@
             let totalPecas = 0; let totalOps = 0; let listaSaidas = [];
 
             if(hist && hist.length > 0) {
-                let cH = hist[0].map(h => h.toString().trim());
+                let cH = hist[0].map(h => String(h).trim());
                 let hData = cH.indexOf("Data"); if(hData === -1) hData = 1; let hAcao = cH.indexOf("Ação"); if(hAcao === -1) hAcao = 2;
                 let hPess = cH.indexOf("Separador"); if(hPess === -1) hPess = 3; let hMod = cH.indexOf("Modelo"); if(hMod === -1) hMod = 4;
                 let hQtd = cH.indexOf("Quantidade"); if(hQtd === -1) hQtd = 5;
 
                 for(let i = 1; i < hist.length; i++) {
-                    let a = hist[i][hAcao]; let p = hist[i][hPess];
+                    let a = String(hist[i][hAcao]).trim(); let p = String(hist[i][hPess]).trim();
                     
                     if(a === acaoSelecionada && p === pessoa) {
                         let dt = parseData(hist[i][hData]); dt.setHours(0,0,0,0);
@@ -1410,7 +1422,7 @@
                         if(dt.getTime() === dataFiltro.getTime()) {
                             let q = Number(hist[i][hQtd]) || 0;
                             totalPecas += q; totalOps++;
-                            listaSaidas.push({ data: hist[i][hData], modelo: hist[i][hMod], qtd: q });
+                            listaSaidas.push({ data: hist[i][hData], modelo: String(hist[i][hMod]).trim(), qtd: q });
                         }
                     }
                 }
@@ -1445,7 +1457,7 @@
 
             doc.setFillColor(241, 245, 249); doc.roundedRect(15, 72, 180, 25, 3, 3, 'F');
             doc.setFont("helvetica", "bold"); doc.setFontSize(12);
-            doc.text(`TOTAL DE PEÇAS ${acaoText}: ${r.totalPecas} unidades`, 22, 88); doc.text(`TOTAL DE REGISTROS: ${r.totalOps}`, 120, 88);
+            doc.text(`TOTAL DE PEÇAS ${acaoText}: ${r.totalPecas} units`, 22, 88); doc.text(`TOTAL DE REGISTROS: ${r.totalOps}`, 120, 88);
 
             doc.setFontSize(11); doc.setFont("helvetica", "bold"); doc.text(`Histórico Detalhado de ${r.acao}s:`, 15, 110);
             doc.setFillColor(226, 232, 240); doc.rect(15, 115, 180, 8, 'F'); doc.setFontSize(9);
