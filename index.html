@@ -702,7 +702,7 @@
             }
 
             try {
-                let url = `${API_URL}?setor=${estado.setor}&t=${new Date().getTime()}`;
+                let url = `${API_URL}?setor=${estado.setor}`;
                 let r = await fetch(url);
                 let json = await r.json();
                 if(json.erro) throw new Error(json.erro);
@@ -735,9 +735,9 @@
                 return;
             }
 
-            if(forcarSync) toast('⏳ Sincronizando com o servidor...');
+            if(forcarSync) toast('⏳ Sincronizando...');
             try {
-                let url = `${API_URL}?setor=${estado.setor}&t=${new Date().getTime()}`;
+                let url = `${API_URL}?setor=${estado.setor}`;
                 let r = await fetch(url);
                 let json = await r.json();
                 if(json.erro) return alert("⚠️ Erro API:\n" + json.erro);
@@ -792,14 +792,14 @@
             if(!estado.dados || !estado.dados.estoque || !estado.dados.historico) return;
 
             let est = estado.dados.estoque;
-            let cabecalhoEst = est[0].map(h => String(h).trim());
-            let idxMod = cabecalhoEst.indexOf("Modelo"); if(idxMod === -1) idxMod = 0;
-            let idxQtd = cabecalhoEst.indexOf("Quantidade"); if(idxQtd === -1) idxQtd = 1;
+            let cabecalhoEst = est[0];
+            let idxMod = cabecalhoEst.findIndex(h => h && h.toString().trim() === "Modelo"); if(idxMod === -1) idxMod = 0;
+            let idxQtd = cabecalhoEst.findIndex(h => h && h.toString().trim() === "Quantidade"); if(idxQtd === -1) idxQtd = 1;
 
             if (qtd > 0) {
                 let achou = false;
                 for(let i=1; i<est.length; i++) {
-                    if(String(est[i][idxMod]) === String(modelo)) {
+                    if(est[i][idxMod] === modelo) {
                         let qtdAtual = Number(est[i][idxQtd]) || 0;
                         if(acao === 'Entrada') est[i][idxQtd] = qtdAtual + qtd;
                         else est[i][idxQtd] = Math.max(0, qtdAtual - qtd);
@@ -808,7 +808,7 @@
                 }
                 if(!achou && acao === 'Entrada') {
                     let novaLinha = new Array(est[0].length).fill('');
-                    novaLinha[idxMod] = String(modelo); 
+                    novaLinha[idxMod] = modelo; 
                     novaLinha[idxQtd] = qtd;
                     est.push(novaLinha);
                 }
@@ -816,19 +816,19 @@
 
             let hist = estado.dados.historico;
             if(hist && hist.length > 0) {
-                let cabHist = hist[0].map(h => String(h).trim());
-                let idxData = cabHist.indexOf("Data"); if(idxData === -1) idxData = 1;
-                let idxAcao = cabHist.indexOf("Ação"); if(idxAcao === -1) idxAcao = 2;
-                let idxPess = cabHist.indexOf("Separador"); if(idxPess === -1) idxPess = 3;
-                let idxM = cabHist.indexOf("Modelo"); if(idxM === -1) idxM = 4;
-                let idxQ = cabHist.indexOf("Quantidade"); if(idxQ === -1) idxQ = 5;
+                let cabHist = hist[0];
+                let idxData = cabHist.findIndex(h => h && h.toString().trim() === "Data"); if(idxData === -1) idxData = 1;
+                let idxAcao = cabHist.findIndex(h => h && h.toString().trim() === "Ação"); if(idxAcao === -1) idxAcao = 2;
+                let idxPess = cabHist.findIndex(h => h && h.toString().trim() === "Separador"); if(idxPess === -1) idxPess = 3;
+                let idxM = cabHist.findIndex(h => h && h.toString().trim() === "Modelo"); if(idxM === -1) idxM = 4;
+                let idxQ = cabHist.findIndex(h => h && h.toString().trim() === "Quantidade"); if(idxQ === -1) idxQ = 5;
 
                 let novaLinhaHist = new Array(hist[0].length).fill('');
                 let agora = new Date();
                 novaLinhaHist[idxData] = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR');
                 novaLinhaHist[idxAcao] = acao;
                 novaLinhaHist[idxPess] = pessoa;
-                novaLinhaHist[idxM] = String(modelo);
+                novaLinhaHist[idxM] = modelo;
                 novaLinhaHist[idxQ] = qtd;
                 
                 hist.splice(1, 0, novaLinhaHist); 
@@ -874,8 +874,9 @@
             let totalSaidasHoje = 0;
             let hojeStr = new Date().toLocaleDateString('pt-BR');
 
+            // LÊ HISTÓRICO COM EXATIDÃO (SEM MODIFICAR STRING)
             if(hist && hist.length > 0) {
-                let cH = hist[0].map(h => String(h).trim());
+                let cH = hist[0].map(h => h ? h.toString().trim() : '');
                 let hData = cH.indexOf("Data"); if(hData === -1) hData = 1;
                 let hAcao = cH.indexOf("Ação"); if(hAcao === -1) hAcao = 2;
                 let hPess = cH.indexOf("Separador"); if(hPess === -1) hPess = 3;
@@ -883,10 +884,7 @@
                 let hQtd = cH.indexOf("Quantidade"); if(hQtd === -1) hQtd = 5;
 
                 for(let i = 1; i < hist.length; i++) {
-                    let a = String(hist[i][hAcao]).trim(); 
-                    let p = String(hist[i][hPess]).trim(); 
-                    let m = String(hist[i][hMod]); 
-                    let q = Number(hist[i][hQtd]) || 0;
+                    let a = hist[i][hAcao]; let p = hist[i][hPess]; let m = hist[i][hMod]; let q = Number(hist[i][hQtd]) || 0;
                     if(!m) continue;
 
                     if(p.startsWith('⏳ REPOSIÇÃO|')) {
@@ -899,7 +897,7 @@
                     }
 
                     if(a === 'Saída' && !p.includes('REPOSIÇÃO') && !p.includes('FAZENDO')) {
-                        let nomeLinha = m.split('-')[0].trim();
+                        let nomeLinha = String(m).split('-')[0].trim();
                         estado.mapaSaidasPorModelo[nomeLinha] = (estado.mapaSaidasPorModelo[nomeLinha] || 0) + q;
 
                         let dtStr = String(hist[i][hData]).split(' ')[0];
@@ -910,7 +908,7 @@
                 }
             }
 
-            let cabecalhoEst = est[0].map(h => String(h).trim());
+            let cabecalhoEst = est[0].map(h => h ? h.toString().trim() : '');
             let idxMod = cabecalhoEst.indexOf("Modelo"); if(idxMod === -1) idxMod = 0;
             let idxQtd = cabecalhoEst.indexOf("Quantidade"); if(idxQtd === -1) idxQtd = 1;
 
@@ -918,17 +916,16 @@
             let totPecas = 0, zerados = []; estado.catalogoAgrupado = []; 
 
             for(let i=1; i<est.length; i++) {
-                let nomeOriginal = est[i][idxMod];
-                if(nomeOriginal === undefined || nomeOriginal === null || nomeOriginal === '') continue;
-                
-                let nomeCompleto = String(nomeOriginal); 
+                let nomeCompleto = est[i][idxMod]; 
                 let qtd = Number(est[i][idxQtd]) || 0;
+                if(!nomeCompleto) continue;
                 
                 totPecas += qtd; if(qtd === 0) zerados.push(nomeCompleto);
                 
                 htmlModelos += `<option value="${nomeCompleto}">Saldo: ${qtd} un</option>`;
                 
-                let partes = nomeCompleto.split('-');
+                let nomeString = String(nomeCompleto);
+                let partes = nomeString.split('-');
                 let linha = partes[0].trim();
                 let cor = partes.length > 1 ? partes.slice(1).join('-').trim() : 'Padrão';
                 
@@ -959,161 +956,66 @@
             if(estado.perfil === 'admin') gerarRelatorioFeedback();
         }
 
-        function abrirModal(idx) {
-            let item = estado.catalogoAgrupado[idx];
-            document.getElementById('modal-titulo').innerText = item.linha; document.getElementById('modal-total').innerText = `Estoque Total: ${item.total} un.`;
-            let html = '';
-            item.detalhes.forEach((d, i) => {
-                let statusText = d.qtd === 0 ? '🔴 Esgotado' : (d.qtd < 10 ? '🔴 Crítico' : (d.qtd <= 25 ? '🟡 Atenção' : '🟢 OK'));
-                let inpId = `mqtd-${idx}-${i}`;
-                let safeName = d.nomeC.replace(/'/g, "\\'");
-                
-                let produtor = estado.emProducao[d.nomeC];
-                let avisoProducao = ''; let btnAcaoProd = '';
-
-                if (produtor) {
-                    if (produtor === (estado.nomeAtivo || estado.perfil.toUpperCase())) {
-                        avisoProducao = `<div style="background:rgba(16,185,129,0.2); color:#10b981; font-size:11px; padding:6px; border-radius:6px; margin-bottom:8px; font-weight:800;">👨‍🔧 Você está repondo isto</div>`;
-                        btnAcaoProd = `<button class="btn" style="margin:0 0 10px 0; padding:6px; font-size:11px; background:transparent; border:1px solid #10b981; color:#10b981; font-weight:800;" onclick="concluirProducao(this, '${safeName}')">✅ Concluir Reposição</button>`;
-                    } else {
-                        avisoProducao = `<div style="background:rgba(245,158,11,0.2); color:#f59e0b; font-size:11px; padding:6px; border-radius:6px; margin-bottom:8px; font-weight:800;">⚠️ ${produtor} está repondo</div>`;
-                    }
-                } else {
-                    btnAcaoProd = `<button class="btn" style="margin:0 0 10px 0; padding:6px; font-size:11px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.2); color:var(--text-main);" onclick="assumirProducao(this, '${safeName}')">✋ Assumir Reposição</button>`;
-                }
-
-                html += `
-                <div class="card-detalhe">
-                    <span>${d.cor}</span><b>${d.qtd}</b><small style="color:var(--text-sub); font-weight:700; display:block; margin-bottom:12px;">${statusText}</small>
-                    
-                    ${avisoProducao}
-                    ${btnAcaoProd}
-                    
-                    <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:12px;">
-                        <button onclick="mudarQtdModal('${inpId}', -1)" style="background:rgba(239, 68, 68, 0.2); color:#ef4444; border:none; border-radius:8px; width:32px; height:32px; font-weight:900; font-size:16px; cursor:pointer;">-</button>
-                        <input type="number" id="${inpId}" value="1" min="1" style="width:60px; margin:0; padding:5px; text-align:center; font-weight:bold; height:32px; border-radius:8px; color:var(--text-main); background:rgba(0,0,0,0.2); border:1px solid var(--border-color);">
-                        <button onclick="mudarQtdModal('${inpId}', 1)" style="background:rgba(16, 185, 129, 0.2); color:#10b981; border:none; border-radius:8px; width:32px; height:32px; font-weight:900; font-size:16px; cursor:pointer;">+</button>
-                    </div>
-
-                    <div style="display:flex; gap:6px;">
-                        <button class="btn btn-primary" style="margin:0; padding:8px 4px; font-size:11px; flex:1;" onclick="lancarDoModal(this, 'Saída', '${safeName}', '${inpId}')">📤 Retirar</button>
-                        <button class="btn" style="margin:0; padding:8px 4px; font-size:11px; flex:1; background:#10b981; border:none; color:white; font-weight:bold; border-radius:18px;" onclick="lancarDoModal(this, 'Entrada', '${safeName}', '${inpId}')">📥 Lançar</button>
-                    </div>
-                </div>`;
-            });
-            document.getElementById('modal-grid').innerHTML = html; document.getElementById('modal-detalhe').style.display = 'flex';
-        }
-
-        function fecharModal() { document.getElementById('modal-detalhe').style.display = 'none'; }
-
-        async function lancarDoModal(btn, acao, modelo, inputId) {
-            let q = parseInt(document.getElementById(inputId).value) || 0;
-            let p = estado.nomeAtivo;
-
-            if(!p) {
-                let pfx = acao === 'Entrada' ? 'e' : 's';
-                p = document.getElementById(`${pfx}-pessoa`).value;
-                if(!p) {
-                    alert('⚠️ Administrador: Para lançar por aqui, selecione o nome na aba de ' + acao + ' primeiro.');
-                    fecharModal();
-                    let tabId = acao === 'Saída' ? 'saida' : 'entrada';
-                    let btnTab = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(`'${tabId}'`));
-                    if(btnTab) btnTab.click();
-                    return;
-                }
-            }
-
-            if(q < 1) return alert('⚠️ Quantidade inválida!');
-
-            let txtOriginal = btn.innerHTML;
-            btn.innerHTML = '⏳...'; btn.disabled = true;
-
-            let payload = { setor: estado.setor, acao: acao, pessoa: p, modelo: modelo, quantidade: q };
-            
-            try {
-                await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
-                atualizarEstoqueLocal(acao, p, modelo, q);
-                fecharModal();
-                playSomSucesso(); 
-                toast(`✅ ${q}x ${acao} de ${modelo.split('-')[0].trim()} registrada!`);
-            } catch(e) {
+        function enviarPayloadSilencioso(payload, msgSucesso) {
+            if (!navigator.onLine) {
                 filaOffline.push(payload); localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
-                atualizarEstoqueLocal(acao, p, modelo, q);
-                fecharModal();
-                playSomSucesso(); toast(`📶 Salvo offline!`);
-                atualizarStatusRede();
+                toast(`📶 Salvo offline!`); atualizarStatusRede(); return;
             }
+            
+            fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) })
+            .then(() => {
+                playSomSucesso(); toast(msgSucesso); 
+                setTimeout(() => carregarDados(false), 2000); 
+            })
+            .catch(e => {
+                filaOffline.push(payload); localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
+                toast(`📶 Queda de rede. Salvo offline!`); atualizarStatusRede();
+            });
         }
 
-        async function assumirProducao(btn, modelo) {
+        function assumirProducao(btn, modelo) {
             let p = estado.nomeAtivo || estado.perfil.toUpperCase();
-            let txtOriginal = btn.innerHTML;
             btn.innerHTML = '⏳...'; btn.disabled = true;
-
+            
+            atualizarEstoqueLocal('Entrada', '⚙️ FAZENDO|' + p, modelo, 0); 
+            
             let payload = { setor: estado.setor, acao: 'Entrada', pessoa: '⚙️ FAZENDO|' + p, modelo: modelo, quantidade: 0 };
-            try {
-                await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
-                atualizarEstoqueLocal('Entrada', '⚙️ FAZENDO|' + p, modelo, 0);
-                fecharModal();
-                playSomSucesso(); toast('✋ Você assumiu a reposição!');
-            } catch(e) { 
-                btn.innerHTML = txtOriginal; btn.disabled = false;
-                toast('Erro de rede.');
-            }
+            enviarPayloadSilencioso(payload, '✋ Você assumiu a reposição deste item!');
         }
 
-        async function concluirProducao(btn, modelo) {
-            let txtOriginal = btn.innerHTML;
+        function concluirProducao(btn, modelo) {
             btn.innerHTML = '⏳...'; btn.disabled = true;
+            
+            atualizarEstoqueLocal('Entrada', '✅ FIM REPOSIÇÃO', modelo, 0);
+            
             let payload = { setor: estado.setor, acao: 'Entrada', pessoa: '✅ FIM REPOSIÇÃO', modelo: modelo, quantidade: 0 };
-            try {
-                await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
-                atualizarEstoqueLocal('Entrada', '✅ FIM REPOSIÇÃO', modelo, 0);
-                fecharModal();
-                playSomSucesso(); toast('✅ Reposição concluída!');
-            } catch(e) { 
-                btn.innerHTML = txtOriginal; btn.disabled = false;
-                toast('Erro de rede.');
-            }
+            enviarPayloadSilencioso(payload, '✅ Reposição liberada/concluída!');
         }
 
-        async function solicitarReposicao() {
+        function solicitarReposicao() {
             let m = document.getElementById('rep-modelo').value; let q = document.getElementById('rep-qtd').value;
             if(!m || !q) return alert('⚠️ Preencha o modelo e a quantidade que deseja pedir!');
             
             let btn = document.getElementById('btn-pedir-rep'); let txtOriginal = btn.innerText;
             btn.disabled = true; btn.innerText = '⏳ Solicitando...';
-            
-            let payload = { setor: estado.setor, acao: 'Entrada', pessoa: '⏳ REPOSIÇÃO|' + q, modelo: m, quantidade: 0 };
 
-            try {
-                await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
-                atualizarEstoqueLocal('Entrada', '⏳ REPOSIÇÃO|' + q, m, 0);
-                document.getElementById('rep-modelo').value = ''; document.getElementById('rep-qtd').value = '';
-                btn.innerText = txtOriginal; btn.disabled = false;
-                playSomSucesso(); toast('✅ Ordem enviada para a equipe!');
-            } catch(e) { 
-                btn.innerText = txtOriginal; btn.disabled = false;
-                toast('Erro ao solicitar.');
-            }
+            atualizarEstoqueLocal('Entrada', '⏳ REPOSIÇÃO|' + q, m, 0);
+            document.getElementById('rep-modelo').value = ''; document.getElementById('rep-qtd').value = '';
+            btn.innerText = txtOriginal; btn.disabled = false;
+
+            let payload = { setor: estado.setor, acao: 'Entrada', pessoa: '⏳ REPOSIÇÃO|' + q, modelo: m, quantidade: 0 };
+            enviarPayloadSilencioso(payload, '✅ Ordem enviada para a equipe!');
         }
 
-        async function concluirReposicao(btn, modelo) {
+        function concluirReposicao(btn, modelo) {
             if(!confirm(`Deseja forçar a conclusão da ordem de "${modelo}" e remover da lista?`)) return;
             
-            let txtOriginal = btn.innerText;
             btn.innerText = '⏳...'; btn.disabled = true;
-            
+
+            atualizarEstoqueLocal('Entrada', '✅ FIM REPOSIÇÃO', modelo, 0);
+
             let payload = { setor: estado.setor, acao: 'Entrada', pessoa: '✅ FIM REPOSIÇÃO', modelo: modelo, quantidade: 0 };
-            
-            try {
-                await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
-                atualizarEstoqueLocal('Entrada', '✅ FIM REPOSIÇÃO', modelo, 0);
-                playSomSucesso(); toast('✅ Pedido finalizado!');
-            } catch(e) { 
-                btn.innerText = txtOriginal; btn.disabled = false;
-                toast('Erro de rede.');
-            }
+            enviarPayloadSilencioso(payload, '✅ Pedido finalizado!');
         }
 
         function renderizarReposicao() {
@@ -1204,7 +1106,7 @@
             let b = busca.toLowerCase().trim();
 
             if(hist && hist.length > 0) {
-                let cH = hist[0].map(h => String(h).trim());
+                let cH = hist[0].map(h => h ? h.toString().trim() : '');
                 let hData = cH.indexOf("Data"); if(hData === -1) hData = 1;
                 let hAcao = cH.indexOf("Ação"); if(hAcao === -1) hAcao = 2;
                 let hPess = cH.indexOf("Separador"); if(hPess === -1) hPess = 3;
@@ -1215,11 +1117,11 @@
                 let contagem = 0;
 
                 for(let i = hist.length - 1; i > 0; i--) { 
-                    let m = String(hist[i][hMod]);
-                    if(!m || m === 'undefined') continue; 
+                    let m = hist[i][hMod];
+                    if(m === undefined || m === null || m === '') continue; 
                     
-                    let d = String(hist[i][hData]).split(' ')[0]; let a = String(hist[i][hAcao]).trim(); 
-                    let p = String(hist[i][hPess]).trim(); let q = String(hist[i][hQtd]).trim();
+                    let d = String(hist[i][hData]).split(' ')[0]; let a = String(hist[i][hAcao]); 
+                    let p = String(hist[i][hPess]); let q = String(hist[i][hQtd]);
                     
                     let textoDaLinha = `${d} ${a} ${p} ${m} ${q}`.toLowerCase();
                     if(b !== '' && !textoDaLinha.includes(b)) continue; 
@@ -1229,7 +1131,8 @@
                     else if (p === '✅ FIM REPOSIÇÃO') { p = `✅ Produção Concluída`; q = '-'; }
 
                     let isSaida = a === 'Saída'; let cAcao = isSaida ? 'acao-saida' : 'acao-entrada'; let icone = isSaida ? '📤' : '📥';
-                    let btnPDF = (isSaida && q !== '-') ? `<button class="btn btn-pdf" onclick="gerarPDF('${d}','${p}','${m}','${q}')">📄 PDF</button>` : '';
+                    let safeM = String(m).replace(/'/g, "\\'");
+                    let btnPDF = (isSaida && q !== '-') ? `<button class="btn btn-pdf" onclick="gerarPDF('${d}','${p}','${safeM}','${q}')">📄 PDF</button>` : '';
 
                     htmlHist += `<div class='history-card'>
                         <div>${d}</div>
@@ -1353,7 +1256,83 @@
             if(el) { let v = parseInt(el.value) || 1; v += delta; if(v < 1) v = 1; el.value = v; }
         }
 
-        async function cadastrarNovoItem() {
+        function lancarDoModal(btn, acao, modelo, inputId) {
+            let q = parseInt(document.getElementById(inputId).value) || 0;
+            let p = estado.nomeAtivo;
+
+            if(!p) {
+                let pfx = acao === 'Entrada' ? 'e' : 's';
+                p = document.getElementById(`${pfx}-pessoa`).value;
+                if(!p) {
+                    alert('⚠️ Administrador: Para lançar por aqui, selecione o nome na aba de ' + acao + ' primeiro.');
+                    fecharModal();
+                    let tabId = acao === 'Saída' ? 'saida' : 'entrada';
+                    let btnTab = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(`'${tabId}'`));
+                    if(btnTab) btnTab.click();
+                    return;
+                }
+            }
+
+            if(q < 1) return alert('⚠️ Quantidade inválida!');
+
+            let txtOriginal = btn.innerHTML;
+            btn.innerHTML = '⏳...'; btn.disabled = true;
+
+            atualizarEstoqueLocal(acao, p, modelo, q);
+            fecharModal();
+
+            let payload = { setor: estado.setor, acao: acao, pessoa: p, modelo: modelo, quantidade: q };
+            enviarPayloadSilencioso(payload, `✅ ${q}x ${acao} de ${modelo.split('-')[0].trim()} registrada!`);
+        }
+
+        function abrirModal(idx) {
+            let item = estado.catalogoAgrupado[idx];
+            document.getElementById('modal-titulo').innerText = item.linha; document.getElementById('modal-total').innerText = `Estoque Total: ${item.total} un.`;
+            let html = '';
+            item.detalhes.forEach((d, i) => {
+                let statusText = d.qtd === 0 ? '🔴 Esgotado' : (d.qtd < 10 ? '🔴 Crítico' : (d.qtd <= 25 ? '🟡 Atenção' : '🟢 OK'));
+                let inpId = `mqtd-${idx}-${i}`;
+                let safeName = d.nomeC.replace(/'/g, "\\'");
+                
+                let produtor = estado.emProducao[d.nomeC];
+                let avisoProducao = ''; let btnAcaoProd = '';
+
+                if (produtor) {
+                    if (produtor === (estado.nomeAtivo || estado.perfil.toUpperCase())) {
+                        avisoProducao = `<div style="background:rgba(16,185,129,0.2); color:#10b981; font-size:11px; padding:6px; border-radius:6px; margin-bottom:8px; font-weight:800;">👨‍🔧 Você está repondo isto</div>`;
+                        btnAcaoProd = `<button class="btn" style="margin:0 0 10px 0; padding:6px; font-size:11px; background:transparent; border:1px solid #10b981; color:#10b981; font-weight:800;" onclick="concluirProducao(this, '${safeName}')">✅ Concluir Reposição</button>`;
+                    } else {
+                        avisoProducao = `<div style="background:rgba(245,158,11,0.2); color:#f59e0b; font-size:11px; padding:6px; border-radius:6px; margin-bottom:8px; font-weight:800;">⚠️ ${produtor} está repondo</div>`;
+                    }
+                } else {
+                    btnAcaoProd = `<button class="btn" style="margin:0 0 10px 0; padding:6px; font-size:11px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.2); color:var(--text-main);" onclick="assumirProducao(this, '${safeName}')">✋ Assumir Reposição</button>`;
+                }
+
+                html += `
+                <div class="card-detalhe">
+                    <span>${d.cor}</span><b>${d.qtd}</b><small style="color:var(--text-sub); font-weight:700; display:block; margin-bottom:12px;">${statusText}</small>
+                    
+                    ${avisoProducao}
+                    ${btnAcaoProd}
+                    
+                    <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:12px;">
+                        <button onclick="mudarQtdModal('${inpId}', -1)" style="background:rgba(239, 68, 68, 0.2); color:#ef4444; border:none; border-radius:8px; width:32px; height:32px; font-weight:900; font-size:16px; cursor:pointer;">-</button>
+                        <input type="number" id="${inpId}" value="1" min="1" style="width:60px; margin:0; padding:5px; text-align:center; font-weight:bold; height:32px; border-radius:8px; color:var(--text-main); background:rgba(0,0,0,0.2); border:1px solid var(--border-color);">
+                        <button onclick="mudarQtdModal('${inpId}', 1)" style="background:rgba(16, 185, 129, 0.2); color:#10b981; border:none; border-radius:8px; width:32px; height:32px; font-weight:900; font-size:16px; cursor:pointer;">+</button>
+                    </div>
+
+                    <div style="display:flex; gap:6px;">
+                        <button class="btn btn-primary" style="margin:0; padding:8px 4px; font-size:11px; flex:1;" onclick="lancarDoModal(this, 'Saída', '${safeName}', '${inpId}')">📤 Retirar</button>
+                        <button class="btn" style="margin:0; padding:8px 4px; font-size:11px; flex:1; background:#10b981; border:none; color:white; font-weight:bold; border-radius:18px;" onclick="lancarDoModal(this, 'Entrada', '${safeName}', '${inpId}')">📥 Lançar</button>
+                    </div>
+                </div>`;
+            });
+            document.getElementById('modal-grid').innerHTML = html; document.getElementById('modal-detalhe').style.display = 'flex';
+        }
+
+        function fecharModal() { document.getElementById('modal-detalhe').style.display = 'none'; }
+
+        function cadastrarNovoItem() {
             let nome = document.getElementById('ni-nome').value.trim();
             let cor = document.getElementById('ni-cor').value.trim();
             let qtd = Number(document.getElementById('ni-qtd').value) || 0;
@@ -1361,28 +1340,19 @@
             if(!nome) return alert('⚠️ Digite o nome do modelo/linha!');
 
             let modeloCompleto = cor ? `${nome} - ${cor}` : nome;
+            
             let btn = document.getElementById('btn-cadastrar-item');
             let txtOriginal = btn.innerText;
             btn.disabled = true; btn.innerText = '⏳ Cadastrando...';
 
-            let payload = { setor: estado.setor, acao: 'Entrada', pessoa: 'Cadastro', modelo: modeloCompleto, quantidade: qtd };
+            atualizarEstoqueLocal('Entrada', 'Cadastro', modeloCompleto, qtd);
 
-            try {
-                await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
-                atualizarEstoqueLocal('Entrada', 'Cadastro', modeloCompleto, qtd);
-                playSomSucesso(); toast(`✨ Item "${modeloCompleto}" cadastrado com sucesso!`);
-                document.getElementById('ni-nome').value = ''; document.getElementById('ni-cor').value = ''; document.getElementById('ni-qtd').value = '0';
-                btn.innerText = txtOriginal; btn.disabled = false;
-                document.querySelectorAll('.tab-btn')[0].click();
-            } catch(e) {
-                filaOffline.push(payload); localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
-                atualizarEstoqueLocal('Entrada', 'Cadastro', modeloCompleto, qtd);
-                playSomSucesso(); toast(`📶 Salvo offline!`);
-                document.getElementById('ni-nome').value = ''; document.getElementById('ni-cor').value = ''; document.getElementById('ni-qtd').value = '0';
-                btn.innerText = txtOriginal; btn.disabled = false;
-                document.querySelectorAll('.tab-btn')[0].click();
-                atualizarStatusRede();
-            }
+            document.getElementById('ni-nome').value = ''; document.getElementById('ni-cor').value = ''; document.getElementById('ni-qtd').value = '0';
+            btn.innerText = txtOriginal; btn.disabled = false;
+            document.querySelectorAll('.tab-btn')[0].click();
+
+            let payload = { setor: estado.setor, acao: 'Entrada', pessoa: 'Cadastro', modelo: modeloCompleto, quantidade: qtd };
+            enviarPayloadSilencioso(payload, `✨ Item "${modeloCompleto}" cadastrado com sucesso!`);
         }
 
         function atualizarPreviewInventario() {
@@ -1417,7 +1387,7 @@
             }
         }
 
-        async function confirmarAjusteInventario() {
+        function confirmarAjusteInventario() {
             let modelo = document.getElementById('inv-modelo').value;
             let qtdFisica = Number(document.getElementById('inv-qtd-fisica').value);
             let saldoSistema = Number(document.getElementById('inv-saldo-sistema').innerText) || 0;
@@ -1430,34 +1400,18 @@
             let tipoAcao = diff > 0 ? 'Entrada' : 'Saída';
             let qtdAjuste = Math.abs(diff);
 
-            let btn = document.getElementById('btn-inv-ajustar');
-            let txtOriginal = btn.innerText;
-            btn.innerText = '⏳ Processando Ajuste...'; btn.disabled = true;
+            document.getElementById('inv-qtd-fisica').value = '0';
+            document.getElementById('inv-modelo').value = '';
+            
+            atualizarEstoqueLocal(tipoAcao, 'Ajuste Inventário', modelo, qtdAjuste);
+            atualizarPreviewInventario();
+            document.querySelectorAll('.tab-btn')[0].click(); 
 
             let payload = { setor: estado.setor, acao: tipoAcao, pessoa: 'Ajuste Inventário', modelo: modelo, quantidade: qtdAjuste };
-
-            try {
-                await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
-                atualizarEstoqueLocal(tipoAcao, 'Ajuste Inventário', modelo, qtdAjuste);
-                
-                document.getElementById('inv-qtd-fisica').value = '0'; document.getElementById('inv-modelo').value = '';
-                btn.innerText = txtOriginal; btn.disabled = false;
-                atualizarPreviewInventario(); document.querySelectorAll('.tab-btn')[0].click(); 
-                
-                playSomSucesso(); toast(`⚙️ Ajuste de ${qtdAjuste}x concluído!`);
-            } catch(e) {
-                filaOffline.push(payload); localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
-                atualizarEstoqueLocal(tipoAcao, 'Ajuste Inventário', modelo, qtdAjuste);
-                
-                document.getElementById('inv-qtd-fisica').value = '0'; document.getElementById('inv-modelo').value = '';
-                btn.innerText = txtOriginal; btn.disabled = false;
-                atualizarPreviewInventario(); document.querySelectorAll('.tab-btn')[0].click(); 
-
-                playSomSucesso(); toast(`📶 Ajuste salvo offline!`); atualizarStatusRede();
-            }
+            enviarPayloadSilencioso(payload, `⚙️ Ajuste de ${qtdAjuste}x concluído!`);
         }
 
-        async function lancar(tipo) {
+        function lancar(tipo) {
             let pfx = tipo === 'Entrada' ? 'e' : 's';
             let p = document.getElementById(`${pfx}-pessoa`).value; let m = document.getElementById(`${pfx}-modelo`).value; let q = Number(document.getElementById(`${pfx}-qtd`).value);
             if(!p || !m || q < 1) return alert('⚠️ Preencha todos os campos corretamente!');
@@ -1466,27 +1420,16 @@
             let txtOriginal = btn.innerText;
             btn.disabled = true; btn.innerText = '⏳ Processando...';
             
+            atualizarEstoqueLocal(tipo, p, m, q);
+            
+            document.getElementById(`${pfx}-modelo`).value = '';
+            document.getElementById(`${pfx}-qtd`).value = '1';
+            
+            btn.innerText = txtOriginal; btn.disabled = false;
+            document.querySelectorAll('.tab-btn')[0].click(); 
+
             let payload = { setor: estado.setor, acao: tipo, pessoa: p, modelo: m, quantidade: q };
-
-            try {
-                await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
-                atualizarEstoqueLocal(tipo, p, m, q);
-                
-                document.getElementById(`${pfx}-modelo`).value = ''; document.getElementById(`${pfx}-qtd`).value = '1';
-                btn.innerText = txtOriginal; btn.disabled = false;
-                document.querySelectorAll('.tab-btn')[0].click(); 
-
-                playSomSucesso(); toast(`✅ ${q}x ${tipo} registrada!`);
-            } catch(e) { 
-                filaOffline.push(payload); localStorage.setItem('filaLogistica', JSON.stringify(filaOffline));
-                atualizarEstoqueLocal(tipo, p, m, q);
-                
-                document.getElementById(`${pfx}-modelo`).value = ''; document.getElementById(`${pfx}-qtd`).value = '1';
-                btn.innerText = txtOriginal; btn.disabled = false;
-                document.querySelectorAll('.tab-btn')[0].click(); 
-
-                playSomSucesso(); toast(`📶 Sem internet. Salvo para enviar depois!`); atualizarStatusRede();
-            }
+            enviarPayloadSilencioso(payload, `✅ ${q}x ${tipo} registrada!`);
         }
 
         function parseData(strData) {
